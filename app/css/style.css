@@ -53,6 +53,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html,
+body,
+[data-landing-scroll-root] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+[data-landing-scroll-root]::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 /* Hexagon clip — the numbered/iconed badges throughout the page. */
 .hex-clip {
   clip-path: var(--hex);

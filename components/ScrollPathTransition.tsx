@@ -19,8 +19,8 @@ const PATHS = {
 
 const TRANSITION_LAYERS = [
   { id: 'yellow', fill: '#ffde4a', delay: 0 },
-  { id: 'ink', fill: '#202124', delay: 90 },
-  { id: 'paper', fill: '#fbf7ee', delay: 180 },
+  { id: 'ink', fill: '#202124', delay: 120 },
+  { id: 'paper', fill: '#fbf7ee', delay: 560 },
 ] as const;
 
 const PATH_NUMBER_PATTERN = /-?\d*\.?\d+/g;
