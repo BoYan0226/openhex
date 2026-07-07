@@ -2,7 +2,6 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { AuthAwareCtaButton } from './AuthAwareCtaButton';
 import { BookDemoButton } from './BookDemoButton';
-import { HONEYCOMB_LIGHT_STYLE } from '@/components/ui/textures';
 
 /**
  * Hero section for the Live Agent landing redesign.
@@ -18,14 +17,7 @@ export function HeroSection() {
   const t = useTranslations('landing.hero');
 
   return (
-    <section className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-paper pb-16 pt-24 md:pb-20 md:pt-28">
-      {/* Faint honeycomb texture */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={HONEYCOMB_LIGHT_STYLE}
-      />
-
+    <section className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] pb-16 pt-24 md:pb-20 md:pt-28">
       <div className="relative mx-auto flex w-full max-w-[1240px] flex-col items-center gap-14 px-6 2xl:max-w-[1440px] md:flex-row md:items-center md:gap-14">
         {/* Left column — copy */}
         <div className="flex w-full max-w-[560px] flex-col items-start 2xl:max-w-[680px]">

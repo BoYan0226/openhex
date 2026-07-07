@@ -3,32 +3,30 @@
 import { useEffect, useRef } from 'react';
 
 const PATHS = {
-  hiddenFromBottom: 'M 0 100 V 100 Q 50 100 100 100 V 100 z',
-  enterCurve: 'M 0 100 V 48 Q 50 -18 100 48 V 100 z',
-  fullFromBottom: 'M 0 100 V 0 Q 50 0 100 0 V 100 z',
-  fullFromTop: 'M 0 0 V 100 Q 50 100 100 100 V 0 z',
-  exitCurve: 'M 0 0 V 52 Q 50 118 100 52 V 0 z',
-  hiddenFromTop: 'M 0 0 V 0 Q 50 0 100 0 V 0 z',
+  step1: {
+    unfilled: 'M 0 100 V 100 Q 50 100 100 100 V 100 z',
+    curve1: 'M 0 100 V 50 Q 50 0 100 50 V 100 z',
+    curve2: 'M 0 100 V 50 Q 50 100 100 50 V 100 z',
+    filled: 'M 0 100 V 0 Q 50 0 100 0 V 100 z',
+  },
+  step2: {
+    filled: 'M 0 0 V 100 Q 50 100 100 100 V 0 z',
+    curve1: 'M 0 0 V 50 Q 50 0 100 50 V 0 z',
+    curve2: 'M 0 0 V 50 Q 50 100 100 50 V 0 z',
+    unfilled: 'M 0 0 V 0 Q 50 0 100 0 V 0 z',
+  },
 };
 
-const PATH_NUMBER_PATTERN = /-?\d*\.?\d+/g;
 const TRANSITION_LAYERS = [
-  { id: 'yellow', fill: '#ffde4a', start: 0, end: 0.82 },
-  { id: 'ink', fill: '#202124', start: 0.1, end: 0.92 },
-  { id: 'paper', fill: '#fbf7ee', start: 0.2, end: 1 },
+  { id: 'yellow', fill: '#ffde4a', delay: 0 },
+  { id: 'ink', fill: '#202124', delay: 90 },
+  { id: 'paper', fill: '#fbf7ee', delay: 180 },
 ] as const;
 
-function clamp(value: number, min = 0, max = 1) {
-  return Math.min(Math.max(value, min), max);
-}
-
-function easeOutQuart(value: number) {
-  return 1 - (1 - value) ** 4;
-}
-
-function easeInQuart(value: number) {
-  return value ** 4;
-}
+const PATH_NUMBER_PATTERN = /-?\d*\.?\d+/g;
+const FIRST_SCREEN_INDEX = 0;
+const SECOND_SCREEN_INDEX = 1;
+const SCREEN_TOLERANCE = 0.16;
 
 function interpolatePath(from: string, to: string, progress: number) {
   const fromNumbers = from.match(PATH_NUMBER_PATTERN)?.map(Number) ?? [];
@@ -43,54 +41,28 @@ function interpolatePath(from: string, to: string, progress: number) {
   });
 }
 
-function segment(progress: number, start: number, end: number) {
-  return clamp((progress - start) / (end - start));
+function power4In(value: number) {
+  return value ** 4;
 }
 
-function remapProgress(progress: number, start: number, end: number) {
-  return clamp((progress - start) / (end - start));
+function power4Out(value: number) {
+  return 1 - (1 - value) ** 4;
 }
 
-function getPathForProgress(progress: number) {
-  if (progress < 0.46) {
-    return interpolatePath(
-      PATHS.hiddenFromBottom,
-      PATHS.enterCurve,
-      easeInQuart(segment(progress, 0, 0.46))
-    );
-  }
+function sineIn(value: number) {
+  return 1 - Math.cos((value * Math.PI) / 2);
+}
 
-  if (progress < 0.62) {
-    return interpolatePath(
-      PATHS.enterCurve,
-      PATHS.fullFromBottom,
-      easeOutQuart(segment(progress, 0.46, 0.62))
-    );
-  }
-
-  if (progress < 0.72) {
-    return PATHS.fullFromTop;
-  }
-
-  if (progress < 0.84) {
-    return interpolatePath(
-      PATHS.fullFromTop,
-      PATHS.exitCurve,
-      segment(progress, 0.72, 0.84)
-    );
-  }
-
-  return interpolatePath(
-    PATHS.exitCurve,
-    PATHS.hiddenFromTop,
-    easeOutQuart(segment(progress, 0.84, 1))
-  );
+function wait(ms: number) {
+  return new Promise(resolve => window.setTimeout(resolve, ms));
 }
 
 export function ScrollPathTransition() {
   const overlayRef = useRef<SVGSVGElement>(null);
   const pathRefs = useRef<Array<SVGPathElement | null>>([]);
   const frameRef = useRef<number | null>(null);
+  const isAnimatingRef = useRef(false);
+  const touchStartYRef = useRef<number | null>(null);
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
@@ -98,39 +70,187 @@ export function ScrollPathTransition() {
 
     if (!root || !overlay || pathRefs.current.some(path => !path)) return undefined;
 
-    const update = () => {
-      const viewportHeight = root.clientHeight || window.innerHeight;
-      const progress = clamp(root.scrollTop / viewportHeight);
-      const isActive = progress > 0.015 && progress < 0.985;
+    let isDisposed = false;
 
-      overlay.style.opacity = isActive ? '1' : '0';
-      TRANSITION_LAYERS.forEach((layer, index) => {
-        pathRefs.current[index]?.setAttribute(
-          'd',
-          getPathForProgress(remapProgress(progress, layer.start, layer.end))
-        );
-      });
+    const getViewportHeight = () => root.clientHeight || window.innerHeight;
+    const getScreenTop = (screenIndex: number) => screenIndex * getViewportHeight();
+    const isNearScreen = (screenIndex: number) => {
+      const tolerance = getViewportHeight() * SCREEN_TOLERANCE;
+      return Math.abs(root.scrollTop - getScreenTop(screenIndex)) <= tolerance;
     };
 
-    const requestUpdate = () => {
-      if (frameRef.current !== null) return;
-
-      frameRef.current = window.requestAnimationFrame(() => {
-        frameRef.current = null;
-        update();
-      });
+    const setOverlayVisible = (visible: boolean) => {
+      overlay.style.opacity = visible ? '1' : '0';
     };
 
-    update();
-    root.addEventListener('scroll', requestUpdate, { passive: true });
-    window.addEventListener('resize', requestUpdate);
+    const jumpToScreen = (screenIndex: number) => {
+      root.scrollTo({ top: getScreenTop(screenIndex), behavior: 'auto' });
+    };
+
+    const restoreScroll = () => {
+      root.style.overflowY = '';
+      root.style.scrollSnapType = '';
+      root.style.scrollBehavior = '';
+    };
+
+    const animatePath = (
+      path: SVGPathElement,
+      from: string,
+      to: string,
+      duration: number,
+      easing: (value: number) => number
+    ) =>
+      new Promise<void>(resolve => {
+        const start = performance.now();
+        path.setAttribute('d', from);
+
+        const tick = (now: number) => {
+          if (isDisposed) {
+            resolve();
+            return;
+          }
+
+          const progress = Math.min((now - start) / duration, 1);
+          path.setAttribute('d', interpolatePath(from, to, easing(progress)));
+
+          if (progress < 1) {
+            frameRef.current = window.requestAnimationFrame(tick);
+            return;
+          }
+
+          resolve();
+        };
+
+        frameRef.current = window.requestAnimationFrame(tick);
+      });
+
+    const revealLayer = async (path: SVGPathElement, delay: number, shouldSwitch: boolean) => {
+      await wait(delay);
+      await animatePath(path, PATHS.step1.unfilled, PATHS.step1.curve1, 800, power4In);
+      await animatePath(path, PATHS.step1.curve1, PATHS.step1.filled, 200, value => value);
+      if (shouldSwitch) {
+        jumpToScreen(SECOND_SCREEN_INDEX);
+      }
+      await animatePath(path, PATHS.step2.filled, PATHS.step2.curve1, 200, sineIn);
+      await animatePath(path, PATHS.step2.curve1, PATHS.step2.unfilled, 1000, power4Out);
+    };
+
+    const unrevealLayer = async (path: SVGPathElement, delay: number, shouldSwitch: boolean) => {
+      await wait(delay);
+      await animatePath(path, PATHS.step2.unfilled, PATHS.step2.curve2, 800, power4In);
+      await animatePath(path, PATHS.step2.curve2, PATHS.step2.filled, 200, value => value);
+      if (shouldSwitch) {
+        jumpToScreen(FIRST_SCREEN_INDEX);
+      }
+      await animatePath(path, PATHS.step1.filled, PATHS.step1.curve2, 200, sineIn);
+      await animatePath(path, PATHS.step1.curve2, PATHS.step1.unfilled, 1000, power4Out);
+    };
+
+    const runTransition = async (direction: 'forward' | 'back') => {
+      if (isAnimatingRef.current) return;
+
+      isAnimatingRef.current = true;
+      root.style.overflowY = 'hidden';
+      root.style.scrollSnapType = 'none';
+      root.style.scrollBehavior = 'auto';
+      jumpToScreen(direction === 'forward' ? FIRST_SCREEN_INDEX : SECOND_SCREEN_INDEX);
+      setOverlayVisible(true);
+
+      const layerTasks = TRANSITION_LAYERS.map((layer, index) => {
+        const path = pathRefs.current[index];
+        if (!path) return Promise.resolve();
+
+        return direction === 'forward'
+          ? revealLayer(path, layer.delay, index === TRANSITION_LAYERS.length - 1)
+          : unrevealLayer(path, layer.delay, index === TRANSITION_LAYERS.length - 1);
+      });
+
+      await Promise.all(layerTasks);
+      setOverlayVisible(false);
+      restoreScroll();
+      isAnimatingRef.current = false;
+    };
+
+    const onWheel = (event: WheelEvent) => {
+      if (isAnimatingRef.current) {
+        event.preventDefault();
+        return;
+      }
+
+      if (event.deltaY > 0 && isNearScreen(FIRST_SCREEN_INDEX)) {
+        event.preventDefault();
+        void runTransition('forward');
+        return;
+      }
+
+      if (event.deltaY < 0 && isNearScreen(SECOND_SCREEN_INDEX)) {
+        event.preventDefault();
+        void runTransition('back');
+      }
+    };
+
+    const onTouchStart = (event: TouchEvent) => {
+      touchStartYRef.current = event.touches[0]?.clientY ?? null;
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      if (isAnimatingRef.current) {
+        event.preventDefault();
+        return;
+      }
+
+      const startY = touchStartYRef.current;
+      const currentY = event.touches[0]?.clientY;
+      if (startY === null || currentY === undefined) return;
+
+      const deltaY = startY - currentY;
+      if (deltaY > 24 && isNearScreen(FIRST_SCREEN_INDEX)) {
+        event.preventDefault();
+        touchStartYRef.current = null;
+        void runTransition('forward');
+        return;
+      }
+
+      if (deltaY < -24 && isNearScreen(SECOND_SCREEN_INDEX)) {
+        event.preventDefault();
+        touchStartYRef.current = null;
+        void runTransition('back');
+      }
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (isAnimatingRef.current) {
+        event.preventDefault();
+        return;
+      }
+
+      if (['ArrowDown', 'PageDown', ' ', 'Spacebar'].includes(event.key) && isNearScreen(FIRST_SCREEN_INDEX)) {
+        event.preventDefault();
+        void runTransition('forward');
+        return;
+      }
+
+      if (['ArrowUp', 'PageUp'].includes(event.key) && isNearScreen(SECOND_SCREEN_INDEX)) {
+        event.preventDefault();
+        void runTransition('back');
+      }
+    };
+
+    root.addEventListener('wheel', onWheel, { passive: false, capture: true });
+    root.addEventListener('touchstart', onTouchStart, { passive: true });
+    root.addEventListener('touchmove', onTouchMove, { passive: false, capture: true });
+    window.addEventListener('keydown', onKeyDown);
 
     return () => {
+      isDisposed = true;
       if (frameRef.current !== null) {
         window.cancelAnimationFrame(frameRef.current);
       }
-      root.removeEventListener('scroll', requestUpdate);
-      window.removeEventListener('resize', requestUpdate);
+      root.removeEventListener('wheel', onWheel, { capture: true });
+      root.removeEventListener('touchstart', onTouchStart);
+      root.removeEventListener('touchmove', onTouchMove, { capture: true });
+      window.removeEventListener('keydown', onKeyDown);
+      restoreScroll();
     };
   }, []);
 
@@ -149,7 +269,7 @@ export function ScrollPathTransition() {
           ref={node => {
             pathRefs.current[index] = node;
           }}
-          d={PATHS.hiddenFromBottom}
+          d={PATHS.step1.unfilled}
           fill={layer.fill}
         />
       ))}
