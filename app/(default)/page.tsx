@@ -13,15 +13,23 @@ import { FinalCtaSection } from '@/components/sections/FinalCtaSection';
 import { LandingFooter } from '@/components/LandingFooter';
 import { ScrollPathTransition } from '@/components/ScrollPathTransition';
 
-const stickyStyle = (index: number) =>
+const stickyStyle = (layer: number, offsetRem: number) =>
   ({
-    '--sticky-offset': `${index * 2}rem`,
-    '--sticky-z': index + 1,
+    '--sticky-offset': `${offsetRem}rem`,
+    '--sticky-z': layer,
   }) as CSSProperties;
 
-function StickyPanel({ children, index }: { children: ReactNode; index: number }) {
+function StickyPanel({
+  children,
+  layer,
+  offsetRem,
+}: {
+  children: ReactNode;
+  layer: number;
+  offsetRem: number;
+}) {
   return (
-    <div className="sticky-panel snap-start" style={stickyStyle(index)}>
+    <div className="sticky-panel snap-start" style={stickyStyle(layer, offsetRem)}>
       {children}
     </div>
   );
@@ -37,31 +45,31 @@ export default function HomePage() {
       <ScrollPathTransition />
       <FinalCtaSection />
       <div className="sticky-flow">
-        <StickyPanel index={0}>
+        <StickyPanel layer={1} offsetRem={0}>
           <HeroSection />
         </StickyPanel>
-        <StickyPanel index={1}>
+        <StickyPanel layer={2} offsetRem={4}>
           <LiveFourSection />
         </StickyPanel>
-        <StickyPanel index={2}>
+        <StickyPanel layer={3} offsetRem={4}>
           <CapabilitiesSection />
         </StickyPanel>
-        <StickyPanel index={3}>
+        <StickyPanel layer={4} offsetRem={6}>
           <AssetSection />
         </StickyPanel>
-        <StickyPanel index={4}>
+        <StickyPanel layer={5} offsetRem={8}>
           <HowItWorksSection />
         </StickyPanel>
-        <StickyPanel index={5}>
+        <StickyPanel layer={6} offsetRem={10}>
           <ConnectorsSection />
         </StickyPanel>
-        <StickyPanel index={6}>
+        <StickyPanel layer={7} offsetRem={12}>
           <InfraSection />
         </StickyPanel>
-        <StickyPanel index={7}>
+        <StickyPanel layer={8} offsetRem={14}>
           <WhichSideSection />
         </StickyPanel>
-        <StickyPanel index={8}>
+        <StickyPanel layer={9} offsetRem={16}>
           <SummarySection />
         </StickyPanel>
       </div>
