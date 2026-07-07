@@ -12,12 +12,12 @@ import { SummarySection } from '@/components/sections/SummarySection';
 import { FinalCtaSection } from '@/components/sections/FinalCtaSection';
 import { LandingFooter } from '@/components/LandingFooter';
 import { ScrollPathTransition } from '@/components/ScrollPathTransition';
+import { StackJumpNav } from '@/components/StackJumpNav';
 
 type StickyPanelTone = 'light' | 'dark';
 
 type StickyPanelProps = {
   children: ReactNode;
-  label: string;
   layer: number;
   offsetRem: number;
   surfaceEnd?: string;
@@ -30,6 +30,17 @@ const STICKY_BASE_OFFSET_REM = 4;
 const STICKY_STEP_REM = 1.5;
 
 const stickyOffset = (index: number) => STICKY_BASE_OFFSET_REM + index * STICKY_STEP_REM;
+
+const STACK_NAV_ITEMS = [
+  { id: 'stack-live-agent', label: 'Live Agent' },
+  { id: 'stack-live-four', label: 'LIVE 四要素' },
+  { id: 'stack-capabilities', label: '核心能力' },
+  { id: 'stack-asset', label: '能力资产' },
+  { id: 'stack-how-it-works', label: '如何创建' },
+  { id: 'stack-connectors', label: '连接器' },
+  { id: 'stack-infra', label: '技术底座' },
+  { id: 'stack-which-side', label: '适合谁' },
+] as const;
 
 const stickyStyle = (
   layer: number,
@@ -46,7 +57,6 @@ const stickyStyle = (
 
 function StickyPanel({
   children,
-  label,
   layer,
   offsetRem,
   surfaceEnd = '#ffffff',
@@ -55,16 +65,19 @@ function StickyPanel({
   tone = 'light',
 }: StickyPanelProps) {
   return (
-    <div
-      id={targetId}
-      className={`sticky-panel sticky-panel--${tone}`}
-      style={stickyStyle(layer, offsetRem, surfaceStart, surfaceEnd)}
-    >
-      <a className="sticky-panel-label" href={`#${targetId}`}>
-        {label}
-      </a>
-      {children}
-    </div>
+    <>
+      <div
+        id={targetId}
+        className="stack-anchor"
+        style={stickyStyle(layer, offsetRem, surfaceStart, surfaceEnd)}
+      />
+      <div
+        className={`sticky-panel sticky-panel--${tone}`}
+        style={stickyStyle(layer, offsetRem, surfaceStart, surfaceEnd)}
+      >
+        {children}
+      </div>
+    </>
   );
 }
 
@@ -78,8 +91,8 @@ export default function HomePage() {
       <ScrollPathTransition />
       <FinalCtaSection />
       <div className="sticky-flow">
+        <StackJumpNav items={STACK_NAV_ITEMS} />
         <StickyPanel
-          label="Live Agent"
           layer={1}
           offsetRem={stickyOffset(0)}
           targetId="stack-live-agent"
@@ -87,77 +100,69 @@ export default function HomePage() {
           <HeroSection />
         </StickyPanel>
         <StickyPanel
-          label="LIVE 四要素"
           layer={2}
           offsetRem={stickyOffset(1)}
-          surfaceEnd="#e7e7e7"
-          surfaceStart="#f0f0f0"
+          surfaceEnd="#f2f2f2"
+          surfaceStart="#fafafa"
           targetId="stack-live-four"
         >
           <LiveFourSection />
         </StickyPanel>
         <StickyPanel
-          label="核心能力"
           layer={3}
           offsetRem={stickyOffset(2)}
-          surfaceEnd="#dedede"
-          surfaceStart="#e6e6e6"
+          surfaceEnd="#ededed"
+          surfaceStart="#f5f5f5"
           targetId="stack-capabilities"
         >
           <CapabilitiesSection />
         </StickyPanel>
         <StickyPanel
-          label="能力资产"
           layer={4}
           offsetRem={stickyOffset(3)}
-          surfaceEnd="#d5d5d5"
-          surfaceStart="#dddddd"
+          surfaceEnd="#e6e6e6"
+          surfaceStart="#eeeeee"
           targetId="stack-asset"
         >
           <AssetSection />
         </StickyPanel>
         <StickyPanel
-          label="如何创建"
           layer={5}
           offsetRem={stickyOffset(4)}
-          surfaceEnd="#cccccc"
-          surfaceStart="#d4d4d4"
+          surfaceEnd="#dfdfdf"
+          surfaceStart="#e8e8e8"
           targetId="stack-how-it-works"
         >
           <HowItWorksSection />
         </StickyPanel>
         <StickyPanel
-          label="连接器"
           layer={6}
           offsetRem={stickyOffset(5)}
-          surfaceEnd="#c4c4c4"
-          surfaceStart="#cbcbcb"
+          surfaceEnd="#d8d8d8"
+          surfaceStart="#e1e1e1"
           targetId="stack-connectors"
         >
           <ConnectorsSection />
         </StickyPanel>
         <StickyPanel
-          label="技术底座"
           layer={7}
           offsetRem={stickyOffset(6)}
-          surfaceEnd="#bfbfbf"
-          surfaceStart="#c5c5c5"
+          surfaceEnd="#d0d0d0"
+          surfaceStart="#dadada"
           targetId="stack-infra"
         >
           <InfraSection />
         </StickyPanel>
         <StickyPanel
-          label="适合谁"
           layer={8}
           offsetRem={stickyOffset(7)}
-          surfaceEnd="#bababa"
-          surfaceStart="#bfbfbf"
+          surfaceEnd="#c9c9c9"
+          surfaceStart="#d3d3d3"
           targetId="stack-which-side"
         >
           <WhichSideSection />
         </StickyPanel>
         <StickyPanel
-          label="总结"
           layer={9}
           offsetRem={stickyOffset(8)}
           targetId="stack-summary"

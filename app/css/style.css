@@ -85,38 +85,49 @@ body::-webkit-scrollbar,
   scroll-margin-top: 4rem;
 }
 
-.sticky-panel-label {
+.stack-jump-nav {
+  position: fixed;
+  top: 4rem;
+  z-index: 90;
+  height: 0;
+  pointer-events: none;
+}
+
+.stack-jump-label {
   position: absolute;
-  top: 0.34rem;
   left: clamp(1rem, 3vw, 3rem);
-  z-index: 8;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.42rem;
-  min-height: 1rem;
+  top: calc(0.34rem + var(--stack-label-index) * 1.5rem);
+  z-index: 1;
   border: 0;
   background: transparent;
   padding: 0.3rem 0;
-  color: rgba(32, 33, 36, 0.62);
+  color: #fff;
+  font: inherit;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   line-height: 1;
+  text-align: left;
   text-transform: uppercase;
-  text-decoration: none;
-  transition: color 160ms ease;
+  white-space: nowrap;
+  cursor: pointer;
+  mix-blend-mode: difference;
+  opacity: 0.72;
+  pointer-events: auto;
+  transition: opacity 160ms ease;
 }
 
-.sticky-panel-label:hover {
-  color: rgba(32, 33, 36, 0.92);
+.stack-jump-label:hover {
+  opacity: 1;
 }
 
-.sticky-panel--dark .sticky-panel-label {
-  background: transparent;
-  color: var(--color-honey);
+.stack-anchor {
+  height: 0;
+  scroll-margin-top: var(--sticky-offset, 4rem);
 }
 
 .sticky-panel > section {
+  box-shadow: none;
   min-height: calc(100vh - var(--sticky-offset, 0px));
   scroll-snap-align: none;
 }
