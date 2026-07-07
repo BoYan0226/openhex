@@ -15,6 +15,16 @@ import { ScrollPathTransition } from '@/components/ScrollPathTransition';
 
 type StickyPanelTone = 'light' | 'dark';
 
+type StickyPanelProps = {
+  children: ReactNode;
+  label: string;
+  layer: number;
+  offsetRem: number;
+  surfaceEnd?: string;
+  surfaceStart?: string;
+  tone?: StickyPanelTone;
+};
+
 const STICKY_BASE_OFFSET_REM = 4;
 const STICKY_STEP_REM = 3;
 
@@ -38,18 +48,10 @@ function StickyPanel({
   label,
   layer,
   offsetRem,
-  surfaceEnd = '#a1a1a1',
+  surfaceEnd = '#ffffff',
   surfaceStart = '#ffffff',
   tone = 'light',
-}: {
-  children: ReactNode;
-  label: string;
-  layer: number;
-  offsetRem: number;
-  surfaceEnd?: string;
-  surfaceStart?: string;
-  tone?: StickyPanelTone;
-}) {
+}: StickyPanelProps) {
   return (
     <div
       className={`sticky-panel sticky-panel--${tone}`}
@@ -73,23 +75,24 @@ export default function HomePage() {
       <ScrollPathTransition />
       <FinalCtaSection />
       <div className="sticky-flow">
-        <StickyPanel
-          label="Live Agent"
-          layer={1}
-          offsetRem={stickyOffset(0)}
-          surfaceEnd="#f1f1f1"
-        >
+        <StickyPanel label="Live Agent" layer={1} offsetRem={stickyOffset(0)}>
           <HeroSection />
         </StickyPanel>
-        <StickyPanel label="LIVE 四要素" layer={2} offsetRem={stickyOffset(1)} tone="dark">
+        <StickyPanel
+          label="LIVE 四要素"
+          layer={2}
+          offsetRem={stickyOffset(1)}
+          surfaceEnd="#f1f1f1"
+          surfaceStart="#ffffff"
+        >
           <LiveFourSection />
         </StickyPanel>
         <StickyPanel
           label="核心能力"
           layer={3}
           offsetRem={stickyOffset(2)}
-          surfaceEnd="#dfdfdf"
-          surfaceStart="#fafafa"
+          surfaceEnd="#e8e8e8"
+          surfaceStart="#f1f1f1"
         >
           <CapabilitiesSection />
         </StickyPanel>
@@ -97,8 +100,8 @@ export default function HomePage() {
           label="能力资产"
           layer={4}
           offsetRem={stickyOffset(3)}
-          surfaceEnd="#d4d4d4"
-          surfaceStart="#f5f5f5"
+          surfaceEnd="#dfdfdf"
+          surfaceStart="#e8e8e8"
         >
           <AssetSection />
         </StickyPanel>
@@ -106,8 +109,8 @@ export default function HomePage() {
           label="如何创建"
           layer={5}
           offsetRem={stickyOffset(4)}
-          surfaceEnd="#c9c9c9"
-          surfaceStart="#eeeeee"
+          surfaceEnd="#d6d6d6"
+          surfaceStart="#dfdfdf"
         >
           <HowItWorksSection />
         </StickyPanel>
@@ -115,20 +118,26 @@ export default function HomePage() {
           label="连接器"
           layer={6}
           offsetRem={stickyOffset(5)}
-          surfaceEnd="#bebebe"
-          surfaceStart="#e7e7e7"
+          surfaceEnd="#cdcdcd"
+          surfaceStart="#d6d6d6"
         >
           <ConnectorsSection />
         </StickyPanel>
-        <StickyPanel label="技术底座" layer={7} offsetRem={stickyOffset(6)} tone="dark">
+        <StickyPanel
+          label="技术底座"
+          layer={7}
+          offsetRem={stickyOffset(6)}
+          surfaceEnd="#c3c3c3"
+          surfaceStart="#cdcdcd"
+        >
           <InfraSection />
         </StickyPanel>
         <StickyPanel
           label="适合谁"
           layer={8}
           offsetRem={stickyOffset(7)}
-          surfaceEnd="#a1a1a1"
-          surfaceStart="#dedede"
+          surfaceEnd="#bababa"
+          surfaceStart="#c3c3c3"
         >
           <WhichSideSection />
         </StickyPanel>

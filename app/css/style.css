@@ -126,8 +126,7 @@ body::-webkit-scrollbar,
   background: linear-gradient(
     180deg,
     var(--stack-surface-start, #ffffff) 0%,
-    #f8f8f8 42%,
-    var(--stack-surface-end, #a1a1a1) 100%
+    var(--stack-surface-end, #ffffff) 100%
   );
 }
 
