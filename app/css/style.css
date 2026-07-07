@@ -68,6 +68,22 @@ body::-webkit-scrollbar,
   display: none;
 }
 
+/* Codrops-style sticky stack starts after the opening screen. */
+.sticky-flow {
+  isolation: isolate;
+  background: var(--color-paper);
+}
+
+.sticky-panel {
+  position: sticky;
+  top: var(--sticky-offset, 0px);
+  z-index: var(--sticky-z, 1);
+}
+
+.sticky-panel > section {
+  min-height: calc(100vh - var(--sticky-offset, 0px));
+}
+
 /* Hexagon clip — the numbered/iconed badges throughout the page. */
 .hex-clip {
   clip-path: var(--hex);

@@ -2,7 +2,6 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { AuthAwareCtaButton } from '@/components/AuthAwareCtaButton';
 import { CONSUMER_CONTACTS_URL } from '@/components/landingLinks';
-import { HONEYCOMB_LIGHT_STYLE } from '@/components/ui/textures';
 
 /**
  * 你想做哪一端? — centered header + two large cards (创造者 / 使用者). Each
@@ -15,13 +14,8 @@ export function WhichSideSection() {
   return (
     <section
       id="which-side"
-      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-paper py-20 md:py-24"
+      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={HONEYCOMB_LIGHT_STYLE}
-      />
       <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
         {/* Centered header */}
         <div className="mb-12 flex flex-col items-center text-center 2xl:mb-20">

@@ -12,7 +12,6 @@ import {
   BarChart3,
   Check,
 } from 'lucide-react';
-import { HONEYCOMB_LIGHT_STYLE } from '@/components/ui/textures';
 
 /**
  * AssetSection — "把你的判断力，封装成一个 持续生钱的资产".
@@ -90,12 +89,7 @@ export function AssetSection() {
   const tags = t.raw('tags') as string[];
 
   return (
-    <section className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-paper py-20 md:py-24">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={HONEYCOMB_LIGHT_STYLE}
-      />
+    <section className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24">
       <div className="relative z-10 mx-auto max-w-[1240px] px-6 2xl:max-w-[1560px]">
         <div className="grid items-center gap-12 md:grid-cols-2 2xl:gap-20">
           {/* LEFT — copy */}

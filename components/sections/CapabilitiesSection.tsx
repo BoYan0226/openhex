@@ -1,6 +1,5 @@
 import { useTranslations } from 'next-intl';
 import { UserRound, Share2, Send } from 'lucide-react';
-import { HONEYCOMB_LIGHT_STYLE } from '@/components/ui/textures';
 
 /**
  * 三件普通 AI 做不到的事 — cream section, 3 numbered cards each with a
@@ -22,13 +21,8 @@ export function CapabilitiesSection() {
   return (
     <section
       id="capabilities"
-      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-paper py-20 md:py-24"
+      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={HONEYCOMB_LIGHT_STYLE}
-      />
       <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
         {/* Header */}
         <div className="mb-12 text-center md:mb-16 2xl:mb-20">
