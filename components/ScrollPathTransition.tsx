@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
 
 const TRANSITION_PATHS = {
   step1: {
@@ -20,10 +19,32 @@ const TRANSITION_PATHS = {
 const FIRST_SCREEN_INDEX = 0;
 const SECOND_SCREEN_INDEX = 1;
 const SCROLL_EDGE_TOLERANCE = 0.12;
+const PATH_NUMBER_PATTERN = /-?\d*\.?\d+/g;
+
+const ease = {
+  linear: (value: number) => value,
+  power4In: (value: number) => value ** 4,
+  power4Out: (value: number) => 1 - (1 - value) ** 4,
+  sineIn: (value: number) => 1 - Math.cos((value * Math.PI) / 2),
+};
+
+function interpolatePath(from: string, to: string, progress: number) {
+  const fromNumbers = from.match(PATH_NUMBER_PATTERN)?.map(Number) ?? [];
+  const toNumbers = to.match(PATH_NUMBER_PATTERN)?.map(Number) ?? [];
+  let index = 0;
+
+  return from.replace(PATH_NUMBER_PATTERN, () => {
+    const current = fromNumbers[index] ?? 0;
+    const next = toNumbers[index] ?? current;
+    index += 1;
+    return (current + (next - current) * progress).toFixed(3).replace(/\.?0+$/, '');
+  });
+}
 
 export function ScrollPathTransition() {
   const overlayRef = useRef<SVGSVGElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
   const isAnimatingRef = useRef(false);
   const touchStartYRef = useRef<number | null>(null);
 
@@ -36,6 +57,8 @@ export function ScrollPathTransition() {
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) return undefined;
+
+    let isDisposed = false;
 
     const getViewportHeight = () => root.clientHeight || window.innerHeight;
     const getScreenTop = (screenIndex: number) => screenIndex * getViewportHeight();
@@ -53,7 +76,41 @@ export function ScrollPathTransition() {
       root.scrollTo({ top: getScreenTop(screenIndex), behavior: 'auto' });
     };
 
-    const runTransition = (direction: 'forward' | 'back') => {
+    const setOverlayVisible = (visible: boolean) => {
+      overlay.style.opacity = visible ? '1' : '0';
+    };
+
+    const animatePath = (
+      from: string,
+      to: string,
+      duration: number,
+      easing: (value: number) => number
+    ) =>
+      new Promise<void>(resolve => {
+        const start = performance.now();
+        overlayPath.setAttribute('d', from);
+
+        const tick = (now: number) => {
+          if (isDisposed) {
+            resolve();
+            return;
+          }
+
+          const progress = Math.min((now - start) / duration, 1);
+          overlayPath.setAttribute('d', interpolatePath(from, to, easing(progress)));
+
+          if (progress < 1) {
+            animationFrameRef.current = window.requestAnimationFrame(tick);
+            return;
+          }
+
+          resolve();
+        };
+
+        animationFrameRef.current = window.requestAnimationFrame(tick);
+      });
+
+    const runTransition = async (direction: 'forward' | 'back') => {
       if (isAnimatingRef.current) return;
 
       isAnimatingRef.current = true;
@@ -65,70 +122,65 @@ export function ScrollPathTransition() {
         '--landing-transition-fill',
         goingForward ? 'var(--color-paper)' : 'var(--color-night)'
       );
-
-      const timeline = gsap.timeline({
-        defaults: { overwrite: true },
-        onStart: () => {
-          gsap.set(overlay, { autoAlpha: 1 });
-        },
-        onComplete: () => {
-          gsap.set(overlay, { autoAlpha: 0 });
-          restoreScroll();
-          isAnimatingRef.current = false;
-        },
-      });
+      setOverlayVisible(true);
 
       if (goingForward) {
-        timeline
-          .set(overlayPath, { attr: { d: TRANSITION_PATHS.step1.unfilled } })
-          .to(overlayPath, {
-            duration: 0.68,
-            ease: 'power4.in',
-            attr: { d: TRANSITION_PATHS.step1.curve },
-          })
-          .to(overlayPath, {
-            duration: 0.18,
-            ease: 'power1',
-            attr: { d: TRANSITION_PATHS.step1.filled },
-            onComplete: () => jumpToScreen(SECOND_SCREEN_INDEX),
-          })
-          .set(overlayPath, { attr: { d: TRANSITION_PATHS.step2.filled } })
-          .to(overlayPath, {
-            duration: 0.18,
-            ease: 'sine.in',
-            attr: { d: TRANSITION_PATHS.step2.curveForward },
-          })
-          .to(overlayPath, {
-            duration: 0.76,
-            ease: 'power4',
-            attr: { d: TRANSITION_PATHS.step2.unfilled },
-          });
+        await animatePath(
+          TRANSITION_PATHS.step1.unfilled,
+          TRANSITION_PATHS.step1.curve,
+          680,
+          ease.power4In
+        );
+        await animatePath(
+          TRANSITION_PATHS.step1.curve,
+          TRANSITION_PATHS.step1.filled,
+          180,
+          ease.linear
+        );
+        jumpToScreen(SECOND_SCREEN_INDEX);
+        await animatePath(
+          TRANSITION_PATHS.step2.filled,
+          TRANSITION_PATHS.step2.curveForward,
+          180,
+          ease.sineIn
+        );
+        await animatePath(
+          TRANSITION_PATHS.step2.curveForward,
+          TRANSITION_PATHS.step2.unfilled,
+          760,
+          ease.power4Out
+        );
       } else {
-        timeline
-          .set(overlayPath, { attr: { d: TRANSITION_PATHS.step2.unfilled } })
-          .to(overlayPath, {
-            duration: 0.68,
-            ease: 'power4.in',
-            attr: { d: TRANSITION_PATHS.step2.curveBack },
-          })
-          .to(overlayPath, {
-            duration: 0.18,
-            ease: 'power1',
-            attr: { d: TRANSITION_PATHS.step2.filled },
-            onComplete: () => jumpToScreen(FIRST_SCREEN_INDEX),
-          })
-          .set(overlayPath, { attr: { d: TRANSITION_PATHS.step1.filled } })
-          .to(overlayPath, {
-            duration: 0.18,
-            ease: 'sine.in',
-            attr: { d: TRANSITION_PATHS.step1.curve },
-          })
-          .to(overlayPath, {
-            duration: 0.76,
-            ease: 'power4',
-            attr: { d: TRANSITION_PATHS.step1.unfilled },
-          });
+        await animatePath(
+          TRANSITION_PATHS.step2.unfilled,
+          TRANSITION_PATHS.step2.curveBack,
+          680,
+          ease.power4In
+        );
+        await animatePath(
+          TRANSITION_PATHS.step2.curveBack,
+          TRANSITION_PATHS.step2.filled,
+          180,
+          ease.linear
+        );
+        jumpToScreen(FIRST_SCREEN_INDEX);
+        await animatePath(
+          TRANSITION_PATHS.step1.filled,
+          TRANSITION_PATHS.step1.curve,
+          180,
+          ease.sineIn
+        );
+        await animatePath(
+          TRANSITION_PATHS.step1.curve,
+          TRANSITION_PATHS.step1.unfilled,
+          760,
+          ease.power4Out
+        );
       }
+
+      setOverlayVisible(false);
+      restoreScroll();
+      isAnimatingRef.current = false;
     };
 
     const shouldInterceptForward = () => isNearScreen(FIRST_SCREEN_INDEX);
@@ -142,13 +194,13 @@ export function ScrollPathTransition() {
 
       if (event.deltaY > 0 && shouldInterceptForward()) {
         event.preventDefault();
-        runTransition('forward');
+        void runTransition('forward');
         return;
       }
 
       if (event.deltaY < 0 && shouldInterceptBack()) {
         event.preventDefault();
-        runTransition('back');
+        void runTransition('back');
       }
     };
 
@@ -170,14 +222,14 @@ export function ScrollPathTransition() {
       if (deltaY > 24 && shouldInterceptForward()) {
         event.preventDefault();
         touchStartYRef.current = null;
-        runTransition('forward');
+        void runTransition('forward');
         return;
       }
 
       if (deltaY < -24 && shouldInterceptBack()) {
         event.preventDefault();
         touchStartYRef.current = null;
-        runTransition('back');
+        void runTransition('back');
       }
     };
 
@@ -192,13 +244,13 @@ export function ScrollPathTransition() {
 
       if (forwardKeys.includes(event.key) && shouldInterceptForward()) {
         event.preventDefault();
-        runTransition('forward');
+        void runTransition('forward');
         return;
       }
 
       if (backKeys.includes(event.key) && shouldInterceptBack()) {
         event.preventDefault();
-        runTransition('back');
+        void runTransition('back');
       }
     };
 
@@ -208,12 +260,15 @@ export function ScrollPathTransition() {
     window.addEventListener('keydown', onKeyDown);
 
     return () => {
+      isDisposed = true;
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+      }
       root.removeEventListener('wheel', onWheel);
       root.removeEventListener('touchstart', onTouchStart);
       root.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('keydown', onKeyDown);
       restoreScroll();
-      gsap.killTweensOf([overlay, overlayPath]);
     };
   }, []);
 
