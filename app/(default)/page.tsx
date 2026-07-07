@@ -10,7 +10,7 @@ import { WhichSideSection } from '@/components/sections/WhichSideSection';
 import { SummarySection } from '@/components/sections/SummarySection';
 import { FinalCtaSection } from '@/components/sections/FinalCtaSection';
 import { LandingFooter } from '@/components/LandingFooter';
-import { PathTransitionSection } from '@/components/sections/PathTransitionSection';
+import { ScrollPathTransition } from '@/components/ScrollPathTransition';
 
 export default function HomePage() {
   return (
@@ -19,8 +19,8 @@ export default function HomePage() {
       className="h-screen snap-y snap-proximity overflow-x-hidden overflow-y-scroll scroll-smooth bg-paper text-ink"
     >
       <LandingNav />
+      <ScrollPathTransition />
       <FinalCtaSection />
-      <PathTransitionSection />
       <HeroSection />
       <LiveFourSection />
       <CapabilitiesSection />
