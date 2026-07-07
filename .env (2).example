@@ -1,0 +1,6 @@
+# Local development environment.
+#
+# CTA buttons point to `${NEXT_PUBLIC_APP_URL}/login`.
+# Leave this as production, change it to staging, or point it at your own
+# local app while editing the landing page in Codespaces.
+NEXT_PUBLIC_APP_URL=https://app.openhex.tech

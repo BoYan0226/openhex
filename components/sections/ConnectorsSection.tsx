@@ -1,0 +1,93 @@
+import { useTranslations } from 'next-intl';
+import { CONN_LOGOS } from './connectorLogos';
+import { HONEYCOMB_LIGHT_STYLE } from '@/components/ui/textures';
+
+/**
+ * 系统连接器 — centered header + 3×2 grid of 6 connector cards + trust pill.
+ * Each card shows the real paired brand marks (lifted from the design,
+ * see connectorLogos.ts) on the left and name/status/desc on the right.
+ */
+
+type StatusKey = 'online' | 'comingSoon';
+
+type ConnectorItem = {
+  key: string;
+  name: string;
+  status: StatusKey;
+  desc: string;
+};
+
+const STATUS_STYLE: Record<StatusKey, string> = {
+  online: 'bg-emerald-50 text-emerald-600 border border-emerald-200',
+  comingSoon: 'bg-honey/10 text-honey-deep',
+};
+
+export function ConnectorsSection() {
+  const t = useTranslations('landing.connectors');
+  const items = t.raw('items') as ConnectorItem[];
+
+  return (
+    <section
+      id="connectors"
+      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-paper py-20 md:py-24"
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={HONEYCOMB_LIGHT_STYLE}
+      />
+      <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
+        {/* Header */}
+        <div className="mb-12 flex flex-col items-center text-center 2xl:mb-20">
+          <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
+            <span className="hex-clip h-2.5 w-2.5 bg-honey" />
+            {t('eyebrow')}
+          </span>
+          <h2 className="mt-5 text-[30px] font-semibold text-ink md:text-[44px] 2xl:text-[54px]">
+            {t('title')}
+          </h2>
+          <p className="mx-auto mt-4 max-w-[680px] text-ink/55 2xl:text-[17px]">{t('subtitle')}</p>
+        </div>
+
+        {/* 6-card grid (3 cols × 2 rows on desktop) */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:gap-7">
+          {items.map(item => (
+            <article
+              key={item.key}
+              className="flex items-center gap-4 rounded-[16px] border border-line bg-white p-5 transition-shadow hover:shadow-[0_6px_24px_rgba(34,28,19,.07)] 2xl:gap-5 2xl:p-7"
+            >
+              <div
+                className="conn-logos shrink-0"
+                aria-hidden
+                dangerouslySetInnerHTML={{ __html: CONN_LOGOS[item.key] ?? '' }}
+              />
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[15px] font-semibold text-ink 2xl:text-[17px]">
+                    {item.name}
+                  </span>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_STYLE[item.status]}`}
+                  >
+                    {t(`status.${item.status}`)}
+                  </span>
+                </div>
+                <p className="mt-1 text-[13px] leading-relaxed text-ink/55 2xl:mt-1.5 2xl:text-[15px]">
+                  {item.desc}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {/* Trust pill */}
+        <div className="mt-10 flex justify-center 2xl:mt-16">
+          <div className="inline-flex items-center gap-2.5 rounded-full bg-honey/[0.08] px-5 py-2.5 text-[13px] text-ink/70">
+            <span className="hex-clip h-4 w-4 shrink-0 bg-honey" />
+            {t('trustPill')}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
