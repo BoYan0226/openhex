@@ -13,23 +13,51 @@ import { FinalCtaSection } from '@/components/sections/FinalCtaSection';
 import { LandingFooter } from '@/components/LandingFooter';
 import { ScrollPathTransition } from '@/components/ScrollPathTransition';
 
-const stickyStyle = (layer: number, offsetRem: number) =>
+type StickyPanelTone = 'light' | 'dark';
+
+const STICKY_BASE_OFFSET_REM = 4;
+const STICKY_STEP_REM = 3;
+
+const stickyOffset = (index: number) => STICKY_BASE_OFFSET_REM + index * STICKY_STEP_REM;
+
+const stickyStyle = (
+  layer: number,
+  offsetRem: number,
+  surfaceStart: string,
+  surfaceEnd: string
+) =>
   ({
     '--sticky-offset': `${offsetRem}rem`,
     '--sticky-z': layer,
+    '--stack-surface-start': surfaceStart,
+    '--stack-surface-end': surfaceEnd,
   }) as CSSProperties;
 
 function StickyPanel({
   children,
+  label,
   layer,
   offsetRem,
+  surfaceEnd = '#a1a1a1',
+  surfaceStart = '#ffffff',
+  tone = 'light',
 }: {
   children: ReactNode;
+  label: string;
   layer: number;
   offsetRem: number;
+  surfaceEnd?: string;
+  surfaceStart?: string;
+  tone?: StickyPanelTone;
 }) {
   return (
-    <div className="sticky-panel snap-start" style={stickyStyle(layer, offsetRem)}>
+    <div
+      className={`sticky-panel sticky-panel--${tone}`}
+      style={stickyStyle(layer, offsetRem, surfaceStart, surfaceEnd)}
+    >
+      <div className="sticky-panel-label" aria-hidden>
+        {label}
+      </div>
       {children}
     </div>
   );
@@ -39,37 +67,72 @@ export default function HomePage() {
   return (
     <main
       data-landing-scroll-root
-      className="h-screen snap-y snap-proximity overflow-x-hidden overflow-y-scroll scroll-smooth bg-paper text-ink"
+      className="h-screen overflow-x-hidden overflow-y-scroll bg-paper text-ink"
     >
       <LandingNav />
       <ScrollPathTransition />
       <FinalCtaSection />
       <div className="sticky-flow">
-        <StickyPanel layer={1} offsetRem={0}>
+        <StickyPanel
+          label="Live Agent"
+          layer={1}
+          offsetRem={stickyOffset(0)}
+          surfaceEnd="#f1f1f1"
+        >
           <HeroSection />
         </StickyPanel>
-        <StickyPanel layer={2} offsetRem={4}>
+        <StickyPanel label="LIVE 四要素" layer={2} offsetRem={stickyOffset(1)} tone="dark">
           <LiveFourSection />
         </StickyPanel>
-        <StickyPanel layer={3} offsetRem={4}>
+        <StickyPanel
+          label="核心能力"
+          layer={3}
+          offsetRem={stickyOffset(2)}
+          surfaceEnd="#dfdfdf"
+          surfaceStart="#fafafa"
+        >
           <CapabilitiesSection />
         </StickyPanel>
-        <StickyPanel layer={4} offsetRem={6}>
+        <StickyPanel
+          label="能力资产"
+          layer={4}
+          offsetRem={stickyOffset(3)}
+          surfaceEnd="#d4d4d4"
+          surfaceStart="#f5f5f5"
+        >
           <AssetSection />
         </StickyPanel>
-        <StickyPanel layer={5} offsetRem={8}>
+        <StickyPanel
+          label="如何创建"
+          layer={5}
+          offsetRem={stickyOffset(4)}
+          surfaceEnd="#c9c9c9"
+          surfaceStart="#eeeeee"
+        >
           <HowItWorksSection />
         </StickyPanel>
-        <StickyPanel layer={6} offsetRem={10}>
+        <StickyPanel
+          label="连接器"
+          layer={6}
+          offsetRem={stickyOffset(5)}
+          surfaceEnd="#bebebe"
+          surfaceStart="#e7e7e7"
+        >
           <ConnectorsSection />
         </StickyPanel>
-        <StickyPanel layer={7} offsetRem={12}>
+        <StickyPanel label="技术底座" layer={7} offsetRem={stickyOffset(6)} tone="dark">
           <InfraSection />
         </StickyPanel>
-        <StickyPanel layer={8} offsetRem={14}>
+        <StickyPanel
+          label="适合谁"
+          layer={8}
+          offsetRem={stickyOffset(7)}
+          surfaceEnd="#a1a1a1"
+          surfaceStart="#dedede"
+        >
           <WhichSideSection />
         </StickyPanel>
-        <StickyPanel layer={9} offsetRem={16}>
+        <StickyPanel label="总结" layer={9} offsetRem={stickyOffset(8)} tone="dark">
           <SummarySection />
         </StickyPanel>
       </div>

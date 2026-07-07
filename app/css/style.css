@@ -80,9 +80,62 @@ body::-webkit-scrollbar,
   z-index: var(--sticky-z, 1);
 }
 
+.sticky-panel-label {
+  position: absolute;
+  top: 0.72rem;
+  left: clamp(1rem, 3vw, 3rem);
+  z-index: 8;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(32, 33, 36, 0.16);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 0.18rem 0.62rem;
+  color: rgba(32, 33, 36, 0.72);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+
+.sticky-panel-label::before {
+  content: '';
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: var(--color-honey);
+}
+
+.sticky-panel--dark .sticky-panel-label {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(24, 19, 9, 0.72);
+  color: var(--color-honey);
+}
+
 .sticky-panel > section {
   border-top: 1px solid rgba(32, 33, 36, 0.18);
   min-height: calc(100vh - var(--sticky-offset, 0px));
+  scroll-snap-align: none;
+}
+
+.sticky-panel--light > section {
+  background: linear-gradient(
+    180deg,
+    var(--stack-surface-start, #ffffff) 0%,
+    #f8f8f8 42%,
+    var(--stack-surface-end, #a1a1a1) 100%
+  );
+}
+
+[data-landing-scroll-root],
+[data-landing-scroll-root] section,
+.sticky-panel {
+  scroll-snap-align: none;
+  scroll-snap-stop: normal;
 }
 
 /* Hexagon clip — the numbered/iconed badges throughout the page. */
