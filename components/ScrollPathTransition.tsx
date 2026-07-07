@@ -20,6 +20,7 @@ const FIRST_SCREEN_INDEX = 0;
 const SECOND_SCREEN_INDEX = 1;
 const SCROLL_EDGE_TOLERANCE = 0.12;
 const SCROLL_BOUNDARY_RATIO = 0.42;
+const MID_SCROLL_TOLERANCE_PX = 8;
 const PATH_NUMBER_PATTERN = /-?\d*\.?\d+/g;
 
 const ease = {
@@ -67,6 +68,17 @@ export function ScrollPathTransition() {
     const isNearScreen = (screenIndex: number) => {
       const tolerance = getViewportHeight() * SCROLL_EDGE_TOLERANCE;
       return Math.abs(root.scrollTop - getScreenTop(screenIndex)) <= tolerance;
+    };
+    const isInsideFirstTransitionRange = () => {
+      const viewportHeight = getViewportHeight();
+      return (
+        root.scrollTop > MID_SCROLL_TOLERANCE_PX &&
+        root.scrollTop < viewportHeight - MID_SCROLL_TOLERANCE_PX
+      );
+    };
+    const isInsideFirstTwoScreens = () => {
+      const viewportHeight = getViewportHeight();
+      return root.scrollTop >= 0 && root.scrollTop <= viewportHeight + MID_SCROLL_TOLERANCE_PX;
     };
 
     const restoreScroll = () => {
@@ -189,8 +201,10 @@ export function ScrollPathTransition() {
       isAnimatingRef.current = false;
     };
 
-    const shouldInterceptForward = () => isNearScreen(FIRST_SCREEN_INDEX);
-    const shouldInterceptBack = () => isNearScreen(SECOND_SCREEN_INDEX);
+    const shouldInterceptForward = () =>
+      isNearScreen(FIRST_SCREEN_INDEX) || isInsideFirstTransitionRange();
+    const shouldInterceptBack = () =>
+      isNearScreen(SECOND_SCREEN_INDEX) || isInsideFirstTransitionRange();
 
     const onWheel = (event: WheelEvent) => {
       if (isAnimatingRef.current) {
@@ -198,13 +212,13 @@ export function ScrollPathTransition() {
         return;
       }
 
-      if (event.deltaY > 0 && shouldInterceptForward()) {
+      if (event.deltaY > 0 && isInsideFirstTwoScreens() && shouldInterceptForward()) {
         event.preventDefault();
         void runTransition('forward');
         return;
       }
 
-      if (event.deltaY < 0 && shouldInterceptBack()) {
+      if (event.deltaY < 0 && isInsideFirstTwoScreens() && shouldInterceptBack()) {
         event.preventDefault();
         void runTransition('back');
       }
@@ -225,14 +239,14 @@ export function ScrollPathTransition() {
       if (startY === null || currentY === undefined) return;
 
       const deltaY = startY - currentY;
-      if (deltaY > 24 && shouldInterceptForward()) {
+      if (deltaY > 24 && isInsideFirstTwoScreens() && shouldInterceptForward()) {
         event.preventDefault();
         touchStartYRef.current = null;
         void runTransition('forward');
         return;
       }
 
-      if (deltaY < -24 && shouldInterceptBack()) {
+      if (deltaY < -24 && isInsideFirstTwoScreens() && shouldInterceptBack()) {
         event.preventDefault();
         touchStartYRef.current = null;
         void runTransition('back');
@@ -267,6 +281,12 @@ export function ScrollPathTransition() {
       const currentScrollTop = root.scrollTop;
       const forwardBoundary = viewportHeight * SCROLL_BOUNDARY_RATIO;
       const backBoundary = viewportHeight * (1 + SCROLL_BOUNDARY_RATIO);
+      const direction = currentScrollTop >= lastScrollTop ? 'forward' : 'back';
+
+      if (isInsideFirstTransitionRange()) {
+        void runTransition(direction);
+        return;
+      }
 
       if (lastScrollTop < forwardBoundary && currentScrollTop >= forwardBoundary) {
         void runTransition('forward');
