@@ -22,11 +22,12 @@ type StickyPanelProps = {
   offsetRem: number;
   surfaceEnd?: string;
   surfaceStart?: string;
+  targetId: string;
   tone?: StickyPanelTone;
 };
 
 const STICKY_BASE_OFFSET_REM = 4;
-const STICKY_STEP_REM = 3;
+const STICKY_STEP_REM = 1.5;
 
 const stickyOffset = (index: number) => STICKY_BASE_OFFSET_REM + index * STICKY_STEP_REM;
 
@@ -50,16 +51,18 @@ function StickyPanel({
   offsetRem,
   surfaceEnd = '#ffffff',
   surfaceStart = '#ffffff',
+  targetId,
   tone = 'light',
 }: StickyPanelProps) {
   return (
     <div
+      id={targetId}
       className={`sticky-panel sticky-panel--${tone}`}
       style={stickyStyle(layer, offsetRem, surfaceStart, surfaceEnd)}
     >
-      <div className="sticky-panel-label" aria-hidden>
+      <a className="sticky-panel-label" href={`#${targetId}`}>
         {label}
-      </div>
+      </a>
       {children}
     </div>
   );
@@ -75,7 +78,12 @@ export default function HomePage() {
       <ScrollPathTransition />
       <FinalCtaSection />
       <div className="sticky-flow">
-        <StickyPanel label="Live Agent" layer={1} offsetRem={stickyOffset(0)}>
+        <StickyPanel
+          label="Live Agent"
+          layer={1}
+          offsetRem={stickyOffset(0)}
+          targetId="stack-live-agent"
+        >
           <HeroSection />
         </StickyPanel>
         <StickyPanel
@@ -84,6 +92,7 @@ export default function HomePage() {
           offsetRem={stickyOffset(1)}
           surfaceEnd="#f1f1f1"
           surfaceStart="#ffffff"
+          targetId="stack-live-four"
         >
           <LiveFourSection />
         </StickyPanel>
@@ -93,6 +102,7 @@ export default function HomePage() {
           offsetRem={stickyOffset(2)}
           surfaceEnd="#e8e8e8"
           surfaceStart="#f1f1f1"
+          targetId="stack-capabilities"
         >
           <CapabilitiesSection />
         </StickyPanel>
@@ -102,6 +112,7 @@ export default function HomePage() {
           offsetRem={stickyOffset(3)}
           surfaceEnd="#dfdfdf"
           surfaceStart="#e8e8e8"
+          targetId="stack-asset"
         >
           <AssetSection />
         </StickyPanel>
@@ -111,6 +122,7 @@ export default function HomePage() {
           offsetRem={stickyOffset(4)}
           surfaceEnd="#d6d6d6"
           surfaceStart="#dfdfdf"
+          targetId="stack-how-it-works"
         >
           <HowItWorksSection />
         </StickyPanel>
@@ -120,6 +132,7 @@ export default function HomePage() {
           offsetRem={stickyOffset(5)}
           surfaceEnd="#cdcdcd"
           surfaceStart="#d6d6d6"
+          targetId="stack-connectors"
         >
           <ConnectorsSection />
         </StickyPanel>
@@ -129,6 +142,7 @@ export default function HomePage() {
           offsetRem={stickyOffset(6)}
           surfaceEnd="#c3c3c3"
           surfaceStart="#cdcdcd"
+          targetId="stack-infra"
         >
           <InfraSection />
         </StickyPanel>
@@ -138,10 +152,17 @@ export default function HomePage() {
           offsetRem={stickyOffset(7)}
           surfaceEnd="#bababa"
           surfaceStart="#c3c3c3"
+          targetId="stack-which-side"
         >
           <WhichSideSection />
         </StickyPanel>
-        <StickyPanel label="总结" layer={9} offsetRem={stickyOffset(8)} tone="dark">
+        <StickyPanel
+          label="总结"
+          layer={9}
+          offsetRem={stickyOffset(8)}
+          targetId="stack-summary"
+          tone="dark"
+        >
           <SummarySection />
         </StickyPanel>
       </div>

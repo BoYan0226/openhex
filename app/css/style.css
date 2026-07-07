@@ -60,6 +60,10 @@ body,
   -ms-overflow-style: none;
 }
 
+[data-landing-scroll-root] {
+  scroll-behavior: smooth;
+}
+
 html::-webkit-scrollbar,
 body::-webkit-scrollbar,
 [data-landing-scroll-root]::-webkit-scrollbar {
@@ -78,46 +82,49 @@ body::-webkit-scrollbar,
   position: sticky;
   top: var(--sticky-offset, 0px);
   z-index: var(--sticky-z, 1);
+  scroll-margin-top: 4rem;
 }
 
 .sticky-panel-label {
   position: absolute;
-  top: 0.72rem;
+  top: 0.34rem;
   left: clamp(1rem, 3vw, 3rem);
   z-index: 8;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  min-height: 1.45rem;
-  border-radius: 999px;
-  border: 1px solid rgba(32, 33, 36, 0.16);
-  background: rgba(255, 255, 255, 0.72);
-  padding: 0.18rem 0.62rem;
-  color: rgba(32, 33, 36, 0.72);
+  gap: 0.42rem;
+  min-height: 1rem;
+  border: 0;
+  background: transparent;
+  padding: 0.3rem 0;
+  color: rgba(32, 33, 36, 0.62);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   line-height: 1;
   text-transform: uppercase;
-  backdrop-filter: blur(10px);
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.sticky-panel-label:hover {
+  color: rgba(32, 33, 36, 0.92);
 }
 
 .sticky-panel-label::before {
   content: '';
-  width: 0.42rem;
-  height: 0.42rem;
+  width: 0.38rem;
+  height: 0.38rem;
   border-radius: 999px;
   background: var(--color-honey);
 }
 
 .sticky-panel--dark .sticky-panel-label {
-  border-color: rgba(255, 255, 255, 0.18);
-  background: rgba(24, 19, 9, 0.72);
+  background: transparent;
   color: var(--color-honey);
 }
 
 .sticky-panel > section {
-  border-top: 1px solid rgba(32, 33, 36, 0.18);
   min-height: calc(100vh - var(--sticky-offset, 0px));
   scroll-snap-align: none;
 }

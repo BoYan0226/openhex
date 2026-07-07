@@ -3,13 +3,7 @@
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { AuthAwareCtaButton } from './AuthAwareCtaButton';
-import { BookDemoButton } from './BookDemoButton';
 import { LANDING_PLATFORM_DOC_URL } from './landingLinks';
-
-interface NavItem {
-  slug: string;
-  label: string;
-}
 
 /**
  * Top nav (2026 landing redesign).
@@ -23,11 +17,10 @@ interface NavItem {
  */
 export function LandingNav() {
   const t = useTranslations('landing.nav');
-  const items = t.raw('items') as NavItem[];
 
   return (
     <nav className="fixed left-0 right-0 top-0 z-50 h-16 border-b border-line bg-paper/80 backdrop-blur-[6px]">
-      <div className="relative mx-auto flex h-full max-w-[1240px] 2xl:max-w-[1440px] items-center px-5">
+      <div className="relative flex h-full items-center px-[clamp(1rem,3vw,3rem)]">
         {/* Logo: icon + wordmark + 迷境智塔旗下 tagline */}
         <a href="/" className="flex shrink-0 items-center" aria-label="OpenHex">
           <Image
@@ -53,35 +46,16 @@ export function LandingNav() {
           </div>
         </a>
 
-        {/* Centred nav links — absolutely positioned to the viewport. */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 lg:block">
-          <div className="pointer-events-auto flex h-9 items-center gap-1">
-            {items.map(item => (
-              <a
-                key={item.slug}
-                href={`#${item.slug}`}
-                className="flex h-9 items-center justify-center rounded-[10px] px-4 text-[14px] font-medium text-ink/80 transition-colors hover:bg-ink/5 hover:text-ink"
-              >
-                {item.label}
-              </a>
-            ))}
-            {/* 技术文档 — external docs site, sits after 适合谁 */}
-            <a
-              href={LANDING_PLATFORM_DOC_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex h-9 items-center justify-center rounded-[10px] px-4 text-[14px] font-medium text-ink/80 transition-colors hover:bg-ink/5 hover:text-ink"
-            >
-              {t('docsLink')}
-            </a>
-          </div>
-        </div>
-
-        {/* Right slot: ghost demo link + brand CTA. */}
+        {/* Right slot: docs link + brand CTA. */}
         <div className="ml-auto flex items-center gap-2">
-          <BookDemoButton className="hidden h-9 items-center rounded-[10px] px-3 text-[14px] font-medium text-ink/70 transition-colors hover:bg-ink/5 hover:text-ink sm:inline-flex">
-            {t('demoCta')}
-          </BookDemoButton>
+          <a
+            href={LANDING_PLATFORM_DOC_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden h-9 items-center rounded-[10px] px-3 text-[14px] font-medium text-ink/70 transition-colors hover:bg-ink/5 hover:text-ink sm:inline-flex"
+          >
+            {t('docsLink')}
+          </a>
           <AuthAwareCtaButton
             path="/login"
             className="inline-flex h-9 items-center rounded-full bg-honey px-4 text-[13px] font-semibold text-ink shadow-[0_2px_10px_rgba(241,212,34,0.4)] transition-colors hover:bg-honey-soft"
