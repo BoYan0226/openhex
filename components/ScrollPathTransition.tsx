@@ -12,6 +12,11 @@ const PATHS = {
 };
 
 const PATH_NUMBER_PATTERN = /-?\d*\.?\d+/g;
+const TRANSITION_LAYERS = [
+  { id: 'yellow', fill: '#ffde4a', start: 0, end: 0.82 },
+  { id: 'ink', fill: '#202124', start: 0.1, end: 0.92 },
+  { id: 'paper', fill: '#fbf7ee', start: 0.2, end: 1 },
+] as const;
 
 function clamp(value: number, min = 0, max = 1) {
   return Math.min(Math.max(value, min), max);
@@ -39,6 +44,10 @@ function interpolatePath(from: string, to: string, progress: number) {
 }
 
 function segment(progress: number, start: number, end: number) {
+  return clamp((progress - start) / (end - start));
+}
+
+function remapProgress(progress: number, start: number, end: number) {
   return clamp((progress - start) / (end - start));
 }
 
@@ -80,15 +89,14 @@ function getPathForProgress(progress: number) {
 
 export function ScrollPathTransition() {
   const overlayRef = useRef<SVGSVGElement>(null);
-  const pathRef = useRef<SVGPathElement>(null);
+  const pathRefs = useRef<Array<SVGPathElement | null>>([]);
   const frameRef = useRef<number | null>(null);
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
     const overlay = overlayRef.current;
-    const path = pathRef.current;
 
-    if (!root || !overlay || !path) return undefined;
+    if (!root || !overlay || pathRefs.current.some(path => !path)) return undefined;
 
     const update = () => {
       const viewportHeight = root.clientHeight || window.innerHeight;
@@ -96,7 +104,12 @@ export function ScrollPathTransition() {
       const isActive = progress > 0.015 && progress < 0.985;
 
       overlay.style.opacity = isActive ? '1' : '0';
-      path.setAttribute('d', getPathForProgress(progress));
+      TRANSITION_LAYERS.forEach((layer, index) => {
+        pathRefs.current[index]?.setAttribute(
+          'd',
+          getPathForProgress(remapProgress(progress, layer.start, layer.end))
+        );
+      });
     };
 
     const requestUpdate = () => {
@@ -130,7 +143,16 @@ export function ScrollPathTransition() {
       aria-hidden="true"
       focusable="false"
     >
-      <path ref={pathRef} d={PATHS.hiddenFromBottom} fill="var(--color-paper)" />
+      {TRANSITION_LAYERS.map((layer, index) => (
+        <path
+          key={layer.id}
+          ref={node => {
+            pathRefs.current[index] = node;
+          }}
+          d={PATHS.hiddenFromBottom}
+          fill={layer.fill}
+        />
+      ))}
     </svg>
   );
 }
