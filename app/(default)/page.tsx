@@ -90,8 +90,8 @@ export default function HomePage() {
           label="LIVE 四要素"
           layer={2}
           offsetRem={stickyOffset(1)}
-          surfaceEnd="#f1f1f1"
-          surfaceStart="#ffffff"
+          surfaceEnd="#e7e7e7"
+          surfaceStart="#f0f0f0"
           targetId="stack-live-four"
         >
           <LiveFourSection />
@@ -100,8 +100,8 @@ export default function HomePage() {
           label="核心能力"
           layer={3}
           offsetRem={stickyOffset(2)}
-          surfaceEnd="#e8e8e8"
-          surfaceStart="#f1f1f1"
+          surfaceEnd="#dedede"
+          surfaceStart="#e6e6e6"
           targetId="stack-capabilities"
         >
           <CapabilitiesSection />
@@ -110,8 +110,8 @@ export default function HomePage() {
           label="能力资产"
           layer={4}
           offsetRem={stickyOffset(3)}
-          surfaceEnd="#dfdfdf"
-          surfaceStart="#e8e8e8"
+          surfaceEnd="#d5d5d5"
+          surfaceStart="#dddddd"
           targetId="stack-asset"
         >
           <AssetSection />
@@ -120,8 +120,8 @@ export default function HomePage() {
           label="如何创建"
           layer={5}
           offsetRem={stickyOffset(4)}
-          surfaceEnd="#d6d6d6"
-          surfaceStart="#dfdfdf"
+          surfaceEnd="#cccccc"
+          surfaceStart="#d4d4d4"
           targetId="stack-how-it-works"
         >
           <HowItWorksSection />
@@ -130,8 +130,8 @@ export default function HomePage() {
           label="连接器"
           layer={6}
           offsetRem={stickyOffset(5)}
-          surfaceEnd="#cdcdcd"
-          surfaceStart="#d6d6d6"
+          surfaceEnd="#c4c4c4"
+          surfaceStart="#cbcbcb"
           targetId="stack-connectors"
         >
           <ConnectorsSection />
@@ -140,8 +140,8 @@ export default function HomePage() {
           label="技术底座"
           layer={7}
           offsetRem={stickyOffset(6)}
-          surfaceEnd="#c3c3c3"
-          surfaceStart="#cdcdcd"
+          surfaceEnd="#bfbfbf"
+          surfaceStart="#c5c5c5"
           targetId="stack-infra"
         >
           <InfraSection />
@@ -151,7 +151,7 @@ export default function HomePage() {
           layer={8}
           offsetRem={stickyOffset(7)}
           surfaceEnd="#bababa"
-          surfaceStart="#c3c3c3"
+          surfaceStart="#bfbfbf"
           targetId="stack-which-side"
         >
           <WhichSideSection />

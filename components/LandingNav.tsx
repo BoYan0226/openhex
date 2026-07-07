@@ -19,7 +19,7 @@ export function LandingNav() {
   const t = useTranslations('landing.nav');
 
   return (
-    <nav className="fixed left-0 right-0 top-0 z-50 h-16 border-b border-line bg-paper/80 backdrop-blur-[6px]">
+    <nav className="fixed left-0 right-0 top-0 z-50 h-16 border-b border-white/10 bg-[#2f3033]">
       <div className="relative flex h-full items-center px-[clamp(1rem,3vw,3rem)]">
         {/* Logo: icon + wordmark + 迷境智塔旗下 tagline */}
         <a href="/" className="flex shrink-0 items-center" aria-label="OpenHex">
@@ -29,7 +29,7 @@ export function LandingNav() {
             width={52}
             height={52}
             priority
-            className="h-[44px] w-[44px] shrink-0"
+            className="h-[44px] w-[44px] shrink-0 brightness-0 invert"
           />
           <div className="inline-grid grid-cols-[max-content] grid-rows-[max-content] place-items-start leading-[0]">
             <Image
@@ -38,9 +38,9 @@ export function LandingNav() {
               width={114}
               height={24}
               priority
-              className="col-start-1 row-start-1 block h-[21px] w-[104px]"
+              className="col-start-1 row-start-1 block h-[21px] w-[104px] brightness-0 invert"
             />
-            <p className="col-start-1 row-start-1 ml-[3px] mt-[20px] whitespace-nowrap text-[9px] font-medium leading-[1.5] tracking-[8.4px] text-ink/70">
+            <p className="col-start-1 row-start-1 ml-[3px] mt-[20px] whitespace-nowrap text-[9px] font-medium leading-[1.5] tracking-[8.4px] text-white/70">
               迷境智塔旗下
             </p>
           </div>
@@ -52,7 +52,7 @@ export function LandingNav() {
             href={LANDING_PLATFORM_DOC_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden h-9 items-center rounded-[10px] px-3 text-[14px] font-medium text-ink/70 transition-colors hover:bg-ink/5 hover:text-ink sm:inline-flex"
+            className="hidden h-9 items-center rounded-[10px] px-3 text-[14px] font-medium text-white transition-colors hover:bg-white/10 sm:inline-flex"
           >
             {t('docsLink')}
           </a>

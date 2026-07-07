@@ -111,14 +111,6 @@ body::-webkit-scrollbar,
   color: rgba(32, 33, 36, 0.92);
 }
 
-.sticky-panel-label::before {
-  content: '';
-  width: 0.38rem;
-  height: 0.38rem;
-  border-radius: 999px;
-  background: var(--color-honey);
-}
-
 .sticky-panel--dark .sticky-panel-label {
   background: transparent;
   color: var(--color-honey);
