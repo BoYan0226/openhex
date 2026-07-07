@@ -19,6 +19,7 @@ const TRANSITION_PATHS = {
 const FIRST_SCREEN_INDEX = 0;
 const SECOND_SCREEN_INDEX = 1;
 const SCROLL_EDGE_TOLERANCE = 0.12;
+const SCROLL_BOUNDARY_RATIO = 0.42;
 const PATH_NUMBER_PATTERN = /-?\d*\.?\d+/g;
 
 const ease = {
@@ -59,6 +60,7 @@ export function ScrollPathTransition() {
     if (prefersReducedMotion) return undefined;
 
     let isDisposed = false;
+    let lastScrollTop = root.scrollTop;
 
     const getViewportHeight = () => root.clientHeight || window.innerHeight;
     const getScreenTop = (screenIndex: number) => screenIndex * getViewportHeight();
@@ -70,6 +72,7 @@ export function ScrollPathTransition() {
     const restoreScroll = () => {
       root.style.overflowY = '';
       root.style.scrollSnapType = '';
+      root.style.scrollBehavior = '';
     };
 
     const jumpToScreen = (screenIndex: number) => {
@@ -116,8 +119,10 @@ export function ScrollPathTransition() {
       isAnimatingRef.current = true;
       root.style.overflowY = 'hidden';
       root.style.scrollSnapType = 'none';
+      root.style.scrollBehavior = 'auto';
 
       const goingForward = direction === 'forward';
+      jumpToScreen(goingForward ? FIRST_SCREEN_INDEX : SECOND_SCREEN_INDEX);
       overlay.style.setProperty(
         '--landing-transition-fill',
         goingForward ? 'var(--color-paper)' : 'var(--color-night)'
@@ -180,6 +185,7 @@ export function ScrollPathTransition() {
 
       setOverlayVisible(false);
       restoreScroll();
+      lastScrollTop = root.scrollTop;
       isAnimatingRef.current = false;
     };
 
@@ -254,9 +260,31 @@ export function ScrollPathTransition() {
       }
     };
 
-    root.addEventListener('wheel', onWheel, { passive: false });
+    const onScroll = () => {
+      if (isAnimatingRef.current) return;
+
+      const viewportHeight = getViewportHeight();
+      const currentScrollTop = root.scrollTop;
+      const forwardBoundary = viewportHeight * SCROLL_BOUNDARY_RATIO;
+      const backBoundary = viewportHeight * (1 + SCROLL_BOUNDARY_RATIO);
+
+      if (lastScrollTop < forwardBoundary && currentScrollTop >= forwardBoundary) {
+        void runTransition('forward');
+        return;
+      }
+
+      if (lastScrollTop > backBoundary && currentScrollTop <= backBoundary) {
+        void runTransition('back');
+        return;
+      }
+
+      lastScrollTop = currentScrollTop;
+    };
+
+    root.addEventListener('wheel', onWheel, { passive: false, capture: true });
+    root.addEventListener('scroll', onScroll, { passive: true });
     root.addEventListener('touchstart', onTouchStart, { passive: true });
-    root.addEventListener('touchmove', onTouchMove, { passive: false });
+    root.addEventListener('touchmove', onTouchMove, { passive: false, capture: true });
     window.addEventListener('keydown', onKeyDown);
 
     return () => {
@@ -264,9 +292,10 @@ export function ScrollPathTransition() {
       if (animationFrameRef.current !== null) {
         window.cancelAnimationFrame(animationFrameRef.current);
       }
-      root.removeEventListener('wheel', onWheel);
+      root.removeEventListener('wheel', onWheel, { capture: true });
+      root.removeEventListener('scroll', onScroll);
       root.removeEventListener('touchstart', onTouchStart);
-      root.removeEventListener('touchmove', onTouchMove);
+      root.removeEventListener('touchmove', onTouchMove, { capture: true });
       window.removeEventListener('keydown', onKeyDown);
       restoreScroll();
     };
