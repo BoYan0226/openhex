@@ -39,7 +39,7 @@ export function HeroSection() {
       const isMobile = window.matchMedia('(max-width: 767px)').matches;
       return isMobile
         ? { left: 'translate3d(0, 3rem, 0)', right: 'translate3d(0, 3rem, 0)' }
-        : { left: 'translate3d(-46vw, 0, 0)', right: 'translate3d(46vw, 0, 0)' };
+        : { left: 'translate3d(-72vw, 0, 0)', right: 'translate3d(72vw, 0, 0)' };
     };
 
     const cancelPanelAnimations = () => {
@@ -56,12 +56,12 @@ export function HeroSection() {
       setIsEntered(false);
 
       if (leftPanel) {
-        leftPanel.style.opacity = '0';
+        leftPanel.style.opacity = '1';
         leftPanel.style.transform = transforms.left;
       }
 
       if (rightPanel) {
-        rightPanel.style.opacity = '0';
+        rightPanel.style.opacity = '1';
         rightPanel.style.transform = transforms.right;
       }
     };
@@ -91,17 +91,15 @@ export function HeroSection() {
 
             leftPanel?.animate(
               [
-                { opacity: 0, transform: transforms.left },
-                { opacity: 1, offset: 0.22 },
-                { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+                { transform: transforms.left },
+                { transform: 'translate3d(0, 0, 0)' },
               ],
               options
             );
             rightPanel?.animate(
               [
-                { opacity: 0, transform: transforms.right },
-                { opacity: 1, offset: 0.22 },
-                { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+                { transform: transforms.right },
+                { transform: 'translate3d(0, 0, 0)' },
               ],
               options
             );
