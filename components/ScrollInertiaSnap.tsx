@@ -12,10 +12,6 @@ const WHEEL_IDLE_MS = 150;
 const MAX_FRAME_DELTA = 32;
 const SNAP_DIRECTION_THRESHOLD = 8;
 
-function getRemInPixels() {
-  return Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-}
-
 function normalizeWheelDelta(event: WheelEvent, root: HTMLElement) {
   if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) return event.deltaY * 18;
   if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) return event.deltaY * root.clientHeight;
@@ -63,16 +59,13 @@ export function ScrollInertiaSnap() {
     const maxScrollTop = () => Math.max(0, root.scrollHeight - root.clientHeight);
 
     const getSnapPoints = () => {
-      const remPx = getRemInPixels();
       const points = [0, root.clientHeight];
 
       document.querySelectorAll<HTMLElement>('.stack-anchor').forEach(anchor => {
         if (anchor.id === 'stack-live-agent') return;
         if (anchor.id === 'stack-summary') return;
 
-        const offsetValue = getComputedStyle(anchor).getPropertyValue('--sticky-offset');
-        const offsetRem = Number.parseFloat(offsetValue) || 0;
-        points.push(anchor.offsetTop - offsetRem * remPx);
+        points.push(anchor.offsetTop);
       });
 
       return uniqueSorted(points.map(point => Math.min(maxScrollTop(), Math.max(0, point))));
