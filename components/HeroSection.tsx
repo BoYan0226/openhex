@@ -39,12 +39,14 @@ export function HeroSection() {
       const isMobile = window.matchMedia('(max-width: 767px)').matches;
       return isMobile
         ? { left: 'translate3d(0, 3rem, 0)', right: 'translate3d(0, 3rem, 0)' }
-        : { left: 'translate3d(-72vw, 0, 0)', right: 'translate3d(72vw, 0, 0)' };
+        : { left: 'translate3d(-32vw, 0, 0)', right: 'translate3d(32vw, 0, 0)' };
     };
 
     const cancelPanelAnimations = () => {
-      leftPanelRef.current?.getAnimations().forEach(animation => animation.cancel());
-      rightPanelRef.current?.getAnimations().forEach(animation => animation.cancel());
+      [leftPanelRef.current, rightPanelRef.current].forEach(panel => {
+        if (!panel) return;
+        panel.style.transition = '';
+      });
     };
 
     const resetPanels = () => {
@@ -57,11 +59,13 @@ export function HeroSection() {
 
       if (leftPanel) {
         leftPanel.style.opacity = '1';
+        leftPanel.style.transition = 'none';
         leftPanel.style.transform = transforms.left;
       }
 
       if (rightPanel) {
         rightPanel.style.opacity = '1';
+        rightPanel.style.transition = 'none';
         rightPanel.style.transform = transforms.right;
       }
     };
@@ -80,29 +84,20 @@ export function HeroSection() {
           revealFrameRef.current = window.requestAnimationFrame(() => {
             const leftPanel = leftPanelRef.current;
             const rightPanel = rightPanelRef.current;
-            const transforms = getStartTransforms();
-            const options: KeyframeAnimationOptions = {
-              duration: window.matchMedia('(max-width: 767px)').matches ? 1100 : 1700,
-              easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
-              fill: 'both',
-            };
+            const duration = window.matchMedia('(max-width: 767px)').matches ? 900 : 1250;
+            const transition = `transform ${duration}ms cubic-bezier(0.22, 1, 0.36, 1)`;
 
             setIsEntered(true);
 
-            leftPanel?.animate(
-              [
-                { transform: transforms.left },
-                { transform: 'translate3d(0, 0, 0)' },
-              ],
-              options
-            );
-            rightPanel?.animate(
-              [
-                { transform: transforms.right },
-                { transform: 'translate3d(0, 0, 0)' },
-              ],
-              options
-            );
+            if (leftPanel) {
+              leftPanel.style.transition = transition;
+              leftPanel.style.transform = 'translate3d(0, 0, 0)';
+            }
+
+            if (rightPanel) {
+              rightPanel.style.transition = transition;
+              rightPanel.style.transform = 'translate3d(0, 0, 0)';
+            }
           });
         });
       }, delay);
@@ -136,13 +131,13 @@ export function HeroSection() {
         if (isTransitioningRef.current) return;
 
         const entry = entries[0];
-        if (entry?.isIntersecting && entry.intersectionRatio > 0.55) {
-          reveal(80);
+        if (entry?.isIntersecting && entry.intersectionRatio > 0.15) {
+          reveal(120);
         }
       },
       {
         root,
-        threshold: [0, 0.55, 0.75],
+        threshold: [0, 0.15, 0.45],
       }
     );
 
