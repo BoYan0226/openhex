@@ -136,6 +136,10 @@ body::-webkit-scrollbar,
   border-top-color: rgba(255, 255, 255, 0.12);
 }
 
+.sticky-panel > section > :not([aria-hidden='true']) {
+  transform: translateY(var(--stack-content-shift, 0));
+}
+
 .sticky-panel--light > section {
   background: linear-gradient(
     180deg,

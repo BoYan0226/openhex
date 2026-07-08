@@ -51,6 +51,7 @@ const stickyStyle = (
   ({
     '--sticky-offset': `${offsetRem}rem`,
     '--sticky-z': layer,
+    '--stack-content-shift': `${(STICKY_BASE_OFFSET_REM - offsetRem) / 2}rem`,
     '--stack-surface-start': surfaceStart,
     '--stack-surface-end': surfaceEnd,
   }) as CSSProperties;
