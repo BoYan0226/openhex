@@ -58,7 +58,7 @@ export function LandingNav() {
           </a>
           <AuthAwareCtaButton
             path="/login"
-            className="inline-flex h-9 items-center rounded-full bg-honey px-4 text-[13px] font-semibold text-ink shadow-none transition-colors hover:bg-honey-soft"
+            className="inline-flex h-8 items-center rounded-full bg-honey px-3.5 text-[13px] font-semibold text-ink shadow-none transition-colors hover:bg-honey-soft"
           >
             {t('primaryCta')}
           </AuthAwareCtaButton>

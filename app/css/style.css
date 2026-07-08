@@ -125,9 +125,15 @@ body::-webkit-scrollbar,
 }
 
 .sticky-panel > section {
-  box-shadow: none;
+  border-top: 1px solid rgba(32, 33, 36, 0.1);
+  box-shadow: none !important;
+  filter: none !important;
   min-height: calc(100vh - var(--sticky-offset, 0px));
   scroll-snap-align: none;
+}
+
+.sticky-panel--dark > section {
+  border-top-color: rgba(255, 255, 255, 0.12);
 }
 
 .sticky-panel--light > section {
