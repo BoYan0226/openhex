@@ -29,9 +29,8 @@ export function HeroSection() {
   useEffect(() => {
     const section = sectionRef.current;
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    if (!section || !root || prefersReducedMotion) {
+    if (!section || !root) {
       setIsEntered(true);
       return undefined;
     }
