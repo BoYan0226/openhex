@@ -1,4 +1,7 @@
+'use client';
+
 import Image from 'next/image';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { AuthAwareCtaButton } from './AuthAwareCtaButton';
 import { BookDemoButton } from './BookDemoButton';
@@ -15,12 +18,79 @@ import { BookDemoButton } from './BookDemoButton';
  */
 export function HeroSection() {
   const t = useTranslations('landing.hero');
+  const sectionRef = useRef<HTMLElement>(null);
+  const revealTimerRef = useRef<number | null>(null);
+  const [isEntered, setIsEntered] = useState(false);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!section || !root || prefersReducedMotion) {
+      setIsEntered(true);
+      return undefined;
+    }
+
+    const reveal = (delay = 0) => {
+      if (revealTimerRef.current !== null) {
+        window.clearTimeout(revealTimerRef.current);
+      }
+
+      setIsEntered(false);
+      revealTimerRef.current = window.setTimeout(() => {
+        setIsEntered(true);
+      }, delay);
+    };
+
+    const observer = new IntersectionObserver(
+      entries => {
+        const entry = entries[0];
+        if (entry?.isIntersecting && entry.intersectionRatio > 0.4) {
+          reveal(1250);
+        }
+      },
+      {
+        root,
+        threshold: [0, 0.4, 0.7],
+      }
+    );
+
+    const onTransitionComplete = (event: Event) => {
+      const direction = (event as CustomEvent<{ direction?: 'forward' | 'back' }>).detail
+        ?.direction;
+      if (direction === 'forward') {
+        reveal(40);
+      }
+
+      if (direction === 'back') {
+        setIsEntered(false);
+      }
+    };
+
+    observer.observe(section);
+    window.addEventListener('landing:path-transition-complete', onTransitionComplete);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('landing:path-transition-complete', onTransitionComplete);
+      if (revealTimerRef.current !== null) {
+        window.clearTimeout(revealTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
-    <section className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] pb-16 pt-24 md:pb-20 md:pt-28">
-      <div className="relative mx-auto flex w-full max-w-[1240px] flex-col items-center gap-14 px-6 2xl:max-w-[1440px] md:flex-row md:items-center md:gap-14">
+    <section
+      ref={sectionRef}
+      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] pb-16 pt-24 md:pb-20 md:pt-28"
+    >
+      <div
+        className="hero-split relative mx-auto flex w-full max-w-[1240px] flex-col items-center gap-14 px-6 2xl:max-w-[1440px] md:flex-row md:items-center md:gap-14"
+        data-entered={isEntered ? 'true' : 'false'}
+      >
         {/* Left column — copy */}
-        <div className="flex w-full max-w-[560px] flex-col items-start 2xl:max-w-[680px]">
+        <div className="hero-split-side hero-split-left flex w-full max-w-[560px] flex-col items-start 2xl:max-w-[680px]">
           <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
             <span className="hex-clip h-2.5 w-2.5 bg-honey" />
             {t('eyebrow')}
@@ -64,7 +134,7 @@ export function HeroSection() {
         </div>
 
         {/* Right column — chat-card mockup (generously scaled to match design) */}
-        <div className="relative w-full min-w-0 max-w-[540px] md:max-w-[620px] md:flex-1 2xl:max-w-[720px]">
+        <div className="hero-split-side hero-split-right relative w-full min-w-0 max-w-[540px] md:max-w-[620px] md:flex-1 2xl:max-w-[720px]">
           {/* Bee mascot peeking out the card's top-left corner */}
           <Image
             src="/landing/bee-hero.gif"

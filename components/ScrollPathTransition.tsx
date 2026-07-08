@@ -168,6 +168,9 @@ export function ScrollPathTransition() {
       setOverlayVisible(false);
       restoreScroll();
       isAnimatingRef.current = false;
+      window.dispatchEvent(
+        new CustomEvent('landing:path-transition-complete', { detail: { direction } })
+      );
     };
 
     const onWheel = (event: WheelEvent) => {
