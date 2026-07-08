@@ -153,6 +153,9 @@ export function ScrollPathTransition() {
       root.style.scrollSnapType = 'none';
       root.style.scrollBehavior = 'auto';
       jumpToScreen(direction === 'forward' ? FIRST_SCREEN_INDEX : SECOND_SCREEN_INDEX);
+      window.dispatchEvent(
+        new CustomEvent('landing:path-transition-start', { detail: { direction } })
+      );
       setOverlayVisible(true);
 
       const layerTasks = TRANSITION_LAYERS.map((layer, index) => {

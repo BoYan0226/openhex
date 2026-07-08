@@ -191,17 +191,17 @@ body::-webkit-scrollbar,
 .hero-split-side {
   opacity: 0;
   transition:
-    opacity 680ms ease,
-    transform 920ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 720ms ease,
+    transform 1400ms cubic-bezier(0.4, 0, 0.2, 1);
   will-change: opacity, transform;
 }
 
 .hero-split-left {
-  transform: translateX(-4.5rem);
+  transform: translateX(-18rem);
 }
 
 .hero-split-right {
-  transform: translateX(4.5rem);
+  transform: translateX(18rem);
 }
 
 .hero-split[data-entered='true'] .hero-split-side {

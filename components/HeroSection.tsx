@@ -20,6 +20,8 @@ export function HeroSection() {
   const t = useTranslations('landing.hero');
   const sectionRef = useRef<HTMLElement>(null);
   const revealTimerRef = useRef<number | null>(null);
+  const revealFrameRef = useRef<number | null>(null);
+  const isTransitioningRef = useRef(false);
   const [isEntered, setIsEntered] = useState(false);
 
   useEffect(() => {
@@ -36,18 +38,27 @@ export function HeroSection() {
       if (revealTimerRef.current !== null) {
         window.clearTimeout(revealTimerRef.current);
       }
+      if (revealFrameRef.current !== null) {
+        window.cancelAnimationFrame(revealFrameRef.current);
+      }
 
       setIsEntered(false);
       revealTimerRef.current = window.setTimeout(() => {
-        setIsEntered(true);
+        revealFrameRef.current = window.requestAnimationFrame(() => {
+          revealFrameRef.current = window.requestAnimationFrame(() => {
+            setIsEntered(true);
+          });
+        });
       }, delay);
     };
 
     const observer = new IntersectionObserver(
       entries => {
+        if (isTransitioningRef.current) return;
+
         const entry = entries[0];
         if (entry?.isIntersecting && entry.intersectionRatio > 0.4) {
-          reveal(1250);
+          reveal();
         }
       },
       {
@@ -60,22 +71,38 @@ export function HeroSection() {
       const direction = (event as CustomEvent<{ direction?: 'forward' | 'back' }>).detail
         ?.direction;
       if (direction === 'forward') {
-        reveal(40);
+        isTransitioningRef.current = false;
+        reveal(120);
       }
 
       if (direction === 'back') {
+        isTransitioningRef.current = false;
+        setIsEntered(false);
+      }
+    };
+
+    const onTransitionStart = (event: Event) => {
+      const direction = (event as CustomEvent<{ direction?: 'forward' | 'back' }>).detail
+        ?.direction;
+      if (direction === 'forward' || direction === 'back') {
+        isTransitioningRef.current = true;
         setIsEntered(false);
       }
     };
 
     observer.observe(section);
+    window.addEventListener('landing:path-transition-start', onTransitionStart);
     window.addEventListener('landing:path-transition-complete', onTransitionComplete);
 
     return () => {
       observer.disconnect();
+      window.removeEventListener('landing:path-transition-start', onTransitionStart);
       window.removeEventListener('landing:path-transition-complete', onTransitionComplete);
       if (revealTimerRef.current !== null) {
         window.clearTimeout(revealTimerRef.current);
+      }
+      if (revealFrameRef.current !== null) {
+        window.cancelAnimationFrame(revealFrameRef.current);
       }
     };
   }, []);
