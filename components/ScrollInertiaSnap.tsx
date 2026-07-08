@@ -2,14 +2,15 @@
 
 import { useEffect, useRef } from 'react';
 
-const WHEEL_GAIN = 0.46;
-const FRICTION = 0.82;
+const WHEEL_GAIN = 0.54;
+const FRICTION = 0.86;
 const SNAP_FRICTION = 0.7;
-const SNAP_EASE = 0.045;
+const SNAP_EASE = 0.085;
 const DAMPING_RANGE = 115;
-const SNAP_SETTLE_DISTANCE = 0.6;
+const SNAP_SETTLE_DISTANCE = 1.2;
 const WHEEL_IDLE_MS = 150;
 const MAX_FRAME_DELTA = 32;
+const SNAP_DIRECTION_THRESHOLD = 8;
 
 function getRemInPixels() {
   return Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
@@ -27,6 +28,23 @@ function nearestPoint(value: number, points: number[]) {
   );
 }
 
+function directionalPoint(value: number, points: number[], direction: number) {
+  if (direction > 0) {
+    return points.find(point => point > value + SNAP_DIRECTION_THRESHOLD) ?? null;
+  }
+
+  if (direction < 0) {
+    return (
+      points
+        .slice()
+        .reverse()
+        .find(point => point < value - SNAP_DIRECTION_THRESHOLD) ?? null
+    );
+  }
+
+  return nearestPoint(value, points);
+}
+
 function uniqueSorted(points: number[]) {
   return Array.from(new Set(points.map(point => Math.round(point)))).sort((a, b) => a - b);
 }
@@ -35,6 +53,7 @@ export function ScrollInertiaSnap() {
   const frameRef = useRef<number | null>(null);
   const lastFrameTimeRef = useRef(0);
   const lastWheelTimeRef = useRef(0);
+  const lastWheelDirectionRef = useRef(0);
   const velocityRef = useRef(0);
 
   useEffect(() => {
@@ -48,6 +67,7 @@ export function ScrollInertiaSnap() {
       const points = [0, root.clientHeight];
 
       document.querySelectorAll<HTMLElement>('.stack-anchor').forEach(anchor => {
+        if (anchor.id === 'stack-live-agent') return;
         if (anchor.id === 'stack-summary') return;
 
         const offsetValue = getComputedStyle(anchor).getPropertyValue('--sticky-offset');
@@ -72,21 +92,39 @@ export function ScrollInertiaSnap() {
 
       const points = getSnapPoints();
       const current = root.scrollTop;
-      const nearest = nearestPoint(current, points);
-      const distance = nearest - current;
       const idleFor = now - lastWheelTimeRef.current;
 
       let velocity = velocityRef.current;
       const shouldSnap = idleFor > WHEEL_IDLE_MS;
+      const target = shouldSnap
+        ? directionalPoint(current, points, lastWheelDirectionRef.current)
+        : nearestPoint(current, points);
+      const distance = target === null ? 0 : target - current;
 
       if (shouldSnap) {
-        const snapStep = distance * SNAP_EASE * delta;
+        if (target === null) {
+          velocity *= FRICTION ** delta;
+          const next = Math.min(maxScrollTop(), Math.max(0, current + velocity * delta));
+          root.scrollTop = next;
+          velocityRef.current = velocity;
+
+          if (Math.abs(velocity) < 0.45) {
+            velocityRef.current = 0;
+            frameRef.current = null;
+            return;
+          }
+
+          frameRef.current = window.requestAnimationFrame(tick);
+          return;
+        }
+
+        const snapStep = distance * Math.min(0.28, SNAP_EASE * delta);
         const next = Math.min(maxScrollTop(), Math.max(0, current + snapStep));
         root.scrollTop = next;
         velocityRef.current = 0;
 
-        if (Math.abs(nearest - next) < SNAP_SETTLE_DISTANCE) {
-          root.scrollTop = nearest;
+        if (Math.abs(target - next) < SNAP_SETTLE_DISTANCE) {
+          root.scrollTop = target;
           frameRef.current = null;
           return;
         }
@@ -127,7 +165,8 @@ export function ScrollInertiaSnap() {
       lastWheelTimeRef.current = performance.now();
 
       const delta = normalizeWheelDelta(event, root);
-      const maxVelocity = root.clientHeight * 0.085;
+      const maxVelocity = root.clientHeight * 0.105;
+      lastWheelDirectionRef.current = Math.sign(delta) || lastWheelDirectionRef.current;
       velocityRef.current = Math.max(
         -maxVelocity,
         Math.min(maxVelocity, velocityRef.current + delta * WHEEL_GAIN)
