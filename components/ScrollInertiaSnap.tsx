@@ -6,7 +6,6 @@ const WHEEL_GAIN = 0.54;
 const FRICTION = 0.86;
 const SNAP_EASE = 0.085;
 const SNAP_SETTLE_DISTANCE = 1.2;
-const SNAP_START_VELOCITY = 2.5;
 const WHEEL_IDLE_MS = 150;
 const MAX_FRAME_DELTA = 32;
 const SNAP_DIRECTION_THRESHOLD = 8;
@@ -87,7 +86,7 @@ export function ScrollInertiaSnap() {
       const idleFor = now - lastWheelTimeRef.current;
 
       let velocity = velocityRef.current;
-      const shouldSnap = idleFor > WHEEL_IDLE_MS && Math.abs(velocity) < SNAP_START_VELOCITY;
+      const shouldSnap = idleFor > WHEEL_IDLE_MS;
       const target = shouldSnap
         ? directionalPoint(current, points, lastWheelDirectionRef.current)
         : null;
