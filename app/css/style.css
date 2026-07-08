@@ -128,7 +128,7 @@ body::-webkit-scrollbar,
   border-top: 1px solid rgba(32, 33, 36, 0.1);
   box-shadow: none !important;
   filter: none !important;
-  min-height: 100vh;
+  min-height: calc(100vh + var(--sticky-offset, 0px));
   scroll-snap-align: none;
 }
 
