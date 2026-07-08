@@ -19,6 +19,8 @@ import { BookDemoButton } from './BookDemoButton';
 export function HeroSection() {
   const t = useTranslations('landing.hero');
   const sectionRef = useRef<HTMLElement>(null);
+  const leftPanelRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
   const revealTimerRef = useRef<number | null>(null);
   const revealFrameRef = useRef<number | null>(null);
   const isTransitioningRef = useRef(false);
@@ -34,6 +36,37 @@ export function HeroSection() {
       return undefined;
     }
 
+    const getStartTransforms = () => {
+      const isMobile = window.matchMedia('(max-width: 767px)').matches;
+      return isMobile
+        ? { left: 'translate3d(0, 3rem, 0)', right: 'translate3d(0, 3rem, 0)' }
+        : { left: 'translate3d(-46vw, 0, 0)', right: 'translate3d(46vw, 0, 0)' };
+    };
+
+    const cancelPanelAnimations = () => {
+      leftPanelRef.current?.getAnimations().forEach(animation => animation.cancel());
+      rightPanelRef.current?.getAnimations().forEach(animation => animation.cancel());
+    };
+
+    const resetPanels = () => {
+      const leftPanel = leftPanelRef.current;
+      const rightPanel = rightPanelRef.current;
+      const transforms = getStartTransforms();
+
+      cancelPanelAnimations();
+      setIsEntered(false);
+
+      if (leftPanel) {
+        leftPanel.style.opacity = '0';
+        leftPanel.style.transform = transforms.left;
+      }
+
+      if (rightPanel) {
+        rightPanel.style.opacity = '0';
+        rightPanel.style.transform = transforms.right;
+      }
+    };
+
     const reveal = (delay = 0) => {
       if (revealTimerRef.current !== null) {
         window.clearTimeout(revealTimerRef.current);
@@ -42,11 +75,37 @@ export function HeroSection() {
         window.cancelAnimationFrame(revealFrameRef.current);
       }
 
-      setIsEntered(false);
+      resetPanels();
       revealTimerRef.current = window.setTimeout(() => {
         revealFrameRef.current = window.requestAnimationFrame(() => {
           revealFrameRef.current = window.requestAnimationFrame(() => {
+            const leftPanel = leftPanelRef.current;
+            const rightPanel = rightPanelRef.current;
+            const transforms = getStartTransforms();
+            const options: KeyframeAnimationOptions = {
+              duration: window.matchMedia('(max-width: 767px)').matches ? 1100 : 1700,
+              easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+              fill: 'both',
+            };
+
             setIsEntered(true);
+
+            leftPanel?.animate(
+              [
+                { opacity: 0, transform: transforms.left },
+                { opacity: 1, offset: 0.22 },
+                { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+              ],
+              options
+            );
+            rightPanel?.animate(
+              [
+                { opacity: 0, transform: transforms.right },
+                { opacity: 1, offset: 0.22 },
+                { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+              ],
+              options
+            );
           });
         });
       }, delay);
@@ -86,7 +145,7 @@ export function HeroSection() {
         ?.direction;
       if (direction === 'forward' || direction === 'back') {
         isTransitioningRef.current = true;
-        setIsEntered(false);
+        resetPanels();
       }
     };
 
@@ -98,6 +157,7 @@ export function HeroSection() {
       observer.disconnect();
       window.removeEventListener('landing:path-transition-start', onTransitionStart);
       window.removeEventListener('landing:path-transition-complete', onTransitionComplete);
+      cancelPanelAnimations();
       if (revealTimerRef.current !== null) {
         window.clearTimeout(revealTimerRef.current);
       }
@@ -117,7 +177,10 @@ export function HeroSection() {
         data-entered={isEntered ? 'true' : 'false'}
       >
         {/* Left column — copy */}
-        <div className="hero-split-side hero-split-left flex w-full max-w-[560px] flex-col items-start 2xl:max-w-[680px]">
+        <div
+          ref={leftPanelRef}
+          className="hero-split-side hero-split-left flex w-full max-w-[560px] flex-col items-start 2xl:max-w-[680px]"
+        >
           <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
             <span className="hex-clip h-2.5 w-2.5 bg-honey" />
             {t('eyebrow')}
@@ -161,7 +224,10 @@ export function HeroSection() {
         </div>
 
         {/* Right column — chat-card mockup (generously scaled to match design) */}
-        <div className="hero-split-side hero-split-right relative w-full min-w-0 max-w-[540px] md:max-w-[620px] md:flex-1 2xl:max-w-[720px]">
+        <div
+          ref={rightPanelRef}
+          className="hero-split-side hero-split-right relative w-full min-w-0 max-w-[540px] md:max-w-[620px] md:flex-1 2xl:max-w-[720px]"
+        >
           {/* Bee mascot peeking out the card's top-left corner */}
           <Image
             src="/landing/bee-hero.gif"
