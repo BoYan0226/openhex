@@ -19,7 +19,7 @@ export function LandingNav() {
   const t = useTranslations('landing.nav');
 
   return (
-    <nav className="fixed left-0 right-0 top-0 z-50 h-16 border-b border-white/10 bg-[#2f3033] shadow-none">
+    <nav className="fixed left-0 right-0 top-0 z-50 h-16 border-b border-white/10 bg-[#202124] shadow-none">
       <div className="relative flex h-full items-center px-[clamp(1rem,3vw,3rem)]">
         {/* Logo: icon + wordmark + 迷境智塔旗下 tagline */}
         <a href="/" className="flex shrink-0 items-center" aria-label="OpenHex">
