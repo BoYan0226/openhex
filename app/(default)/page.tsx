@@ -12,6 +12,7 @@ import { SummarySection } from '@/components/sections/SummarySection';
 import { FinalCtaSection } from '@/components/sections/FinalCtaSection';
 import { LandingFooter } from '@/components/LandingFooter';
 import { ScrollPathTransition } from '@/components/ScrollPathTransition';
+import { ScrollInertia } from '@/components/ScrollInertia';
 import { StackJumpNav } from '@/components/StackJumpNav';
 
 type StickyPanelTone = 'light' | 'dark';
@@ -90,6 +91,7 @@ export default function HomePage() {
     >
       <LandingNav />
       <ScrollPathTransition />
+      <ScrollInertia />
       <FinalCtaSection />
       <div className="sticky-flow">
         <StackJumpNav items={STACK_NAV_ITEMS} />
