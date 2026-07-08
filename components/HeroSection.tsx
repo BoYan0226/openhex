@@ -72,7 +72,7 @@ export function HeroSection() {
         ?.direction;
       if (direction === 'forward') {
         isTransitioningRef.current = false;
-        reveal(120);
+        reveal(300);
       }
 
       if (direction === 'back') {
