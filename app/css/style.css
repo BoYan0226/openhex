@@ -194,15 +194,10 @@ body::-webkit-scrollbar,
 }
 
 .hero-split-left {
-  transform: translate3d(-72vw, 0, 0);
+  transform: translate3d(0, 0, 0);
 }
 
 .hero-split-right {
-  transform: translate3d(72vw, 0, 0);
-}
-
-.hero-split[data-entered='true'] .hero-split-side {
-  opacity: 1;
   transform: translate3d(0, 0, 0);
 }
 

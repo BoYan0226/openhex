@@ -24,13 +24,12 @@ export function HeroSection() {
   const revealTimerRef = useRef<number | null>(null);
   const revealFrameRef = useRef<number | null>(null);
   const isTransitioningRef = useRef(false);
-  const [isEntered, setIsEntered] = useState(false);
+  const [isEntered, setIsEntered] = useState(true);
 
   useEffect(() => {
     const section = sectionRef.current;
-    const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
 
-    if (!section || !root) {
+    if (!section) {
       setIsEntered(true);
       return undefined;
     }
@@ -108,21 +107,6 @@ export function HeroSection() {
       }, delay);
     };
 
-    const observer = new IntersectionObserver(
-      entries => {
-        if (isTransitioningRef.current) return;
-
-        const entry = entries[0];
-        if (entry?.isIntersecting && entry.intersectionRatio > 0.4) {
-          reveal();
-        }
-      },
-      {
-        root,
-        threshold: [0, 0.4, 0.7],
-      }
-    );
-
     const onTransitionComplete = (event: Event) => {
       const direction = (event as CustomEvent<{ direction?: 'forward' | 'back' }>).detail
         ?.direction;
@@ -146,12 +130,10 @@ export function HeroSection() {
       }
     };
 
-    observer.observe(section);
     window.addEventListener('landing:path-transition-start', onTransitionStart);
     window.addEventListener('landing:path-transition-complete', onTransitionComplete);
 
     return () => {
-      observer.disconnect();
       window.removeEventListener('landing:path-transition-start', onTransitionStart);
       window.removeEventListener('landing:path-transition-complete', onTransitionComplete);
       cancelPanelAnimations();
