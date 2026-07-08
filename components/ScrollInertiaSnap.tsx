@@ -4,11 +4,10 @@ import { useEffect, useRef } from 'react';
 
 const WHEEL_GAIN = 0.46;
 const FRICTION = 0.82;
-const SNAP_FRICTION = 0.78;
-const SNAP_PULL = 0.045;
+const SNAP_FRICTION = 0.7;
+const SNAP_EASE = 0.045;
 const DAMPING_RANGE = 115;
 const SNAP_SETTLE_DISTANCE = 0.6;
-const SNAP_SETTLE_VELOCITY = 0.45;
 const WHEEL_IDLE_MS = 150;
 const MAX_FRAME_DELTA = 32;
 
@@ -49,6 +48,8 @@ export function ScrollInertiaSnap() {
       const points = [0, root.clientHeight];
 
       document.querySelectorAll<HTMLElement>('.stack-anchor').forEach(anchor => {
+        if (anchor.id === 'stack-summary') return;
+
         const offsetValue = getComputedStyle(anchor).getPropertyValue('--sticky-offset');
         const offsetRem = Number.parseFloat(offsetValue) || 0;
         points.push(anchor.offsetTop - offsetRem * remPx);
@@ -78,8 +79,23 @@ export function ScrollInertiaSnap() {
       let velocity = velocityRef.current;
       const shouldSnap = idleFor > WHEEL_IDLE_MS;
 
-      if (Math.abs(distance) < DAMPING_RANGE || shouldSnap) {
-        velocity += distance * SNAP_PULL * delta;
+      if (shouldSnap) {
+        const snapStep = distance * SNAP_EASE * delta;
+        const next = Math.min(maxScrollTop(), Math.max(0, current + snapStep));
+        root.scrollTop = next;
+        velocityRef.current = 0;
+
+        if (Math.abs(nearest - next) < SNAP_SETTLE_DISTANCE) {
+          root.scrollTop = nearest;
+          frameRef.current = null;
+          return;
+        }
+
+        frameRef.current = window.requestAnimationFrame(tick);
+        return;
+      }
+
+      if (Math.abs(distance) < DAMPING_RANGE) {
         velocity *= SNAP_FRICTION ** delta;
       } else {
         velocity *= FRICTION ** delta;
@@ -89,18 +105,7 @@ export function ScrollInertiaSnap() {
       root.scrollTop = next;
       velocityRef.current = velocity;
 
-      if (
-        shouldSnap &&
-        Math.abs(nearest - next) < SNAP_SETTLE_DISTANCE &&
-        Math.abs(velocity) < SNAP_SETTLE_VELOCITY
-      ) {
-        root.scrollTop = nearest;
-        velocityRef.current = 0;
-        frameRef.current = null;
-        return;
-      }
-
-      if (!shouldSnap && Math.abs(velocity) < SNAP_SETTLE_VELOCITY) {
+      if (Math.abs(velocity) < 0.45) {
         velocityRef.current = 0;
         frameRef.current = null;
         return;
