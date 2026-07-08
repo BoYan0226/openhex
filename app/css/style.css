@@ -101,7 +101,7 @@ body::-webkit-scrollbar,
   border: 0;
   background: transparent;
   padding: 0.3rem 0;
-  color: #fff;
+  color: rgba(32, 33, 36, 0.62);
   font: inherit;
   font-size: 0.68rem;
   font-weight: 700;
@@ -111,14 +111,12 @@ body::-webkit-scrollbar,
   text-transform: uppercase;
   white-space: nowrap;
   cursor: pointer;
-  mix-blend-mode: difference;
-  opacity: 0.72;
   pointer-events: auto;
-  transition: opacity 160ms ease;
+  transition: color 160ms ease;
 }
 
 .stack-jump-label:hover {
-  opacity: 1;
+  color: rgba(32, 33, 36, 0.92);
 }
 
 .stack-anchor {
