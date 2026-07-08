@@ -28,8 +28,9 @@ export function HeroSection() {
 
   useEffect(() => {
     const section = sectionRef.current;
+    const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
 
-    if (!section) {
+    if (!section || !root) {
       setIsEntered(true);
       return undefined;
     }
@@ -130,10 +131,27 @@ export function HeroSection() {
       }
     };
 
+    const observer = new IntersectionObserver(
+      entries => {
+        if (isTransitioningRef.current) return;
+
+        const entry = entries[0];
+        if (entry?.isIntersecting && entry.intersectionRatio > 0.55) {
+          reveal(80);
+        }
+      },
+      {
+        root,
+        threshold: [0, 0.55, 0.75],
+      }
+    );
+
+    observer.observe(section);
     window.addEventListener('landing:path-transition-start', onTransitionStart);
     window.addEventListener('landing:path-transition-complete', onTransitionComplete);
 
     return () => {
+      observer.disconnect();
       window.removeEventListener('landing:path-transition-start', onTransitionStart);
       window.removeEventListener('landing:path-transition-complete', onTransitionComplete);
       cancelPanelAnimations();
