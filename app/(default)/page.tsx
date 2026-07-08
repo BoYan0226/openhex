@@ -102,8 +102,6 @@ export default function HomePage() {
         <StickyPanel
           layer={2}
           offsetRem={stickyOffset(1)}
-          surfaceEnd="#f2f2f2"
-          surfaceStart="#fafafa"
           targetId="stack-live-four"
         >
           <LiveFourSection />
@@ -111,8 +109,6 @@ export default function HomePage() {
         <StickyPanel
           layer={3}
           offsetRem={stickyOffset(2)}
-          surfaceEnd="#ededed"
-          surfaceStart="#f5f5f5"
           targetId="stack-capabilities"
         >
           <CapabilitiesSection />
@@ -120,8 +116,6 @@ export default function HomePage() {
         <StickyPanel
           layer={4}
           offsetRem={stickyOffset(3)}
-          surfaceEnd="#e6e6e6"
-          surfaceStart="#eeeeee"
           targetId="stack-asset"
         >
           <AssetSection />
@@ -129,8 +123,6 @@ export default function HomePage() {
         <StickyPanel
           layer={5}
           offsetRem={stickyOffset(4)}
-          surfaceEnd="#dfdfdf"
-          surfaceStart="#e8e8e8"
           targetId="stack-how-it-works"
         >
           <HowItWorksSection />
@@ -138,8 +130,6 @@ export default function HomePage() {
         <StickyPanel
           layer={6}
           offsetRem={stickyOffset(5)}
-          surfaceEnd="#d8d8d8"
-          surfaceStart="#e1e1e1"
           targetId="stack-connectors"
         >
           <ConnectorsSection />
@@ -147,8 +137,6 @@ export default function HomePage() {
         <StickyPanel
           layer={7}
           offsetRem={stickyOffset(6)}
-          surfaceEnd="#d0d0d0"
-          surfaceStart="#dadada"
           targetId="stack-infra"
         >
           <InfraSection />
@@ -156,8 +144,6 @@ export default function HomePage() {
         <StickyPanel
           layer={8}
           offsetRem={stickyOffset(7)}
-          surfaceEnd="#c9c9c9"
-          surfaceStart="#d3d3d3"
           targetId="stack-which-side"
         >
           <WhichSideSection />
