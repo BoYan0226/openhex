@@ -2,11 +2,11 @@
 
 import { useEffect, useRef } from 'react';
 
-const WHEEL_GAIN = 0.88;
-const FRICTION = 0.925;
-const SNAP_FRICTION = 0.72;
-const SNAP_PULL = 0.105;
-const DAMPING_RANGE = 220;
+const WHEEL_GAIN = 0.46;
+const FRICTION = 0.82;
+const SNAP_FRICTION = 0.78;
+const SNAP_PULL = 0.045;
+const DAMPING_RANGE = 115;
 const SNAP_SETTLE_DISTANCE = 0.6;
 const SNAP_SETTLE_VELOCITY = 0.45;
 const WHEEL_IDLE_MS = 150;
@@ -122,7 +122,7 @@ export function ScrollInertiaSnap() {
       lastWheelTimeRef.current = performance.now();
 
       const delta = normalizeWheelDelta(event, root);
-      const maxVelocity = root.clientHeight * 0.18;
+      const maxVelocity = root.clientHeight * 0.085;
       velocityRef.current = Math.max(
         -maxVelocity,
         Math.min(maxVelocity, velocityRef.current + delta * WHEEL_GAIN)
