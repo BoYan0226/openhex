@@ -4,9 +4,7 @@ import { useEffect, useRef } from 'react';
 
 const WHEEL_GAIN = 0.54;
 const FRICTION = 0.86;
-const SNAP_FRICTION = 0.7;
 const SNAP_EASE = 0.085;
-const DAMPING_RANGE = 115;
 const SNAP_SETTLE_DISTANCE = 1.2;
 const WHEEL_IDLE_MS = 150;
 const MAX_FRAME_DELTA = 32;
@@ -91,7 +89,7 @@ export function ScrollInertiaSnap() {
       const shouldSnap = idleFor > WHEEL_IDLE_MS;
       const target = shouldSnap
         ? directionalPoint(current, points, lastWheelDirectionRef.current)
-        : nearestPoint(current, points);
+        : null;
       const distance = target === null ? 0 : target - current;
 
       if (shouldSnap) {
@@ -126,11 +124,7 @@ export function ScrollInertiaSnap() {
         return;
       }
 
-      if (Math.abs(distance) < DAMPING_RANGE) {
-        velocity *= SNAP_FRICTION ** delta;
-      } else {
-        velocity *= FRICTION ** delta;
-      }
+      velocity *= FRICTION ** delta;
 
       const next = Math.min(maxScrollTop(), Math.max(0, current + velocity * delta));
       root.scrollTop = next;
