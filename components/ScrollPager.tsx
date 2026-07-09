@@ -2,8 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 
-const GESTURE_END_MS = 180;
+const GESTURE_END_MS = 80;
 const MIN_WHEEL_DELTA = 4;
+const NEW_GESTURE_DELTA = 18;
 const PAGE_TRANSITION_MS = 850;
 const POSITION_EPSILON = 2;
 
@@ -108,9 +109,18 @@ export function ScrollPager() {
       }
 
       event.preventDefault();
+
+      const delta = Math.abs(event.deltaY);
+      if (delta < MIN_WHEEL_DELTA) {
+        return;
+      }
+
       finishGestureAfterPause();
 
-      if (Math.abs(event.deltaY) < MIN_WHEEL_DELTA || gestureActiveRef.current) {
+      if (
+        gestureActiveRef.current &&
+        (animationFrameRef.current !== null || delta < NEW_GESTURE_DELTA)
+      ) {
         return;
       }
 
