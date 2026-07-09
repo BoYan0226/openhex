@@ -29,7 +29,7 @@ type StickyPanelProps = {
 };
 
 const STICKY_BASE_OFFSET_REM = 4;
-const STICKY_STEP_REM = 0.5;
+const STICKY_STEP_REM = 1.5;
 const SOFT_PAGE_WHITE = '#fbfaf7';
 
 const stickyOffset = (index: number) => STICKY_BASE_OFFSET_REM + index * STICKY_STEP_REM;
@@ -54,7 +54,7 @@ const stickyStyle = (
   ({
     '--sticky-offset': `${offsetRem}rem`,
     '--sticky-z': layer,
-    '--stack-content-shift': `${STICKY_BASE_OFFSET_REM - offsetRem}rem`,
+    '--stack-content-shift': `${(STICKY_BASE_OFFSET_REM - offsetRem) * 1.5}rem`,
     '--stack-surface-start': surfaceStart,
     '--stack-surface-end': surfaceEnd,
   }) as CSSProperties;

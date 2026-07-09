@@ -114,7 +114,7 @@ body::-webkit-scrollbar,
   border: 0;
   background: transparent;
   padding: 0.3rem 0;
-  color: rgba(32, 33, 36, 0.62);
+  color: rgba(32, 33, 36, 0.48);
   font: inherit;
   font-size: 0.68rem;
   font-weight: 700;
@@ -130,6 +130,29 @@ body::-webkit-scrollbar,
 
 .stack-jump-label:hover {
   color: rgba(32, 33, 36, 0.92);
+}
+
+.stack-jump-label[data-active='true'] {
+  color: rgba(32, 33, 36, 0.94);
+}
+
+.stack-jump-indicator {
+  position: absolute;
+  left: calc(clamp(1rem, 3vw, 3rem) - 0.65rem);
+  top: 0.46rem;
+  width: 2px;
+  height: 0.8rem;
+  border-radius: 1px;
+  background: #8f9297;
+  opacity: 0;
+  transform: translateY(calc(var(--stack-active-index, 0) * 1.5rem));
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 180ms ease;
+}
+
+.stack-jump-nav[data-visible='true'] .stack-jump-indicator {
+  opacity: 1;
 }
 
 .stack-anchor {
@@ -149,13 +172,10 @@ body::-webkit-scrollbar,
 }
 
 .sticky-panel > section > :not([aria-hidden='true']) {
-  transform: translateY(var(--stack-content-shift, 0));
+  transform: translateY(calc(var(--stack-content-shift, 0px) - 1.5rem));
 }
 
 .sticky-panel--light > section {
-  justify-content: flex-start !important;
-  padding-top: clamp(4.25rem, 8vh, 5.5rem) !important;
-  padding-bottom: 3rem !important;
   background: linear-gradient(
     180deg,
     var(--stack-surface-start, var(--color-page-soft)) 0%,
