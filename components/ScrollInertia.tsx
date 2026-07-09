@@ -30,7 +30,17 @@ export function ScrollInertia() {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
     if (!root) return undefined;
 
-    const maxScrollTop = () => Math.max(0, root.scrollHeight - root.clientHeight);
+    const maxScrollTop = () => {
+      const nativeMax = Math.max(0, root.scrollHeight - root.clientHeight);
+      const summaryAnchor = document.getElementById('stack-summary');
+      if (!summaryAnchor) return nativeMax;
+
+      const rem = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      const offsetRem =
+        Number.parseFloat(getComputedStyle(summaryAnchor).getPropertyValue('--sticky-offset')) || 0;
+
+      return Math.min(nativeMax, summaryAnchor.offsetTop - offsetRem * rem);
+    };
 
     const getSnapPoints = () => {
       const points: number[] = [];
@@ -152,12 +162,21 @@ export function ScrollInertia() {
       velocityRef.current = 0;
     };
 
+    const onScroll = () => {
+      const maxTop = maxScrollTop();
+      if (root.scrollTop > maxTop) {
+        root.scrollTop = maxTop;
+      }
+    };
+
     root.addEventListener('wheel', onWheel, { passive: false });
+    root.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('landing:path-transition-start', onTransitionStart);
 
     return () => {
       stopFrame();
       root.removeEventListener('wheel', onWheel);
+      root.removeEventListener('scroll', onScroll);
       window.removeEventListener('landing:path-transition-start', onTransitionStart);
     };
   }, []);

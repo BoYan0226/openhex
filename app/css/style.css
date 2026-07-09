@@ -79,6 +79,12 @@ body::-webkit-scrollbar,
   background: var(--color-paper);
 }
 
+.sticky-flow::after {
+  content: '';
+  display: block;
+  height: 26rem;
+}
+
 .sticky-panel {
   position: sticky;
   top: var(--sticky-offset, 0px);
