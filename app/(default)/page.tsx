@@ -29,6 +29,7 @@ type StickyPanelProps = {
 
 const STICKY_BASE_OFFSET_REM = 4;
 const STICKY_STEP_REM = 1.5;
+const SOFT_PAGE_WHITE = '#fbfaf7';
 
 const stickyOffset = (index: number) => STICKY_BASE_OFFSET_REM + index * STICKY_STEP_REM;
 
@@ -61,8 +62,8 @@ function StickyPanel({
   children,
   layer,
   offsetRem,
-  surfaceEnd = '#ffffff',
-  surfaceStart = '#ffffff',
+  surfaceEnd = SOFT_PAGE_WHITE,
+  surfaceStart = SOFT_PAGE_WHITE,
   targetId,
   tone = 'light',
 }: StickyPanelProps) {

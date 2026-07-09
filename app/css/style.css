@@ -13,6 +13,7 @@
 @theme {
   /* Surfaces */
   --color-paper: #fbf7ee; /* cream page / light sections */
+  --color-page-soft: #fbfaf7; /* warm white for the stacked content pages */
   --color-card: #fffcf5; /* card surface on cream */
   --color-night: #181309; /* dark sections */
   --color-night-2: #2c2410; /* dark gradient stop */
@@ -61,7 +62,7 @@ body,
 }
 
 [data-landing-scroll-root] {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 html::-webkit-scrollbar,
@@ -154,8 +155,8 @@ body::-webkit-scrollbar,
 .sticky-panel--light > section {
   background: linear-gradient(
     180deg,
-    var(--stack-surface-start, #ffffff) 0%,
-    var(--stack-surface-end, #ffffff) 100%
+    var(--stack-surface-start, var(--color-page-soft)) 0%,
+    var(--stack-surface-end, var(--color-page-soft)) 100%
   );
 }
 

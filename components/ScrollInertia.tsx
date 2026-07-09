@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 
-const WHEEL_GAIN = 0.5;
-const FRICTION = 0.88;
+const WHEEL_GAIN = 0.58;
+const FRICTION = 0.9;
 const MAX_FRAME_DELTA = 32;
 const MIN_VELOCITY = 0.35;
 
