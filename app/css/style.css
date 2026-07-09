@@ -241,7 +241,7 @@ body::-webkit-scrollbar,
 }
 
 /* Wide MacBook windows can hit 2xl styles while leaving little vertical room. */
-@media (min-width: 768px) and (max-height: 900px) {
+@media (min-width: 768px) and (max-height: 1000px) {
   [data-short-screen-fit] {
     padding-top: 2.5rem !important;
     padding-bottom: 2.5rem !important;
