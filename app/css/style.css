@@ -214,7 +214,12 @@ body::-webkit-scrollbar,
   padding-bottom: 1.5rem;
 }
 
-@media (max-width: 767px), (max-height: 850px) {
+@media (max-width: 767px), (max-height: 1000px) {
+  .sticky-panel--summary {
+    position: relative;
+    top: auto;
+  }
+
   .summary-screen {
     height: auto;
     min-height: calc(100vh - var(--sticky-offset, 0px));
@@ -222,7 +227,12 @@ body::-webkit-scrollbar,
   }
 
   .summary-screen > section {
-    min-height: calc(100vh - var(--sticky-offset, 0px));
+    flex: 0 0 auto;
+    min-height: auto;
+    justify-content: flex-start;
+    overflow: visible;
+    padding-top: 4rem !important;
+    padding-bottom: 3rem !important;
   }
 }
 

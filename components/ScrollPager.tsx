@@ -22,7 +22,19 @@ function getPageTops(root: HTMLElement) {
     if (anchor.id === 'stack-summary') {
       const offsetRem =
         Number.parseFloat(getComputedStyle(anchor).getPropertyValue('--sticky-offset')) || 0;
-      points.push(Math.max(0, anchor.offsetTop - offsetRem * rem));
+      const offset = offsetRem * rem;
+      const summaryTop = Math.max(0, anchor.offsetTop - offset);
+      points.push(summaryTop);
+
+      const summaryScreen =
+        anchor.nextElementSibling?.querySelector<HTMLElement>('.summary-screen');
+      if (summaryScreen) {
+        const visibleHeight = root.clientHeight - offset;
+        const summaryBottom = summaryTop + Math.max(0, summaryScreen.scrollHeight - visibleHeight);
+        if (summaryBottom > summaryTop + POSITION_EPSILON) {
+          points.push(summaryBottom);
+        }
+      }
       return;
     }
 
