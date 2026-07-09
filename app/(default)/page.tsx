@@ -23,6 +23,7 @@ type StickyPanelProps = {
   layer: number;
   offsetRem: number;
   preSummary?: boolean;
+  surface?: string;
   surfaceEnd?: string;
   surfaceStart?: string;
   targetId: string;
@@ -32,7 +33,8 @@ type StickyPanelProps = {
 
 const STICKY_BASE_OFFSET_REM = 4;
 const STICKY_STEP_REM = 1.5;
-const SOFT_PAGE_WHITE = '#fbfaf7';
+const PAGE_SURFACE_LIGHT = '#fcfbf8';
+const PAGE_SURFACE_SHADE = '#f6f4ee';
 
 const stickyOffset = (index: number) => STICKY_BASE_OFFSET_REM + index * STICKY_STEP_REM;
 
@@ -66,8 +68,9 @@ function StickyPanel({
   layer,
   offsetRem,
   preSummary = false,
-  surfaceEnd = SOFT_PAGE_WHITE,
-  surfaceStart = SOFT_PAGE_WHITE,
+  surface = PAGE_SURFACE_LIGHT,
+  surfaceEnd = surface,
+  surfaceStart = surface,
   targetId,
   tone = 'light',
   summary = false,
@@ -116,6 +119,7 @@ export default function HomePage() {
         <StickyPanel
           layer={2}
           offsetRem={stickyOffset(1)}
+          surface={PAGE_SURFACE_SHADE}
           targetId="stack-live-four"
         >
           <LiveFourSection />
@@ -130,6 +134,7 @@ export default function HomePage() {
         <StickyPanel
           layer={4}
           offsetRem={stickyOffset(3)}
+          surface={PAGE_SURFACE_SHADE}
           targetId="stack-asset"
         >
           <AssetSection />
@@ -144,6 +149,7 @@ export default function HomePage() {
         <StickyPanel
           layer={6}
           offsetRem={stickyOffset(5)}
+          surface={PAGE_SURFACE_SHADE}
           targetId="stack-connectors"
         >
           <ConnectorsSection />
@@ -159,6 +165,7 @@ export default function HomePage() {
           layer={8}
           offsetRem={stickyOffset(7)}
           preSummary
+          surface={PAGE_SURFACE_SHADE}
           targetId="stack-which-side"
         >
           <WhichSideSection />
