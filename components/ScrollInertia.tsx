@@ -5,9 +5,9 @@ import { useEffect, useRef } from 'react';
 const WHEEL_GAIN = 0.46;
 const FRICTION = 0.86;
 const MAX_FRAME_DELTA = 32;
-const MIN_VELOCITY = 0.35;
-const SNAP_RANGE = 0.34;
-const SNAP_DURATION_MS = 850;
+const MIN_VELOCITY = 1.2;
+const SNAP_RANGE = 0.6;
+const SNAP_DURATION_MS = 650;
 
 function normalizeWheelDelta(event: WheelEvent, root: HTMLElement) {
   if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) return event.deltaY * 18;
@@ -32,15 +32,11 @@ export function ScrollInertia() {
     const maxScrollTop = () => Math.max(0, root.scrollHeight - root.clientHeight);
 
     const getSnapPoints = () => {
-      const points = [0, root.clientHeight];
-      const rem = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      const points: number[] = [];
 
       document.querySelectorAll<HTMLElement>('.stack-anchor').forEach(anchor => {
         if (anchor.id === 'stack-live-agent' || anchor.id === 'stack-summary') return;
-
-        const offsetRem =
-          Number.parseFloat(getComputedStyle(anchor).getPropertyValue('--sticky-offset')) || 0;
-        points.push(anchor.offsetTop - offsetRem * rem);
+        points.push(anchor.offsetTop);
       });
 
       return Array.from(new Set(points.map(point => Math.round(point)))).sort((a, b) => a - b);
@@ -63,7 +59,10 @@ export function ScrollInertia() {
       if (isSummaryVisible()) return;
 
       const current = root.scrollTop;
-      const target = getSnapPoints().reduce((nearest, point) =>
+      const points = getSnapPoints();
+      if (points.length === 0) return;
+
+      const target = points.reduce((nearest, point) =>
         Math.abs(point - current) < Math.abs(nearest - current) ? point : nearest
       );
       const distance = target - current;
