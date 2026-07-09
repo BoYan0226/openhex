@@ -44,6 +44,10 @@ function power4In(value: number) {
   return value ** 4;
 }
 
+function power2In(value: number) {
+  return value ** 2;
+}
+
 function power4Out(value: number) {
   return 1 - (1 - value) ** 4;
 }
@@ -125,7 +129,7 @@ export function ScrollPathTransition() {
 
     const revealLayer = async (path: SVGPathElement, delay: number, shouldSwitch: boolean) => {
       await wait(delay);
-      await animatePath(path, PATHS.step1.unfilled, PATHS.step1.curve1, 800, power4In);
+      await animatePath(path, PATHS.step1.unfilled, PATHS.step1.curve1, 800, power2In);
       await animatePath(path, PATHS.step1.curve1, PATHS.step1.filled, 200, value => value);
       if (shouldSwitch) {
         jumpToScreen(SECOND_SCREEN_INDEX);
