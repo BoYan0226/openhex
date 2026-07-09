@@ -16,6 +16,7 @@ export function WhichSideSection() {
     <section
       id="which-side"
       data-stack-motion
+      data-short-screen-fit
       data-motion-style="split"
       className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >

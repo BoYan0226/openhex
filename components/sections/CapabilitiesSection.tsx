@@ -22,6 +22,7 @@ export function CapabilitiesSection() {
     <section
       id="capabilities"
       data-stack-motion
+      data-short-screen-fit
       data-motion-style="tilt"
       className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >

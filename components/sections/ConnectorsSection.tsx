@@ -29,6 +29,7 @@ export function ConnectorsSection() {
     <section
       id="connectors"
       data-stack-motion
+      data-short-screen-fit
       data-motion-style="weave"
       className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >

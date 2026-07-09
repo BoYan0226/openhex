@@ -18,6 +18,7 @@ export function InfraSection() {
   return (
     <section
       data-stack-motion
+      data-short-screen-fit
       data-motion-style="burst"
       className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden py-20 text-ink md:py-24"
     >

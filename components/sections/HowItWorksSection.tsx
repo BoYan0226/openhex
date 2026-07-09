@@ -18,6 +18,7 @@ export function HowItWorksSection() {
     <section
       id="how-it-works"
       data-stack-motion
+      data-short-screen-fit
       data-motion-style="steps"
       className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >
