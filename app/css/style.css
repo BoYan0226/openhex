@@ -329,73 +329,8 @@ body::-webkit-scrollbar,
   height: 22px;
 }
 
-/* Entrances start only when a stacked page is close to its snap position. */
-[data-stack-motion] [data-motion='header'] > * {
-  opacity: 0;
-  transform: translateY(48px);
-  transition:
-    opacity 760ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 920ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-[data-stack-motion] [data-motion='group'] > * {
-  opacity: 0;
-  transform: translateY(72px) scale(0.97);
-  transition:
-    opacity 760ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 980ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
+[data-stack-motion] [data-motion='header'] > *,
+[data-stack-motion] [data-motion='group'] > *,
 [data-stack-motion] [data-motion='split'] > * {
-  opacity: 0;
-  transition:
-    opacity 760ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 1050ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-[data-stack-motion] [data-motion='split'] > :first-child {
-  transform: translateX(-140px);
-}
-
-[data-stack-motion] [data-motion='split'] > :last-child {
-  transform: translateX(140px);
-}
-
-[data-stack-motion][data-motion-visible='true'] [data-motion='header'] > *,
-[data-stack-motion][data-motion-visible='true'] [data-motion='group'] > *,
-[data-stack-motion][data-motion-visible='true'] [data-motion='split'] > * {
-  opacity: 1;
-  transform: translate3d(0, 0, 0) scale(1);
-}
-
-[data-stack-motion][data-motion-visible='true'] [data-motion='header'] > :nth-child(2) {
-  transition-delay: 90ms;
-}
-
-[data-stack-motion][data-motion-visible='true'] [data-motion='header'] > :nth-child(3) {
-  transition-delay: 180ms;
-}
-
-[data-stack-motion][data-motion-visible='true'] [data-motion='group'] > :nth-child(1) {
-  transition-delay: 160ms;
-}
-
-[data-stack-motion][data-motion-visible='true'] [data-motion='group'] > :nth-child(2) {
-  transition-delay: 260ms;
-}
-
-[data-stack-motion][data-motion-visible='true'] [data-motion='group'] > :nth-child(3) {
-  transition-delay: 360ms;
-}
-
-[data-stack-motion][data-motion-visible='true'] [data-motion='group'] > :nth-child(4) {
-  transition-delay: 460ms;
-}
-
-[data-stack-motion][data-motion-visible='true'] [data-motion='group'] > :nth-child(5) {
-  transition-delay: 560ms;
-}
-
-[data-stack-motion][data-motion-visible='true'] [data-motion='group'] > :nth-child(6) {
-  transition-delay: 660ms;
+  will-change: opacity, transform;
 }
