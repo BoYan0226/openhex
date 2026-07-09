@@ -5,6 +5,8 @@ import { useEffect, useRef } from 'react';
 const MIN_WHEEL_DELTA = 4;
 const POSITION_EPSILON = 2;
 const GESTURE_IDLE_MS = 320;
+const SNAP_IDLE_MS = 110;
+const SNAP_DIRECTION_THRESHOLD = 0.18;
 const GESTURE_DISTANCE_LIMIT = 0.95;
 const WHEEL_DISTANCE_MULTIPLIER = 1.8;
 const MAX_INPUT_STEP = 240;
@@ -59,6 +61,9 @@ export function ScrollPager() {
   const lastInputTimeRef = useRef(0);
   const motionMinRef = useRef(0);
   const motionMaxRef = useRef(Number.POSITIVE_INFINITY);
+  const lastDirectionRef = useRef<-1 | 1>(1);
+  const snapTimerRef = useRef<number | null>(null);
+  const resizeFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
@@ -68,6 +73,13 @@ export function ScrollPager() {
       if (animationFrameRef.current !== null) {
         window.cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
+      }
+    };
+
+    const cancelSnap = () => {
+      if (snapTimerRef.current !== null) {
+        window.clearTimeout(snapTimerRef.current);
+        snapTimerRef.current = null;
       }
     };
 
@@ -119,6 +131,7 @@ export function ScrollPager() {
     };
 
     const movePage = (direction: -1 | 1) => {
+      cancelSnap();
       const points = getPageTops(root);
       const current = root.scrollTop;
       const target =
@@ -127,12 +140,54 @@ export function ScrollPager() {
           : [...points].reverse().find(point => point < current - POSITION_EPSILON);
 
       if (target !== undefined) {
+        lastDirectionRef.current = direction;
         motionMinRef.current = 0;
         motionMaxRef.current = getLastPoint();
         targetRef.current = target;
         velocityRef.current = 0;
         startAnimation();
       }
+    };
+
+    const settleToPage = () => {
+      snapTimerRef.current = null;
+      const points = getPageTops(root);
+      if (points.length === 0) return;
+
+      const position = targetRef.current;
+      let lower = points[0];
+      let upper = points[points.length - 1];
+
+      for (const point of points) {
+        if (point <= position) lower = point;
+        if (point >= position) {
+          upper = point;
+          break;
+        }
+      }
+
+      let target = lower;
+      if (upper !== lower) {
+        const progress = (position - lower) / (upper - lower);
+        target =
+          lastDirectionRef.current > 0
+            ? progress >= SNAP_DIRECTION_THRESHOLD
+              ? upper
+              : lower
+            : progress <= 1 - SNAP_DIRECTION_THRESHOLD
+              ? lower
+              : upper;
+      }
+
+      motionMinRef.current = 0;
+      motionMaxRef.current = getLastPoint();
+      targetRef.current = target;
+      startAnimation();
+    };
+
+    const scheduleSnap = () => {
+      cancelSnap();
+      snapTimerRef.current = window.setTimeout(settleToPage, SNAP_IDLE_MS);
     };
 
     const onWheel = (event: WheelEvent) => {
@@ -157,6 +212,7 @@ export function ScrollPager() {
         return;
       }
 
+      cancelSnap();
       const now = performance.now();
       if (now - lastInputTimeRef.current > GESTURE_IDLE_MS) {
         gestureStartRef.current = root.scrollTop;
@@ -174,12 +230,13 @@ export function ScrollPager() {
         -MAX_INPUT_STEP,
         Math.min(MAX_INPUT_STEP, wheelDelta * WHEEL_DISTANCE_MULTIPLIER)
       );
+      lastDirectionRef.current = step > 0 ? 1 : -1;
 
       if (
         velocityRef.current !== 0 &&
         Math.sign(step) !== Math.sign(velocityRef.current)
       ) {
-        velocityRef.current *= 0.2;
+        velocityRef.current = 0;
       }
 
       targetRef.current = clampTarget(
@@ -193,6 +250,7 @@ export function ScrollPager() {
         Math.min(MAX_VELOCITY, velocityRef.current + step * 7)
       );
       startAnimation();
+      scheduleSnap();
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -224,6 +282,7 @@ export function ScrollPager() {
       if (!(event.target instanceof Element) || !event.target.closest('.stack-jump-label')) {
         return;
       }
+      cancelSnap();
       cancelAnimation();
       velocityRef.current = 0;
       window.setTimeout(() => {
@@ -234,6 +293,32 @@ export function ScrollPager() {
       }, 0);
     };
 
+    const onResize = () => {
+      cancelSnap();
+      cancelAnimation();
+      velocityRef.current = 0;
+
+      if (resizeFrameRef.current !== null) {
+        window.cancelAnimationFrame(resizeFrameRef.current);
+      }
+
+      resizeFrameRef.current = window.requestAnimationFrame(() => {
+        resizeFrameRef.current = null;
+        const points = getPageTops(root);
+        const nearest =
+          points.reduce((best, point) =>
+            Math.abs(point - root.scrollTop) < Math.abs(best - root.scrollTop) ? point : best
+          , points[0] ?? 0);
+
+        root.scrollTop = nearest;
+        targetRef.current = nearest;
+        gestureStartRef.current = nearest;
+        lastInputTimeRef.current = 0;
+        motionMinRef.current = 0;
+        motionMaxRef.current = points.at(-1) ?? 0;
+      });
+    };
+
     targetRef.current = root.scrollTop;
     gestureStartRef.current = root.scrollTop;
     motionMaxRef.current = getLastPoint();
@@ -241,13 +326,19 @@ export function ScrollPager() {
     root.addEventListener('scroll', onScroll, { passive: true });
     root.addEventListener('click', onClick);
     window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('resize', onResize);
 
     return () => {
+      cancelSnap();
       cancelAnimation();
+      if (resizeFrameRef.current !== null) {
+        window.cancelAnimationFrame(resizeFrameRef.current);
+      }
       root.removeEventListener('wheel', onWheel);
       root.removeEventListener('scroll', onScroll);
       root.removeEventListener('click', onClick);
       window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('resize', onResize);
     };
   }, []);
 
