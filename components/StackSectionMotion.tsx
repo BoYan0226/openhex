@@ -158,7 +158,7 @@ export function StackSectionMotion() {
         if (!anchor) return;
 
         const start = anchor.offsetTop - viewportHeight * 0.7;
-        const end = anchor.offsetTop + viewportHeight * 0.02;
+        const end = anchor.offsetTop;
         const sectionProgress = clamp((root.scrollTop - start) / Math.max(1, end - start));
 
         items.forEach(item => renderItem(item, sectionProgress));

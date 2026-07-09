@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 
 const GESTURE_END_MS = 180;
 const MIN_WHEEL_DELTA = 4;
-const PAGE_TRANSITION_MS = 700;
+const PAGE_TRANSITION_MS = 850;
 const POSITION_EPSILON = 2;
 
 function getRemInPixels() {
@@ -18,9 +18,14 @@ function getPageTops(root: HTMLElement) {
   document.querySelectorAll<HTMLElement>('.stack-anchor').forEach(anchor => {
     if (anchor.id === 'stack-live-agent') return;
 
-    const offsetRem =
-      Number.parseFloat(getComputedStyle(anchor).getPropertyValue('--sticky-offset')) || 0;
-    points.push(Math.max(0, anchor.offsetTop - offsetRem * rem));
+    if (anchor.id === 'stack-summary') {
+      const offsetRem =
+        Number.parseFloat(getComputedStyle(anchor).getPropertyValue('--sticky-offset')) || 0;
+      points.push(Math.max(0, anchor.offsetTop - offsetRem * rem));
+      return;
+    }
+
+    points.push(anchor.offsetTop);
   });
 
   return Array.from(new Set(points.map(point => Math.round(point)))).sort((a, b) => a - b);
@@ -51,10 +56,7 @@ export function ScrollPager() {
 
       const tick = (now: number) => {
         const progress = Math.min(1, (now - startTime) / PAGE_TRANSITION_MS);
-        const eased =
-          progress < 0.5
-            ? 4 * progress ** 3
-            : 1 - (-2 * progress + 2) ** 3 / 2;
+        const eased = -(Math.cos(Math.PI * progress) - 1) / 2;
 
         root.scrollTop = startTop + distance * eased;
 
