@@ -72,6 +72,24 @@ export function HeroSection() {
       }
     };
 
+    const settlePanels = () => {
+      if (revealTimerRef.current !== null) {
+        window.clearTimeout(revealTimerRef.current);
+        revealTimerRef.current = null;
+      }
+      if (revealFrameRef.current !== null) {
+        window.cancelAnimationFrame(revealFrameRef.current);
+        revealFrameRef.current = null;
+      }
+
+      setIsEntered(true);
+      [leftPanelRef.current, rightPanelRef.current].forEach(panel => {
+        if (!panel) return;
+        panel.style.transition = 'none';
+        panel.style.transform = 'translate3d(0, 0, 0)';
+      });
+    };
+
     const reveal = (delay = 0) => {
       if (revealTimerRef.current !== null) {
         window.clearTimeout(revealTimerRef.current);
@@ -114,20 +132,21 @@ export function HeroSection() {
 
       if (direction === 'back') {
         isTransitioningRef.current = false;
-        setIsEntered(false);
       }
     };
 
     const onTransitionStart = (event: Event) => {
       const direction = (event as CustomEvent<{ direction?: 'forward' | 'back' }>).detail
         ?.direction;
-      if (direction === 'forward' || direction === 'back') {
+      if (direction === 'forward') {
         isTransitioningRef.current = true;
         resetPanels();
+        reveal(HERO_REVEAL_DELAY_MS);
       }
 
-      if (direction === 'forward') {
-        reveal(HERO_REVEAL_DELAY_MS);
+      if (direction === 'back') {
+        isTransitioningRef.current = true;
+        settlePanels();
       }
     };
 

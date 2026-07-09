@@ -46,19 +46,19 @@ export function StackSectionMotion() {
 
       if (type === 'split') {
         const direction = index === 0 ? -1 : 1;
-        element.style.transform = `translate3d(${(direction * remaining * 100).toFixed(2)}px, 0, 0)`;
+        element.style.transform = `translate3d(${(direction * remaining * 120).toFixed(2)}px, 0, 0)`;
         return;
       }
 
       if (type === 'group') {
-        const scale = 0.975 + itemProgress * 0.025;
-        element.style.transform = `translate3d(0, ${(remaining * 56).toFixed(
+        const scale = 0.97 + itemProgress * 0.03;
+        element.style.transform = `translate3d(0, ${(remaining * 72).toFixed(
           2
         )}px, 0) scale(${scale.toFixed(4)})`;
         return;
       }
 
-      element.style.transform = `translate3d(0, ${(remaining * 36).toFixed(2)}px, 0)`;
+      element.style.transform = `translate3d(0, ${(remaining * 48).toFixed(2)}px, 0)`;
     };
 
     const update = () => {
@@ -68,8 +68,8 @@ export function StackSectionMotion() {
       sections.forEach(({ anchor, items }) => {
         if (!anchor) return;
 
-        const start = anchor.offsetTop - viewportHeight * 0.82;
-        const end = anchor.offsetTop - viewportHeight * 0.12;
+        const start = anchor.offsetTop - viewportHeight * 0.7;
+        const end = anchor.offsetTop + viewportHeight * 0.02;
         const sectionProgress = clamp((root.scrollTop - start) / Math.max(1, end - start));
 
         items.forEach(item => renderItem(item, sectionProgress));
