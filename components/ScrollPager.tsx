@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 
 const GESTURE_END_MS = 180;
 const MIN_WHEEL_DELTA = 4;
+const PAGE_TRANSITION_MS = 700;
 const POSITION_EPSILON = 2;
 
 function getRemInPixels() {
@@ -26,6 +27,7 @@ function getPageTops(root: HTMLElement) {
 }
 
 export function ScrollPager() {
+  const animationFrameRef = useRef<number | null>(null);
   const gestureActiveRef = useRef(false);
   const gestureEndTimerRef = useRef<number | null>(null);
 
@@ -33,7 +35,44 @@ export function ScrollPager() {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
     if (!root) return undefined;
 
+    const cancelAnimation = () => {
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+
+    const animateTo = (target: number) => {
+      cancelAnimation();
+
+      const startTop = root.scrollTop;
+      const distance = target - startTop;
+      const startTime = performance.now();
+
+      const tick = (now: number) => {
+        const progress = Math.min(1, (now - startTime) / PAGE_TRANSITION_MS);
+        const eased =
+          progress < 0.5
+            ? 4 * progress ** 3
+            : 1 - (-2 * progress + 2) ** 3 / 2;
+
+        root.scrollTop = startTop + distance * eased;
+
+        if (progress >= 1) {
+          root.scrollTop = target;
+          animationFrameRef.current = null;
+          return;
+        }
+
+        animationFrameRef.current = window.requestAnimationFrame(tick);
+      };
+
+      animationFrameRef.current = window.requestAnimationFrame(tick);
+    };
+
     const movePage = (direction: -1 | 1) => {
+      if (animationFrameRef.current !== null) return;
+
       const points = getPageTops(root);
       const current = root.scrollTop;
       const target =
@@ -42,7 +81,7 @@ export function ScrollPager() {
           : [...points].reverse().find(point => point < current - POSITION_EPSILON);
 
       if (target !== undefined) {
-        root.scrollTop = target;
+        animateTo(target);
       }
     };
 
@@ -105,6 +144,7 @@ export function ScrollPager() {
     window.addEventListener('keydown', onKeyDown);
 
     return () => {
+      cancelAnimation();
       if (gestureEndTimerRef.current !== null) {
         window.clearTimeout(gestureEndTimerRef.current);
       }
