@@ -167,8 +167,8 @@ export default function HomePage() {
         >
           <SummarySection />
         </StickyPanel>
+        <LandingFooter />
       </div>
-      <LandingFooter />
     </main>
   );
 }

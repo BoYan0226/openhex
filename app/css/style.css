@@ -77,7 +77,6 @@ body::-webkit-scrollbar,
 .sticky-flow {
   isolation: isolate;
   background: var(--color-paper);
-  padding-bottom: 18rem;
 }
 
 .sticky-panel {
