@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 
 const WHEEL_GAIN = 0.52;
-const FRICTION = 0.88;
+const FRICTION = 0.84;
 const MAX_FRAME_DELTA = 32;
 const MAX_VELOCITY_RATIO = 0.065;
 const MIN_VELOCITY = 1.2;
