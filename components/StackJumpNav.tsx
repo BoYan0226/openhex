@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
 
 type StackJumpItem = {
@@ -18,7 +18,6 @@ function getRemInPixels() {
 
 export function StackJumpNav({ items }: StackJumpNavProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const jumpFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
@@ -27,13 +26,6 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
     if (!root) return undefined;
 
     let frame: number | null = null;
-
-    const cancelJump = () => {
-      if (jumpFrameRef.current !== null) {
-        window.cancelAnimationFrame(jumpFrameRef.current);
-        jumpFrameRef.current = null;
-      }
-    };
 
     const update = () => {
       frame = null;
@@ -64,15 +56,12 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
     };
 
     root.addEventListener('scroll', requestUpdate, { passive: true });
-    root.addEventListener('wheel', cancelJump, { passive: true });
     window.addEventListener('resize', requestUpdate);
     requestUpdate();
 
     return () => {
-      cancelJump();
       if (frame !== null) window.cancelAnimationFrame(frame);
       root.removeEventListener('scroll', requestUpdate);
-      root.removeEventListener('wheel', cancelJump);
       window.removeEventListener('resize', requestUpdate);
     };
   }, [items]);
@@ -86,42 +75,7 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
     const topValue = getComputedStyle(target).getPropertyValue('--sticky-offset');
     const offsetRem = Number.parseFloat(topValue) || 0;
     const targetTop = target.offsetTop - offsetRem * getRemInPixels();
-    const startTop = root.scrollTop;
-    const distance = Math.max(0, targetTop) - startTop;
-
-    if (jumpFrameRef.current !== null) {
-      window.cancelAnimationFrame(jumpFrameRef.current);
-    }
-
-    const duration = Math.min(1400, Math.max(700, Math.abs(distance) * 0.16));
-    const startTime = performance.now();
-    const direction = Math.sign(distance);
-    const overshoot = Math.min(10, Math.max(4, Math.abs(distance) * 0.0025));
-
-    const animateJump = (now: number) => {
-      const progress = Math.min(1, (now - startTime) / duration);
-      const arrivalProgress = Math.min(1, progress / 0.84);
-      const arrivalEase = 1 - (1 - arrivalProgress) ** 3;
-      const settleProgress = Math.max(0, (progress - 0.84) / 0.16);
-      const settleEase = settleProgress * settleProgress * (3 - 2 * settleProgress);
-      const arrivalTop =
-        startTop + (distance + direction * overshoot) * arrivalEase;
-
-      root.scrollTop =
-        progress < 0.84
-          ? arrivalTop
-          : Math.max(0, targetTop) + direction * overshoot * (1 - settleEase);
-
-      if (progress >= 1) {
-        root.scrollTop = Math.max(0, targetTop);
-        jumpFrameRef.current = null;
-        return;
-      }
-
-      jumpFrameRef.current = window.requestAnimationFrame(animateJump);
-    };
-
-    jumpFrameRef.current = window.requestAnimationFrame(animateJump);
+    root.scrollTop = Math.max(0, targetTop);
   };
 
   return (
