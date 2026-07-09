@@ -77,7 +77,6 @@ body::-webkit-scrollbar,
 .sticky-flow {
   isolation: isolate;
   background: var(--color-paper);
-  padding-bottom: 18rem;
 }
 
 .sticky-panel {
@@ -177,6 +176,10 @@ body::-webkit-scrollbar,
   filter: none !important;
   min-height: calc(100vh + var(--sticky-offset, 0px));
   scroll-snap-align: none;
+}
+
+.sticky-panel--pre-summary > section {
+  min-height: calc(100vh - var(--sticky-offset, 0px));
 }
 
 .summary-screen {

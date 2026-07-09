@@ -22,6 +22,7 @@ type StickyPanelProps = {
   children: ReactNode;
   layer: number;
   offsetRem: number;
+  preSummary?: boolean;
   surfaceEnd?: string;
   surfaceStart?: string;
   targetId: string;
@@ -64,6 +65,7 @@ function StickyPanel({
   children,
   layer,
   offsetRem,
+  preSummary = false,
   surfaceEnd = SOFT_PAGE_WHITE,
   surfaceStart = SOFT_PAGE_WHITE,
   targetId,
@@ -79,6 +81,8 @@ function StickyPanel({
       />
       <div
         className={`sticky-panel sticky-panel--${tone}${
+          preSummary ? ' sticky-panel--pre-summary' : ''
+        }${
           summary ? ' sticky-panel--summary' : ''
         }`}
         style={stickyStyle(layer, offsetRem, surfaceStart, surfaceEnd)}
@@ -154,6 +158,7 @@ export default function HomePage() {
         <StickyPanel
           layer={8}
           offsetRem={stickyOffset(7)}
+          preSummary
           targetId="stack-which-side"
         >
           <WhichSideSection />

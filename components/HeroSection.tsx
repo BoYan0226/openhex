@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { AuthAwareCtaButton } from './AuthAwareCtaButton';
 import { BookDemoButton } from './BookDemoButton';
 
-const HERO_REVEAL_DELAY_MS = 1320;
+const HERO_REVEAL_DELAY_MS = 700;
 
 /**
  * Hero section for the Live Agent landing redesign.

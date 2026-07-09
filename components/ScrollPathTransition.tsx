@@ -19,7 +19,7 @@ const PATHS = {
 
 const TRANSITION_LAYERS = [
   { id: 'yellow', fill: '#ffde4a', delay: 0 },
-  { id: 'ink', fill: '#202124', delay: 120 },
+  { id: 'ink', fill: '#202124', delay: 60 },
 ] as const;
 
 const PATH_NUMBER_PATTERN = /-?\d*\.?\d+/g;
@@ -131,24 +131,24 @@ export function ScrollPathTransition() {
 
     const revealLayer = async (path: SVGPathElement, delay: number, shouldSwitch: boolean) => {
       await wait(delay);
-      await animatePath(path, PATHS.step1.unfilled, PATHS.step1.curve1, 800, power2In);
-      await animatePath(path, PATHS.step1.curve1, PATHS.step1.filled, 200, value => value);
+      await animatePath(path, PATHS.step1.unfilled, PATHS.step1.curve1, 420, power2In);
+      await animatePath(path, PATHS.step1.curve1, PATHS.step1.filled, 100, value => value);
       if (shouldSwitch) {
         jumpToScreen(SECOND_SCREEN_INDEX);
       }
-      await animatePath(path, PATHS.step2.filled, PATHS.step2.curve1, 200, sineIn);
-      await animatePath(path, PATHS.step2.curve1, PATHS.step2.unfilled, 1000, power4Out);
+      await animatePath(path, PATHS.step2.filled, PATHS.step2.curve1, 100, sineIn);
+      await animatePath(path, PATHS.step2.curve1, PATHS.step2.unfilled, 520, power4Out);
     };
 
     const unrevealLayer = async (path: SVGPathElement, delay: number, shouldSwitch: boolean) => {
       await wait(delay);
-      await animatePath(path, PATHS.step2.unfilled, PATHS.step2.curve2, 800, power4In);
-      await animatePath(path, PATHS.step2.curve2, PATHS.step2.filled, 200, value => value);
+      await animatePath(path, PATHS.step2.unfilled, PATHS.step2.curve2, 420, power4In);
+      await animatePath(path, PATHS.step2.curve2, PATHS.step2.filled, 100, value => value);
       if (shouldSwitch) {
         jumpToScreen(FIRST_SCREEN_INDEX);
       }
-      await animatePath(path, PATHS.step1.filled, PATHS.step1.curve2, 200, sineIn);
-      await animatePath(path, PATHS.step1.curve2, PATHS.step1.unfilled, 1000, power4Out);
+      await animatePath(path, PATHS.step1.filled, PATHS.step1.curve2, 100, sineIn);
+      await animatePath(path, PATHS.step1.curve2, PATHS.step1.unfilled, 520, power4Out);
     };
 
     const runTransition = async (direction: 'forward' | 'back') => {
