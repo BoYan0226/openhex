@@ -43,7 +43,7 @@ export function ScrollInertia() {
 
       root.scrollTop = next;
 
-      const hitEdge = next === 0 || next === maxTop;
+      const hitEdge = (next <= 0 && velocity < 0) || (next >= maxTop && velocity > 0);
       if (hitEdge || Math.abs(velocity) < MIN_VELOCITY) {
         velocityRef.current = 0;
         frameRef.current = null;
@@ -67,6 +67,14 @@ export function ScrollInertia() {
 
       const delta = normalizeWheelDelta(event, root);
       const maxVelocity = root.clientHeight * 0.11;
+
+      if (
+        velocityRef.current !== 0 &&
+        Math.sign(delta) !== Math.sign(velocityRef.current)
+      ) {
+        velocityRef.current = 0;
+      }
+
       velocityRef.current = Math.max(
         -maxVelocity,
         Math.min(maxVelocity, velocityRef.current + delta * WHEEL_GAIN)
