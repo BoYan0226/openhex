@@ -7,6 +7,7 @@ const POSITION_EPSILON = 2;
 const GESTURE_IDLE_MS = 320;
 const SNAP_IDLE_MS = 110;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
+const BACK_TRANSITION_TOLERANCE = 12;
 const GESTURE_DISTANCE_LIMIT = 0.95;
 const WHEEL_DISTANCE_MULTIPLIER = 1.8;
 const MAX_INPUT_STEP = 240;
@@ -14,8 +15,8 @@ const MAX_VELOCITY = 2200;
 const SPRING_STIFFNESS = 120;
 const SPRING_DAMPING = 26;
 const SPRING_MASS = 1.8;
-const SETTLE_DISTANCE = 0.35;
-const SETTLE_SPEED = 4;
+const SETTLE_DISTANCE = 1;
+const SETTLE_SPEED = 12;
 
 function getRemInPixels() {
   return Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
@@ -121,6 +122,11 @@ export function ScrollPager() {
           root.scrollTop = targetRef.current;
           velocityRef.current = 0;
           animationFrameRef.current = null;
+          window.dispatchEvent(
+            new CustomEvent('landing:scroll-settled', {
+              detail: { top: targetRef.current },
+            })
+          );
           return;
         }
 
@@ -214,7 +220,21 @@ export function ScrollPager() {
 
       cancelSnap();
       const now = performance.now();
-      if (now - lastInputTimeRef.current > GESTURE_IDLE_MS) {
+      const isNewGesture = now - lastInputTimeRef.current > GESTURE_IDLE_MS;
+
+      if (
+        wheelDelta < 0 &&
+        isNewGesture &&
+        Math.abs(root.scrollTop - root.clientHeight) <= BACK_TRANSITION_TOLERANCE
+      ) {
+        cancelAnimation();
+        velocityRef.current = 0;
+        window.dispatchEvent(new CustomEvent('landing:request-path-back'));
+        lastInputTimeRef.current = now;
+        return;
+      }
+
+      if (isNewGesture) {
         gestureStartRef.current = root.scrollTop;
         targetRef.current = root.scrollTop;
         const gestureLimit = root.clientHeight * GESTURE_DISTANCE_LIMIT;

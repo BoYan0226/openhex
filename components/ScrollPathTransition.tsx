@@ -26,6 +26,7 @@ const PATH_NUMBER_PATTERN = /-?\d*\.?\d+/g;
 const FIRST_SCREEN_INDEX = 0;
 const SECOND_SCREEN_INDEX = 1;
 const SCREEN_TOLERANCE = 0.16;
+const BACK_TRANSITION_ARM_MS = 180;
 
 function interpolatePath(from: string, to: string, progress: number) {
   const fromNumbers = from.match(PATH_NUMBER_PATTERN)?.map(Number) ?? [];
@@ -65,7 +66,8 @@ export function ScrollPathTransition() {
   const pathRefs = useRef<Array<SVGPathElement | null>>([]);
   const frameRef = useRef<number | null>(null);
   const isAnimatingRef = useRef(false);
-  const backIntentUntilRef = useRef(0);
+  const backTransitionArmedRef = useRef(false);
+  const backTransitionTimerRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -75,8 +77,6 @@ export function ScrollPathTransition() {
     if (!root || !overlay || pathRefs.current.some(path => !path)) return undefined;
 
     let isDisposed = false;
-    let previousScrollTop = root.scrollTop;
-
     const getViewportHeight = () => root.clientHeight || window.innerHeight;
     const getScreenTop = (screenIndex: number) => screenIndex * getViewportHeight();
     const isNearScreen = (screenIndex: number) => {
@@ -182,10 +182,6 @@ export function ScrollPathTransition() {
     };
 
     const onWheel = (event: WheelEvent) => {
-      if (event.deltaY < 0) {
-        backIntentUntilRef.current = performance.now() + 2500;
-      }
-
       if (isAnimatingRef.current) {
         event.preventDefault();
         return;
@@ -195,11 +191,6 @@ export function ScrollPathTransition() {
         event.preventDefault();
         void runTransition('forward');
         return;
-      }
-
-      if (event.deltaY < 0 && isNearScreen(SECOND_SCREEN_INDEX)) {
-        event.preventDefault();
-        void runTransition('back');
       }
     };
 
@@ -218,10 +209,6 @@ export function ScrollPathTransition() {
       if (startY === null || currentY === undefined) return;
 
       const deltaY = startY - currentY;
-      if (deltaY < 0) {
-        backIntentUntilRef.current = performance.now() + 2500;
-      }
-
       if (deltaY > 24 && isNearScreen(FIRST_SCREEN_INDEX)) {
         event.preventDefault();
         touchStartYRef.current = null;
@@ -229,18 +216,19 @@ export function ScrollPathTransition() {
         return;
       }
 
-      if (deltaY < -24 && isNearScreen(SECOND_SCREEN_INDEX)) {
+      if (
+        deltaY < -24 &&
+        backTransitionArmedRef.current &&
+        isNearScreen(SECOND_SCREEN_INDEX)
+      ) {
         event.preventDefault();
         touchStartYRef.current = null;
+        backTransitionArmedRef.current = false;
         void runTransition('back');
       }
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (['ArrowUp', 'PageUp'].includes(event.key)) {
-        backIntentUntilRef.current = performance.now() + 2500;
-      }
-
       if (isAnimatingRef.current) {
         event.preventDefault();
         return;
@@ -259,20 +247,32 @@ export function ScrollPathTransition() {
     };
 
     const onScroll = () => {
-      const current = root.scrollTop;
-      const previous = previousScrollTop;
-      previousScrollTop = current;
+      backTransitionArmedRef.current = false;
 
-      if (isAnimatingRef.current || performance.now() > backIntentUntilRef.current) return;
+      if (backTransitionTimerRef.current !== null) {
+        window.clearTimeout(backTransitionTimerRef.current);
+      }
+
+      backTransitionTimerRef.current = window.setTimeout(() => {
+        backTransitionTimerRef.current = null;
+        backTransitionArmedRef.current =
+          !isAnimatingRef.current && isNearScreen(SECOND_SCREEN_INDEX);
+      }, BACK_TRANSITION_ARM_MS);
+    };
+
+    const onScrollSettled = (event: Event) => {
+      const settledTop = (event as CustomEvent<{ top?: number }>).detail?.top;
+      if (settledTop === undefined) return;
 
       const screenTop = getScreenTop(SECOND_SCREEN_INDEX);
       const tolerance = getViewportHeight() * SCREEN_TOLERANCE;
-      const movingUp = current < previous;
-      const enteredTriggerZone = Math.abs(current - screenTop) <= tolerance;
-      const crossedTriggerZone =
-        previous > screenTop + tolerance && current < screenTop - tolerance;
+      backTransitionArmedRef.current =
+        !isAnimatingRef.current && Math.abs(settledTop - screenTop) <= tolerance;
+    };
 
-      if (movingUp && (enteredTriggerZone || crossedTriggerZone)) {
+    const onBackRequest = () => {
+      if (!isAnimatingRef.current && isNearScreen(SECOND_SCREEN_INDEX)) {
+        backTransitionArmedRef.current = false;
         void runTransition('back');
       }
     };
@@ -282,17 +282,24 @@ export function ScrollPathTransition() {
     root.addEventListener('touchstart', onTouchStart, { passive: true });
     root.addEventListener('touchmove', onTouchMove, { passive: false, capture: true });
     window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('landing:scroll-settled', onScrollSettled);
+    window.addEventListener('landing:request-path-back', onBackRequest);
 
     return () => {
       isDisposed = true;
       if (frameRef.current !== null) {
         window.cancelAnimationFrame(frameRef.current);
       }
+      if (backTransitionTimerRef.current !== null) {
+        window.clearTimeout(backTransitionTimerRef.current);
+      }
       root.removeEventListener('wheel', onWheel, { capture: true });
       root.removeEventListener('scroll', onScroll);
       root.removeEventListener('touchstart', onTouchStart);
       root.removeEventListener('touchmove', onTouchMove, { capture: true });
       window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('landing:scroll-settled', onScrollSettled);
+      window.removeEventListener('landing:request-path-back', onBackRequest);
       restoreScroll();
     };
   }, []);
