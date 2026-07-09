@@ -3,6 +3,7 @@
 import { useEffect, useState, type ComponentPropsWithoutRef, type JSX } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import { publicPath } from '@/components/publicPath';
 
 type LegalDoc = 'privacy' | 'tos';
 type MarkdownElementProps<T extends keyof JSX.IntrinsicElements> = ComponentPropsWithoutRef<T> & {
@@ -26,7 +27,7 @@ export default function LegalMarkdownPage({ doc }: { doc: LegalDoc }) {
     const fetchContent = async () => {
       try {
         const suffix = fallbackLocale === 'zh' ? '.zh' : '';
-        const response = await fetch(`/content/${doc}${suffix}.md`);
+        const response = await fetch(publicPath(`/content/${doc}${suffix}.md`));
 
         if (!response.ok) {
           throw new Error(`Unable to load ${doc} content (${fallbackLocale}).`);

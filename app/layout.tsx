@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { Space_Grotesk } from 'next/font/google';
+import { publicPath } from '@/components/publicPath';
 import './css/style.css';
 
 /**
@@ -27,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: t('title'),
       description: t('description'),
-      images: ['/landing/bee-mascot.png'],
+      images: [publicPath('/landing/bee-mascot.png')],
       type: 'website',
     },
   };

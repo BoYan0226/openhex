@@ -1,9 +1,11 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { AuthAwareCtaButton } from './AuthAwareCtaButton';
 import { LANDING_PLATFORM_DOC_URL } from './landingLinks';
+import { publicPath } from './publicPath';
 
 /**
  * Top nav (2026 landing redesign).
@@ -22,9 +24,9 @@ export function LandingNav() {
     <nav className="fixed left-0 right-0 top-0 z-50 h-16 bg-[#202124] shadow-none">
       <div className="relative flex h-full items-center px-[clamp(1rem,3vw,3rem)]">
         {/* Logo: icon + wordmark + 迷境智塔旗下 tagline */}
-        <a href="/" className="flex shrink-0 items-center" aria-label="OpenHex">
+        <Link href="/" className="flex shrink-0 items-center" aria-label="OpenHex">
           <Image
-            src="/landing/logo-icon.svg"
+            src={publicPath('/landing/logo-icon.svg')}
             alt=""
             width={52}
             height={52}
@@ -33,7 +35,7 @@ export function LandingNav() {
           />
           <div className="inline-grid grid-cols-[max-content] grid-rows-[max-content] place-items-start leading-[0]">
             <Image
-              src="/landing/logo-wordmark.svg"
+              src={publicPath('/landing/logo-wordmark.svg')}
               alt="OpenHex"
               width={114}
               height={24}
@@ -44,7 +46,7 @@ export function LandingNav() {
               迷境智塔旗下
             </p>
           </div>
-        </a>
+        </Link>
 
         {/* Right slot: docs link + brand CTA. */}
         <div className="ml-auto flex items-center gap-2">

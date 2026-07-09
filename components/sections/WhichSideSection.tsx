@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { AuthAwareCtaButton } from '@/components/AuthAwareCtaButton';
 import { CONSUMER_CONTACTS_URL } from '@/components/landingLinks';
+import { publicPath } from '@/components/publicPath';
 
 /**
  * 你想做哪一端? — centered header + two large cards (创造者 / 使用者). Each
@@ -68,7 +69,7 @@ export function WhichSideSection() {
               </AuthAwareCtaButton>
             </div>
             <Image
-              src="/landing/bee-laptop.svg"
+              src={publicPath('/landing/bee-laptop.svg')}
               width={150}
               height={150}
               alt=""
@@ -107,7 +108,7 @@ export function WhichSideSection() {
               </a>
             </div>
             <Image
-              src="/landing/bee-agent.svg"
+              src={publicPath('/landing/bee-agent.svg')}
               width={150}
               height={150}
               unoptimized

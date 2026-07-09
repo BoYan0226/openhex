@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { AuthAwareCtaButton } from './AuthAwareCtaButton';
 import { BookDemoButton } from './BookDemoButton';
+import { publicPath } from './publicPath';
 
 const HERO_REVEAL_DELAY_MS = 700;
 
@@ -246,7 +247,7 @@ export function HeroSection() {
         >
           {/* Bee mascot peeking out the card's top-left corner */}
           <Image
-            src="/landing/bee-hero.gif"
+            src={publicPath('/landing/bee-hero.gif')}
             width={120}
             height={120}
             unoptimized

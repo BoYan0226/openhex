@@ -4,13 +4,14 @@ import { useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { X } from 'lucide-react';
+import { publicPath } from './publicPath';
 
 const CONTACT_EMAIL = 'contact@openhex.tech';
 
 // 大顺 小程序码 — staging vs prod by env (same asset as the demo popup)
 const DAXUN_QR_SRC = (process.env.NEXT_PUBLIC_APP_URL || '').includes('staging')
-  ? '/landing/daxun-qr-staging.png'
-  : '/landing/daxun-qr.png';
+  ? publicPath('/landing/daxun-qr-staging.png')
+  : publicPath('/landing/daxun-qr.png');
 
 /**
  * Footer 公司 entries (关于我们 / 联系合作 / 加入我们) — there are no

@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl';
 import { AuthAwareCtaButton } from '@/components/AuthAwareCtaButton';
 import { FlipWord } from '@/components/FlipWord';
 import { BookDemoButton } from '@/components/BookDemoButton';
+import { publicPath } from '@/components/publicPath';
 import { HONEYCOMB_STYLE } from '@/components/ui/textures';
 
 /**
@@ -40,7 +41,7 @@ export function FinalCtaSection() {
                 sinking into it (the "往下跑" look). */}
             <span className="pointer-events-none absolute left-1/2 top-[-1.65em] -translate-x-1/2">
               <Image
-                src="/landing/bee-running.gif"
+                src={publicPath('/landing/bee-running.gif')}
                 width={200}
                 height={200}
                 unoptimized

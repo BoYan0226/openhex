@@ -4,6 +4,7 @@ import { appUrl } from './AuthAwareCtaButton';
 import { BookDemoButton } from './BookDemoButton';
 import { ContactButton } from './ContactButton';
 import { CONSUMER_CONTACTS_URL, LANDING_PLATFORM_DOC_URL } from './landingLinks';
+import { publicPath } from './publicPath';
 
 interface FooterColumn {
   title: string;
@@ -59,7 +60,7 @@ export function LandingFooter() {
           <div className="max-w-[360px]">
             <div className="flex items-center gap-2">
               <Image
-                src="/landing/logo-icon.svg"
+                src={publicPath('/landing/logo-icon.svg')}
                 alt=""
                 width={36}
                 height={36}
