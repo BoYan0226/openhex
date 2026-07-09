@@ -178,6 +178,17 @@ body::-webkit-scrollbar,
   scroll-snap-align: none;
 }
 
+.sticky-panel--compact > section {
+  min-height: 0;
+  justify-content: flex-start;
+  padding-top: clamp(3.5rem, 6vh, 4.5rem) !important;
+  padding-bottom: clamp(4.5rem, 8vh, 5.5rem) !important;
+}
+
+.sticky-panel--compact > section > :not([aria-hidden='true']) {
+  transform: none;
+}
+
 .sticky-panel--dark::before {
   background: rgba(255, 255, 255, 0.12);
 }

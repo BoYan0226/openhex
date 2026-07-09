@@ -20,6 +20,7 @@ type StickyPanelTone = 'light' | 'dark';
 
 type StickyPanelProps = {
   children: ReactNode;
+  compact?: boolean;
   layer: number;
   offsetRem: number;
   surfaceEnd?: string;
@@ -61,6 +62,7 @@ const stickyStyle = (
 
 function StickyPanel({
   children,
+  compact = false,
   layer,
   offsetRem,
   surfaceEnd = SOFT_PAGE_WHITE,
@@ -76,7 +78,9 @@ function StickyPanel({
         style={stickyStyle(layer, offsetRem, surfaceStart, surfaceEnd)}
       />
       <div
-        className={`sticky-panel sticky-panel--${tone}`}
+        className={`sticky-panel sticky-panel--${tone}${
+          compact ? ' sticky-panel--compact' : ''
+        }`}
         style={stickyStyle(layer, offsetRem, surfaceStart, surfaceEnd)}
       >
         {children}
@@ -155,8 +159,9 @@ export default function HomePage() {
           <WhichSideSection />
         </StickyPanel>
         <StickyPanel
+          compact
           layer={9}
-          offsetRem={stickyOffset(8)}
+          offsetRem={STICKY_BASE_OFFSET_REM}
           targetId="stack-summary"
           tone="dark"
         >
