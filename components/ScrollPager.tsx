@@ -2,11 +2,16 @@
 
 import { useEffect, useRef } from 'react';
 
-const GESTURE_END_MS = 80;
+const GESTURE_END_MS = 180;
 const MIN_WHEEL_DELTA = 4;
-const NEW_GESTURE_DELTA = 18;
-const PAGE_TRANSITION_MS = 850;
 const POSITION_EPSILON = 2;
+const SPRING_STIFFNESS = 150;
+const SPRING_DAMPING = 38;
+const SPRING_MASS = 2.2;
+const MAX_INITIAL_VELOCITY = 1400;
+const MAX_SPRING_MS = 1500;
+const SETTLE_DISTANCE = 0.5;
+const SETTLE_SPEED = 6;
 
 function getRemInPixels() {
   return Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
@@ -60,20 +65,33 @@ export function ScrollPager() {
       }
     };
 
-    const animateTo = (target: number) => {
+    const animateTo = (target: number, initialVelocity = 0) => {
       cancelAnimation();
 
-      const startTop = root.scrollTop;
-      const distance = target - startTop;
+      let position = root.scrollTop;
+      let velocity = initialVelocity;
       const startTime = performance.now();
+      let previousTime = startTime;
 
       const tick = (now: number) => {
-        const progress = Math.min(1, (now - startTime) / PAGE_TRANSITION_MS);
-        const eased = -(Math.cos(Math.PI * progress) - 1) / 2;
+        const elapsed = now - startTime;
+        const deltaTime = Math.min((now - previousTime) / 1000, 0.032);
+        previousTime = now;
 
-        root.scrollTop = startTop + distance * eased;
+        const displacement = position - target;
+        const springForce = -SPRING_STIFFNESS * displacement;
+        const dampingForce = -SPRING_DAMPING * velocity;
+        const acceleration = (springForce + dampingForce) / SPRING_MASS;
 
-        if (progress >= 1) {
+        velocity += acceleration * deltaTime;
+        position += velocity * deltaTime;
+        root.scrollTop = position;
+
+        const settled =
+          Math.abs(target - position) <= SETTLE_DISTANCE &&
+          Math.abs(velocity) <= SETTLE_SPEED;
+
+        if (settled || elapsed >= MAX_SPRING_MS) {
           root.scrollTop = target;
           animationFrameRef.current = null;
           return;
@@ -85,7 +103,7 @@ export function ScrollPager() {
       animationFrameRef.current = window.requestAnimationFrame(tick);
     };
 
-    const movePage = (direction: -1 | 1) => {
+    const movePage = (direction: -1 | 1, inputVelocity = 0) => {
       if (animationFrameRef.current !== null) return;
 
       const points = getPageTops(root);
@@ -96,7 +114,7 @@ export function ScrollPager() {
           : [...points].reverse().find(point => point < current - POSITION_EPSILON);
 
       if (target !== undefined) {
-        animateTo(target);
+        animateTo(target, inputVelocity);
       }
     };
 
@@ -129,15 +147,16 @@ export function ScrollPager() {
 
       finishGestureAfterPause();
 
-      if (
-        gestureActiveRef.current &&
-        (animationFrameRef.current !== null || delta < NEW_GESTURE_DELTA)
-      ) {
+      if (gestureActiveRef.current || animationFrameRef.current !== null) {
+        gestureActiveRef.current = true;
         return;
       }
 
       gestureActiveRef.current = true;
-      movePage(event.deltaY > 0 ? 1 : -1);
+      const direction = event.deltaY > 0 ? 1 : -1;
+      const inputVelocity =
+        direction * Math.min(MAX_INITIAL_VELOCITY, Math.abs(event.deltaY) * 12);
+      movePage(direction, inputVelocity);
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
