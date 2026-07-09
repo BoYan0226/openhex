@@ -12,7 +12,7 @@ import { SummarySection } from '@/components/sections/SummarySection';
 import { FinalCtaSection } from '@/components/sections/FinalCtaSection';
 import { LandingFooter } from '@/components/LandingFooter';
 import { ScrollPathTransition } from '@/components/ScrollPathTransition';
-import { ScrollInertia } from '@/components/ScrollInertia';
+import { ScrollPager } from '@/components/ScrollPager';
 import { StackJumpNav } from '@/components/StackJumpNav';
 import { StackSectionMotion } from '@/components/StackSectionMotion';
 
@@ -104,7 +104,7 @@ export default function HomePage() {
     >
       <LandingNav />
       <ScrollPathTransition />
-      <ScrollInertia />
+      <ScrollPager />
       <StackSectionMotion />
       <FinalCtaSection />
       <div className="sticky-flow">
