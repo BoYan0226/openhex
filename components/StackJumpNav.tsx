@@ -95,15 +95,22 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
 
     const duration = Math.min(1400, Math.max(700, Math.abs(distance) * 0.16));
     const startTime = performance.now();
+    const direction = Math.sign(distance);
+    const overshoot = Math.min(10, Math.max(4, Math.abs(distance) * 0.0025));
 
     const animateJump = (now: number) => {
       const progress = Math.min(1, (now - startTime) / duration);
-      const eased =
-        progress < 0.5
-          ? 4 * progress ** 3
-          : 1 - (-2 * progress + 2) ** 3 / 2;
+      const arrivalProgress = Math.min(1, progress / 0.84);
+      const arrivalEase = 1 - (1 - arrivalProgress) ** 3;
+      const settleProgress = Math.max(0, (progress - 0.84) / 0.16);
+      const settleEase = settleProgress * settleProgress * (3 - 2 * settleProgress);
+      const arrivalTop =
+        startTop + (distance + direction * overshoot) * arrivalEase;
 
-      root.scrollTop = startTop + distance * eased;
+      root.scrollTop =
+        progress < 0.84
+          ? arrivalTop
+          : Math.max(0, targetTop) + direction * overshoot * (1 - settleEase);
 
       if (progress >= 1) {
         root.scrollTop = Math.max(0, targetTop);
