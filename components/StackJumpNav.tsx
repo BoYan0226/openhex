@@ -22,6 +22,7 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
     const targets = items.map(item => document.getElementById(item.id));
+    const summary = document.getElementById('stack-summary');
     if (!root) return undefined;
 
     let frame: number | null = null;
@@ -29,7 +30,12 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
     const update = () => {
       frame = null;
 
-      if (root.scrollTop < root.clientHeight * 0.65) {
+      const isOpeningScreen = root.scrollTop < root.clientHeight * 0.65;
+      const isSummaryScreen = Boolean(
+        summary && root.scrollTop >= summary.offsetTop - root.clientHeight * 0.15
+      );
+
+      if (isOpeningScreen || isSummaryScreen) {
         setActiveIndex(null);
         return;
       }

@@ -6,6 +6,8 @@ const WHEEL_GAIN = 0.46;
 const FRICTION = 0.86;
 const MAX_FRAME_DELTA = 32;
 const MIN_VELOCITY = 0.35;
+const SNAP_RANGE = 0.34;
+const SNAP_DURATION_MS = 850;
 
 function normalizeWheelDelta(event: WheelEvent, root: HTMLElement) {
   if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) return event.deltaY * 18;
@@ -13,8 +15,13 @@ function normalizeWheelDelta(event: WheelEvent, root: HTMLElement) {
   return event.deltaY;
 }
 
+function smoothstep(value: number) {
+  return value * value * (3 - 2 * value);
+}
+
 export function ScrollInertia() {
   const frameRef = useRef<number | null>(null);
+  const isSnappingRef = useRef(false);
   const lastFrameTimeRef = useRef(0);
   const velocityRef = useRef(0);
 
@@ -24,11 +31,63 @@ export function ScrollInertia() {
 
     const maxScrollTop = () => Math.max(0, root.scrollHeight - root.clientHeight);
 
+    const getSnapPoints = () => {
+      const points = [0, root.clientHeight];
+      const rem = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+
+      document.querySelectorAll<HTMLElement>('.stack-anchor').forEach(anchor => {
+        if (anchor.id === 'stack-live-agent' || anchor.id === 'stack-summary') return;
+
+        const offsetRem =
+          Number.parseFloat(getComputedStyle(anchor).getPropertyValue('--sticky-offset')) || 0;
+        points.push(anchor.offsetTop - offsetRem * rem);
+      });
+
+      return Array.from(new Set(points.map(point => Math.round(point)))).sort((a, b) => a - b);
+    };
+
+    const isSummaryVisible = () => {
+      const summary = document.getElementById('stack-summary');
+      return Boolean(summary && root.scrollTop >= summary.offsetTop - root.clientHeight * 0.15);
+    };
+
     const stopFrame = () => {
       if (frameRef.current !== null) {
         window.cancelAnimationFrame(frameRef.current);
         frameRef.current = null;
       }
+      isSnappingRef.current = false;
+    };
+
+    const startSnap = () => {
+      if (isSummaryVisible()) return;
+
+      const current = root.scrollTop;
+      const target = getSnapPoints().reduce((nearest, point) =>
+        Math.abs(point - current) < Math.abs(nearest - current) ? point : nearest
+      );
+      const distance = target - current;
+
+      if (Math.abs(distance) < 1 || Math.abs(distance) > root.clientHeight * SNAP_RANGE) return;
+
+      const start = performance.now();
+      isSnappingRef.current = true;
+
+      const snapTick = (now: number) => {
+        const progress = Math.min(1, (now - start) / SNAP_DURATION_MS);
+        root.scrollTop = current + distance * smoothstep(progress);
+
+        if (progress >= 1) {
+          root.scrollTop = target;
+          isSnappingRef.current = false;
+          frameRef.current = null;
+          return;
+        }
+
+        frameRef.current = window.requestAnimationFrame(snapTick);
+      };
+
+      frameRef.current = window.requestAnimationFrame(snapTick);
     };
 
     const tick = (now: number) => {
@@ -47,6 +106,7 @@ export function ScrollInertia() {
       if (hitEdge || Math.abs(velocity) < MIN_VELOCITY) {
         velocityRef.current = 0;
         frameRef.current = null;
+        startSnap();
         return;
       }
 
@@ -64,6 +124,8 @@ export function ScrollInertia() {
       if (event.defaultPrevented || event.ctrlKey || root.style.overflowY === 'hidden') return;
 
       event.preventDefault();
+
+      if (isSnappingRef.current) stopFrame();
 
       const delta = normalizeWheelDelta(event, root);
       const maxVelocity = root.clientHeight * 0.09;

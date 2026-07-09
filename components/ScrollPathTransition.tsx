@@ -65,6 +65,7 @@ export function ScrollPathTransition() {
   const pathRefs = useRef<Array<SVGPathElement | null>>([]);
   const frameRef = useRef<number | null>(null);
   const isAnimatingRef = useRef(false);
+  const backIntentUntilRef = useRef(0);
   const touchStartYRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -74,6 +75,7 @@ export function ScrollPathTransition() {
     if (!root || !overlay || pathRefs.current.some(path => !path)) return undefined;
 
     let isDisposed = false;
+    let previousScrollTop = root.scrollTop;
 
     const getViewportHeight = () => root.clientHeight || window.innerHeight;
     const getScreenTop = (screenIndex: number) => screenIndex * getViewportHeight();
@@ -180,6 +182,10 @@ export function ScrollPathTransition() {
     };
 
     const onWheel = (event: WheelEvent) => {
+      if (event.deltaY < 0) {
+        backIntentUntilRef.current = performance.now() + 2500;
+      }
+
       if (isAnimatingRef.current) {
         event.preventDefault();
         return;
@@ -212,6 +218,10 @@ export function ScrollPathTransition() {
       if (startY === null || currentY === undefined) return;
 
       const deltaY = startY - currentY;
+      if (deltaY < 0) {
+        backIntentUntilRef.current = performance.now() + 2500;
+      }
+
       if (deltaY > 24 && isNearScreen(FIRST_SCREEN_INDEX)) {
         event.preventDefault();
         touchStartYRef.current = null;
@@ -227,6 +237,10 @@ export function ScrollPathTransition() {
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (['ArrowUp', 'PageUp'].includes(event.key)) {
+        backIntentUntilRef.current = performance.now() + 2500;
+      }
+
       if (isAnimatingRef.current) {
         event.preventDefault();
         return;
@@ -244,7 +258,27 @@ export function ScrollPathTransition() {
       }
     };
 
+    const onScroll = () => {
+      const current = root.scrollTop;
+      const previous = previousScrollTop;
+      previousScrollTop = current;
+
+      if (isAnimatingRef.current || performance.now() > backIntentUntilRef.current) return;
+
+      const screenTop = getScreenTop(SECOND_SCREEN_INDEX);
+      const tolerance = getViewportHeight() * SCREEN_TOLERANCE;
+      const movingUp = current < previous;
+      const enteredTriggerZone = Math.abs(current - screenTop) <= tolerance;
+      const crossedTriggerZone =
+        previous > screenTop + tolerance && current < screenTop - tolerance;
+
+      if (movingUp && (enteredTriggerZone || crossedTriggerZone)) {
+        void runTransition('back');
+      }
+    };
+
     root.addEventListener('wheel', onWheel, { passive: false, capture: true });
+    root.addEventListener('scroll', onScroll, { passive: true });
     root.addEventListener('touchstart', onTouchStart, { passive: true });
     root.addEventListener('touchmove', onTouchMove, { passive: false, capture: true });
     window.addEventListener('keydown', onKeyDown);
@@ -255,6 +289,7 @@ export function ScrollPathTransition() {
         window.cancelAnimationFrame(frameRef.current);
       }
       root.removeEventListener('wheel', onWheel, { capture: true });
+      root.removeEventListener('scroll', onScroll);
       root.removeEventListener('touchstart', onTouchStart);
       root.removeEventListener('touchmove', onTouchMove, { capture: true });
       window.removeEventListener('keydown', onKeyDown);

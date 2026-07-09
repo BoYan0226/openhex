@@ -125,7 +125,18 @@ body::-webkit-scrollbar,
   white-space: nowrap;
   cursor: pointer;
   pointer-events: auto;
-  transition: color 160ms ease;
+  transition:
+    color 160ms ease,
+    opacity 180ms ease;
+}
+
+.stack-jump-nav[data-visible='false'] .stack-jump-label {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.stack-jump-nav[data-visible='true'] .stack-jump-label {
+  opacity: 1;
 }
 
 .stack-jump-label:hover {
