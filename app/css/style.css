@@ -182,6 +182,10 @@ body::-webkit-scrollbar,
   min-height: calc(100vh - var(--sticky-offset, 0px));
 }
 
+.sticky-panel.sticky-panel--pre-summary > section > :not([aria-hidden='true']) {
+  transform: none !important;
+}
+
 .summary-screen {
   display: flex;
   flex-direction: column;
