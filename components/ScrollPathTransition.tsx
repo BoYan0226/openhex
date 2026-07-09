@@ -156,7 +156,6 @@ export function ScrollPathTransition() {
       root.style.overflowY = 'hidden';
       root.style.scrollSnapType = 'none';
       root.style.scrollBehavior = 'auto';
-      jumpToScreen(direction === 'forward' ? FIRST_SCREEN_INDEX : SECOND_SCREEN_INDEX);
       window.dispatchEvent(
         new CustomEvent('landing:path-transition-start', { detail: { direction } })
       );
