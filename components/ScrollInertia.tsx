@@ -6,7 +6,7 @@ const WHEEL_GAIN = 0.46;
 const FRICTION = 0.86;
 const MAX_FRAME_DELTA = 32;
 const MIN_VELOCITY = 1.2;
-const SNAP_RANGE = 0.6;
+const SNAP_RANGE = 0.65;
 const SNAP_DURATION_MS = 650;
 
 function normalizeWheelDelta(event: WheelEvent, root: HTMLElement) {
@@ -33,18 +33,22 @@ export function ScrollInertia() {
 
     const getSnapPoints = () => {
       const points: number[] = [];
+      const rem = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
 
       document.querySelectorAll<HTMLElement>('.stack-anchor').forEach(anchor => {
-        if (anchor.id === 'stack-live-agent' || anchor.id === 'stack-summary') return;
+        if (anchor.id === 'stack-live-agent') return;
+
+        if (anchor.id === 'stack-summary') {
+          const offsetRem =
+            Number.parseFloat(getComputedStyle(anchor).getPropertyValue('--sticky-offset')) || 0;
+          points.push(anchor.offsetTop - offsetRem * rem);
+          return;
+        }
+
         points.push(anchor.offsetTop);
       });
 
       return Array.from(new Set(points.map(point => Math.round(point)))).sort((a, b) => a - b);
-    };
-
-    const isSummaryVisible = () => {
-      const summary = document.getElementById('stack-summary');
-      return Boolean(summary && root.scrollTop >= summary.offsetTop - root.clientHeight * 0.15);
     };
 
     const stopFrame = () => {
@@ -56,8 +60,6 @@ export function ScrollInertia() {
     };
 
     const startSnap = () => {
-      if (isSummaryVisible()) return;
-
       const current = root.scrollTop;
       const points = getSnapPoints();
       if (points.length === 0) return;
