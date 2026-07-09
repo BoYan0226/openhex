@@ -41,7 +41,7 @@
     },
     "liveFour": {
       "eyebrow": "LIVE 四要素",
-      "titleLine1": "什么让它成为一个「工作个体」，",
+      "titleLine1": "什么让它成为一个<nowrap>「工作个体」</nowrap>，",
       "titleLine2": "而不是又一个聊天框",
       "subtitle": "四件事，把工具和「能替你独当一面的协作者」区分开来。",
       "items": [

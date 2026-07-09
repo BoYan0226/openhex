@@ -28,13 +28,18 @@ export function LiveFourSection() {
     >
       <div className="relative mx-auto w-full max-w-[1240px] 2xl:max-w-[1440px] px-6">
         {/* Header — left aligned */}
-        <div className="max-w-[760px]" data-motion="header">
+        <div
+          className="max-w-[760px] md:max-w-[900px] 2xl:max-w-[1080px]"
+          data-motion="header"
+        >
           <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
             <span className="hex-clip h-2.5 w-2.5 bg-honey" />
             {t('eyebrow')}
           </span>
           <h2 className="mt-5 text-[32px] font-bold leading-[1.25] text-ink md:text-[46px] 2xl:text-[56px]">
-            {t('titleLine1')}
+            {t.rich('titleLine1', {
+              nowrap: chunks => <span className="whitespace-nowrap">{chunks}</span>,
+            })}
             <br />
             {t('titleLine2')}
           </h2>
