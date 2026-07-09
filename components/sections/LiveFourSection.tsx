@@ -23,6 +23,7 @@ export function LiveFourSection() {
     <section
       id="live-four"
       data-stack-motion
+      data-motion-style="fan"
       className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden py-20 text-ink md:py-24"
     >
       <div className="relative mx-auto w-full max-w-[1240px] 2xl:max-w-[1440px] px-6">

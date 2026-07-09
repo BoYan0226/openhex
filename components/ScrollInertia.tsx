@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 
-const WHEEL_GAIN = 0.58;
-const FRICTION = 0.9;
+const WHEEL_GAIN = 0.46;
+const FRICTION = 0.86;
 const MAX_FRAME_DELTA = 32;
 const MIN_VELOCITY = 0.35;
 
@@ -66,7 +66,7 @@ export function ScrollInertia() {
       event.preventDefault();
 
       const delta = normalizeWheelDelta(event, root);
-      const maxVelocity = root.clientHeight * 0.11;
+      const maxVelocity = root.clientHeight * 0.09;
 
       if (
         velocityRef.current !== 0 &&

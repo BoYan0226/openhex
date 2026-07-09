@@ -15,6 +15,7 @@ export function WhichSideSection() {
     <section
       id="which-side"
       data-stack-motion
+      data-motion-style="split"
       className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >
       <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
@@ -36,7 +37,7 @@ export function WhichSideSection() {
         {/* Two cards */}
         <div
           className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:gap-8"
-          data-motion="group"
+          data-motion="split"
         >
           {/* Creator card */}
           <div

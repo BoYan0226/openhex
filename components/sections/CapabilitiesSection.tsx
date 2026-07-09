@@ -22,6 +22,7 @@ export function CapabilitiesSection() {
     <section
       id="capabilities"
       data-stack-motion
+      data-motion-style="tilt"
       className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >
       <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
