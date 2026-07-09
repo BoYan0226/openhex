@@ -77,6 +77,7 @@ body::-webkit-scrollbar,
 .sticky-flow {
   isolation: isolate;
   background: var(--color-paper);
+  padding-bottom: 18rem;
 }
 
 .sticky-panel {
@@ -178,16 +179,46 @@ body::-webkit-scrollbar,
   scroll-snap-align: none;
 }
 
-.sticky-panel--summary > section {
+.summary-screen {
+  display: flex;
+  flex-direction: column;
   height: calc(100vh - var(--sticky-offset, 0px));
   min-height: calc(100vh - var(--sticky-offset, 0px));
-  justify-content: center;
-  padding-top: clamp(4rem, 8vh, 6rem) !important;
-  padding-bottom: clamp(4rem, 8vh, 6rem) !important;
+  overflow: hidden;
+  background: var(--color-night);
 }
 
-.sticky-panel--summary > section > :not([aria-hidden='true']) {
+.summary-screen > section {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  padding-top: clamp(1.5rem, 3vh, 2.5rem) !important;
+  padding-bottom: clamp(1.5rem, 3vh, 2.5rem) !important;
+}
+
+.summary-screen > section > :not([aria-hidden='true']) {
   transform: none;
+}
+
+.summary-screen > footer {
+  flex: 0 0 auto;
+}
+
+.summary-screen > footer > div {
+  padding-top: 2rem;
+  padding-bottom: 1.5rem;
+}
+
+@media (max-width: 767px), (max-height: 850px) {
+  .summary-screen {
+    height: auto;
+    min-height: calc(100vh - var(--sticky-offset, 0px));
+    overflow: visible;
+  }
+
+  .summary-screen > section {
+    min-height: calc(100vh - var(--sticky-offset, 0px));
+  }
 }
 
 .sticky-panel--dark::before {

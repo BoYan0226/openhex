@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 
-const WHEEL_GAIN = 0.46;
-const FRICTION = 0.86;
+const WHEEL_GAIN = 0.52;
+const FRICTION = 0.88;
 const MAX_FRAME_DELTA = 32;
 const MIN_VELOCITY = 1.2;
 const SNAP_RANGE = 0.65;
@@ -129,7 +129,7 @@ export function ScrollInertia() {
       if (isSnappingRef.current) stopFrame();
 
       const delta = normalizeWheelDelta(event, root);
-      const maxVelocity = root.clientHeight * 0.09;
+      const maxVelocity = root.clientHeight * 0.1;
 
       if (
         velocityRef.current !== 0 &&

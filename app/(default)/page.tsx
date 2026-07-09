@@ -165,9 +165,11 @@ export default function HomePage() {
           targetId="stack-summary"
           tone="dark"
         >
-          <SummarySection />
+          <div className="summary-screen">
+            <SummarySection />
+            <LandingFooter />
+          </div>
         </StickyPanel>
-        <LandingFooter />
       </div>
     </main>
   );
