@@ -49,7 +49,6 @@ export function CapabilitiesSection() {
             return (
               <article
                 key={item.num}
-                data-motion-card
                 className="flex flex-col rounded-[20px] border border-line bg-card p-8 shadow-[0_2px_20px_rgba(34,28,19,.04)] md:p-9 2xl:min-h-[380px] 2xl:p-12"
               >
                 <span className="font-display text-[15px] font-bold text-honey-deep">

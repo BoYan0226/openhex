@@ -64,7 +64,6 @@ export function LiveFourSection() {
             {items.map(item => (
               <div
                 key={item.letter}
-                data-motion-card
                 className="flex flex-col rounded-[18px] border border-line bg-card p-6 shadow-[0_2px_20px_rgba(34,28,19,.04)] 2xl:min-h-[300px] 2xl:p-8"
               >
                 <span className="font-display text-[44px] font-bold leading-none text-honey 2xl:text-[52px]">

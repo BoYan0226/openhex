@@ -40,7 +40,6 @@ export function WhichSideSection() {
         >
           {/* Creator card */}
           <div
-            data-motion-card
             className="relative flex min-h-[320px] flex-col overflow-hidden rounded-[20px] border border-line bg-[#fffdf7] p-8 shadow-[0_2px_24px_rgba(34,28,19,.05)] md:min-h-[380px] md:p-10 2xl:min-h-[460px] 2xl:p-12"
           >
             <span
@@ -78,7 +77,6 @@ export function WhichSideSection() {
 
           {/* User card */}
           <div
-            data-motion-card
             className="relative flex min-h-[320px] flex-col overflow-hidden rounded-[20px] border border-line bg-[#fffdf7] p-8 shadow-[0_2px_24px_rgba(34,28,19,.05)] md:min-h-[380px] md:p-10 2xl:min-h-[460px] 2xl:p-12"
           >
             <span

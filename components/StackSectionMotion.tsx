@@ -5,36 +5,42 @@ import { useEffect } from 'react';
 export function StackSectionMotion() {
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
-    const sections = document.querySelectorAll<HTMLElement>('[data-stack-motion]');
+    const sections = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-stack-motion]')
+    ).map(section => ({
+      anchor: section.closest('.sticky-panel')?.previousElementSibling as HTMLElement | null,
+      section,
+    }));
     if (!root || sections.length === 0) return undefined;
-    const settleTimers: number[] = [];
 
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.18) {
-            const section = entry.target as HTMLElement;
-            section.dataset.motionVisible = 'true';
-            settleTimers.push(
-              window.setTimeout(() => {
-                section.dataset.motionSettled = 'true';
-              }, 1250)
-            );
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      {
-        root,
-        rootMargin: '0px 0px -10% 0px',
-        threshold: [0.18, 0.35],
-      }
-    );
+    let frame: number | null = null;
 
-    sections.forEach(section => observer.observe(section));
+    const update = () => {
+      frame = null;
+      const triggerDistance = Math.max(84, root.clientHeight * 0.12);
+
+      sections.forEach(({ anchor, section }) => {
+        if (!anchor || section.dataset.motionVisible === 'true') return;
+
+        if (Math.abs(root.scrollTop - anchor.offsetTop) <= triggerDistance) {
+          section.dataset.motionVisible = 'true';
+        }
+      });
+    };
+
+    const requestUpdate = () => {
+      if (frame !== null) return;
+      frame = window.requestAnimationFrame(update);
+    };
+
+    root.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+    requestUpdate();
+
     return () => {
-      observer.disconnect();
-      settleTimers.forEach(timer => window.clearTimeout(timer));
+      if (frame !== null) window.cancelAnimationFrame(frame);
+      root.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
     };
   }, []);
 

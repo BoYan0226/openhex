@@ -55,7 +55,6 @@ export function ConnectorsSection() {
           {items.map(item => (
             <article
               key={item.key}
-              data-motion-card
               className="flex items-center gap-4 rounded-[16px] border border-line bg-white p-5 transition-shadow hover:shadow-[0_6px_24px_rgba(34,28,19,.07)] 2xl:gap-5 2xl:p-7"
             >
               <div

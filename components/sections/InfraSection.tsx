@@ -43,7 +43,6 @@ export function InfraSection() {
             return (
               <article
                 key={item.title}
-                data-motion-card
                 className="flex gap-4 rounded-[18px] border border-line bg-card p-7 shadow-[0_2px_20px_rgba(34,28,19,.04)] 2xl:gap-5 2xl:p-9"
               >
                 <div className="hex-clip flex size-12 shrink-0 items-center justify-center bg-honey/15 text-honey-deep 2xl:size-14">
