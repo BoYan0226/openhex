@@ -6,6 +6,8 @@ import { useTranslations } from 'next-intl';
 import { AuthAwareCtaButton } from './AuthAwareCtaButton';
 import { BookDemoButton } from './BookDemoButton';
 
+const HERO_REVEAL_DELAY_MS = 1320;
+
 /**
  * Hero section for the Live Agent landing redesign.
  *
@@ -108,7 +110,6 @@ export function HeroSection() {
         ?.direction;
       if (direction === 'forward') {
         isTransitioningRef.current = false;
-        reveal(300);
       }
 
       if (direction === 'back') {
@@ -123,6 +124,10 @@ export function HeroSection() {
       if (direction === 'forward' || direction === 'back') {
         isTransitioningRef.current = true;
         resetPanels();
+      }
+
+      if (direction === 'forward') {
+        reveal(HERO_REVEAL_DELAY_MS);
       }
     };
 
