@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 
 type StackJumpItem = {
@@ -18,6 +18,7 @@ function getRemInPixels() {
 
 export function StackJumpNav({ items }: StackJumpNavProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const jumpFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
@@ -26,6 +27,13 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
     if (!root) return undefined;
 
     let frame: number | null = null;
+
+    const cancelJump = () => {
+      if (jumpFrameRef.current !== null) {
+        window.cancelAnimationFrame(jumpFrameRef.current);
+        jumpFrameRef.current = null;
+      }
+    };
 
     const update = () => {
       frame = null;
@@ -56,12 +64,15 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
     };
 
     root.addEventListener('scroll', requestUpdate, { passive: true });
+    root.addEventListener('wheel', cancelJump, { passive: true });
     window.addEventListener('resize', requestUpdate);
     requestUpdate();
 
     return () => {
+      cancelJump();
       if (frame !== null) window.cancelAnimationFrame(frame);
       root.removeEventListener('scroll', requestUpdate);
+      root.removeEventListener('wheel', cancelJump);
       window.removeEventListener('resize', requestUpdate);
     };
   }, [items]);
@@ -75,11 +86,35 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
     const topValue = getComputedStyle(target).getPropertyValue('--sticky-offset');
     const offsetRem = Number.parseFloat(topValue) || 0;
     const targetTop = target.offsetTop - offsetRem * getRemInPixels();
+    const startTop = root.scrollTop;
+    const distance = Math.max(0, targetTop) - startTop;
 
-    root.scrollTo({
-      top: Math.max(0, targetTop),
-      behavior: 'smooth',
-    });
+    if (jumpFrameRef.current !== null) {
+      window.cancelAnimationFrame(jumpFrameRef.current);
+    }
+
+    const duration = Math.min(1400, Math.max(700, Math.abs(distance) * 0.16));
+    const startTime = performance.now();
+
+    const animateJump = (now: number) => {
+      const progress = Math.min(1, (now - startTime) / duration);
+      const eased =
+        progress < 0.5
+          ? 4 * progress ** 3
+          : 1 - (-2 * progress + 2) ** 3 / 2;
+
+      root.scrollTop = startTop + distance * eased;
+
+      if (progress >= 1) {
+        root.scrollTop = Math.max(0, targetTop);
+        jumpFrameRef.current = null;
+        return;
+      }
+
+      jumpFrameRef.current = window.requestAnimationFrame(animateJump);
+    };
+
+    jumpFrameRef.current = window.requestAnimationFrame(animateJump);
   };
 
   return (
