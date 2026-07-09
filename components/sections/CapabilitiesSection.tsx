@@ -21,11 +21,12 @@ export function CapabilitiesSection() {
   return (
     <section
       id="capabilities"
+      data-stack-motion
       className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >
       <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
         {/* Header */}
-        <div className="mb-12 text-center md:mb-16 2xl:mb-20">
+        <div className="mb-12 text-center md:mb-16 2xl:mb-20" data-motion="header">
           <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
             <span className="hex-clip h-2.5 w-2.5 bg-honey" />
             {t('eyebrow')}
@@ -39,12 +40,16 @@ export function CapabilitiesSection() {
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 2xl:gap-8">
+        <div
+          className="grid grid-cols-1 gap-6 md:grid-cols-3 2xl:gap-8"
+          data-motion="group"
+        >
           {items.map((item, i) => {
             const Icon = ICONS[i] ?? UserRound;
             return (
               <article
                 key={item.num}
+                data-motion-card
                 className="flex flex-col rounded-[20px] border border-line bg-card p-8 shadow-[0_2px_20px_rgba(34,28,19,.04)] md:p-9 2xl:min-h-[380px] 2xl:p-12"
               >
                 <span className="font-display text-[15px] font-bold text-honey-deep">

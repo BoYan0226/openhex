@@ -89,9 +89,15 @@ export function AssetSection() {
   const tags = t.raw('tags') as string[];
 
   return (
-    <section className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24">
+    <section
+      data-stack-motion
+      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
+    >
       <div className="relative z-10 mx-auto max-w-[1240px] px-6 2xl:max-w-[1560px]">
-        <div className="grid items-center gap-12 md:grid-cols-2 2xl:gap-20">
+        <div
+          className="grid items-center gap-12 md:grid-cols-2 2xl:gap-20"
+          data-motion="split"
+        >
           {/* LEFT — copy */}
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">

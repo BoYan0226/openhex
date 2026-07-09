@@ -17,11 +17,12 @@ export function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
+      data-stack-motion
       className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >
       <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
         {/* Header */}
-        <div className="mb-12 text-center md:mb-16 2xl:mb-28">
+        <div className="mb-12 text-center md:mb-16 2xl:mb-28" data-motion="header">
           <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
             <span className="hex-clip h-2.5 w-2.5 bg-honey" />
             {t('eyebrow')}
@@ -35,7 +36,10 @@ export function HowItWorksSection() {
         </div>
 
         {/* Steps — three columns separated by vertical dividers (desktop). */}
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-0">
+        <div
+          className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-0"
+          data-motion="group"
+        >
           {steps.map((step, i) => (
             <div
               key={step.num}

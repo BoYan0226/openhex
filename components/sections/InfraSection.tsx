@@ -16,10 +16,13 @@ export function InfraSection() {
   const items = t.raw('items') as Array<{ title: string; desc: string }>;
 
   return (
-    <section className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden py-20 text-ink md:py-24">
+    <section
+      data-stack-motion
+      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden py-20 text-ink md:py-24"
+    >
       <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
         {/* Header */}
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center" data-motion="header">
           <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
             <span className="hex-clip h-2.5 w-2.5 bg-honey" />
             {t('eyebrow')}
@@ -31,12 +34,16 @@ export function InfraSection() {
         </div>
 
         {/* 2×2 card grid */}
-        <div className="mx-auto mt-12 grid max-w-[920px] grid-cols-1 gap-5 md:grid-cols-2 2xl:mt-20 2xl:max-w-[1040px] 2xl:gap-6">
+        <div
+          className="mx-auto mt-12 grid max-w-[920px] grid-cols-1 gap-5 md:grid-cols-2 2xl:mt-20 2xl:max-w-[1040px] 2xl:gap-6"
+          data-motion="group"
+        >
           {items.map((item, i) => {
             const Icon = ICONS[i];
             return (
               <article
                 key={item.title}
+                data-motion-card
                 className="flex gap-4 rounded-[18px] border border-line bg-card p-7 shadow-[0_2px_20px_rgba(34,28,19,.04)] 2xl:gap-5 2xl:p-9"
               >
                 <div className="hex-clip flex size-12 shrink-0 items-center justify-center bg-honey/15 text-honey-deep 2xl:size-14">

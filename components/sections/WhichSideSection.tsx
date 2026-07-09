@@ -14,11 +14,15 @@ export function WhichSideSection() {
   return (
     <section
       id="which-side"
+      data-stack-motion
       className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >
       <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
         {/* Centered header */}
-        <div className="mb-12 flex flex-col items-center text-center 2xl:mb-20">
+        <div
+          className="mb-12 flex flex-col items-center text-center 2xl:mb-20"
+          data-motion="header"
+        >
           <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
             <span className="hex-clip h-2.5 w-2.5 bg-honey" />
             {t('eyebrow')}
@@ -30,9 +34,15 @@ export function WhichSideSection() {
         </div>
 
         {/* Two cards */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:gap-8">
+        <div
+          className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:gap-8"
+          data-motion="group"
+        >
           {/* Creator card */}
-          <div className="relative flex min-h-[320px] flex-col overflow-hidden rounded-[20px] border border-line bg-[#fffdf7] p-8 shadow-[0_2px_24px_rgba(34,28,19,.05)] md:min-h-[380px] md:p-10 2xl:min-h-[460px] 2xl:p-12">
+          <div
+            data-motion-card
+            className="relative flex min-h-[320px] flex-col overflow-hidden rounded-[20px] border border-line bg-[#fffdf7] p-8 shadow-[0_2px_24px_rgba(34,28,19,.05)] md:min-h-[380px] md:p-10 2xl:min-h-[460px] 2xl:p-12"
+          >
             <span
               aria-hidden
               className="pointer-events-none absolute right-6 top-4 font-display text-[88px] font-bold leading-none text-honey/15 md:text-[120px] 2xl:text-[150px]"
@@ -67,7 +77,10 @@ export function WhichSideSection() {
           </div>
 
           {/* User card */}
-          <div className="relative flex min-h-[320px] flex-col overflow-hidden rounded-[20px] border border-line bg-[#fffdf7] p-8 shadow-[0_2px_24px_rgba(34,28,19,.05)] md:min-h-[380px] md:p-10 2xl:min-h-[460px] 2xl:p-12">
+          <div
+            data-motion-card
+            className="relative flex min-h-[320px] flex-col overflow-hidden rounded-[20px] border border-line bg-[#fffdf7] p-8 shadow-[0_2px_24px_rgba(34,28,19,.05)] md:min-h-[380px] md:p-10 2xl:min-h-[460px] 2xl:p-12"
+          >
             <span
               aria-hidden
               className="pointer-events-none absolute right-6 top-4 font-display text-[88px] font-bold leading-none text-honey/15 md:text-[120px] 2xl:text-[150px]"

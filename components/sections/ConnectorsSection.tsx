@@ -28,11 +28,15 @@ export function ConnectorsSection() {
   return (
     <section
       id="connectors"
+      data-stack-motion
       className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >
       <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
         {/* Header */}
-        <div className="mb-12 flex flex-col items-center text-center 2xl:mb-20">
+        <div
+          className="mb-12 flex flex-col items-center text-center 2xl:mb-20"
+          data-motion="header"
+        >
           <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
             <span className="hex-clip h-2.5 w-2.5 bg-honey" />
             {t('eyebrow')}
@@ -44,10 +48,14 @@ export function ConnectorsSection() {
         </div>
 
         {/* 6-card grid (3 cols × 2 rows on desktop) */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:gap-7">
+        <div
+          className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:gap-7"
+          data-motion="group"
+        >
           {items.map(item => (
             <article
               key={item.key}
+              data-motion-card
               className="flex items-center gap-4 rounded-[16px] border border-line bg-white p-5 transition-shadow hover:shadow-[0_6px_24px_rgba(34,28,19,.07)] 2xl:gap-5 2xl:p-7"
             >
               <div
