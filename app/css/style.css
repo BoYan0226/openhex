@@ -153,6 +153,9 @@ body::-webkit-scrollbar,
 }
 
 .sticky-panel--light > section {
+  justify-content: flex-start !important;
+  padding-top: clamp(4.25rem, 8vh, 5.5rem) !important;
+  padding-bottom: 3rem !important;
   background: linear-gradient(
     180deg,
     var(--stack-surface-start, var(--color-page-soft)) 0%,
