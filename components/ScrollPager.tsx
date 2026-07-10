@@ -5,9 +5,9 @@ import { useEffect, useRef } from 'react';
 const MIN_WHEEL_DELTA = 4;
 const POSITION_EPSILON = 2;
 const MOUSE_GESTURE_IDLE_MS = 180;
-const TRACKPAD_GESTURE_IDLE_MS = 220;
-const TRACKPAD_TAIL_IGNORE_MS = 120;
-const TRACKPAD_TAIL_DELTA = 22;
+const TRACKPAD_GESTURE_IDLE_MS = 130;
+const TRACKPAD_TAIL_IGNORE_MS = 70;
+const TRACKPAD_TAIL_DELTA = 16;
 const MOUSE_SNAP_IDLE_MS = 45;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
 const BACK_TRANSITION_TOLERANCE = 28;
@@ -24,7 +24,7 @@ const SETTLE_SPEED = 12;
 const EASE_SNAP_MIN_DURATION = 520;
 const EASE_SNAP_MAX_DURATION = 860;
 const EASE_SNAP_PX_PER_MS = 1.55;
-const TRACKPAD_SNAP_DURATION = 620;
+const TRACKPAD_SNAP_DURATION = 480;
 
 function getPageTops(root: HTMLElement) {
   const points = [0, root.clientHeight];
@@ -315,8 +315,21 @@ export function ScrollPager() {
         return;
       }
 
-      if (animationModeRef.current === 'ease' && (!isTrackpadInput || isNewGesture)) {
+      const isOppositeTrackpadGesture =
+        isTrackpadInput &&
+        animationModeRef.current === 'ease' &&
+        direction !== lastDirectionRef.current &&
+        Math.abs(wheelDelta) >= TRACKPAD_TAIL_DELTA;
+
+      if (
+        animationModeRef.current === 'ease' &&
+        (!isTrackpadInput || isNewGesture || isOppositeTrackpadGesture)
+      ) {
         cancelAnimation();
+        if (isOppositeTrackpadGesture) {
+          isTrackpadGestureRef.current = false;
+          lastInputTimeRef.current = 0;
+        }
       }
 
       if (
