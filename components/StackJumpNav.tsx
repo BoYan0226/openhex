@@ -18,6 +18,7 @@ function getRemInPixels() {
 
 export function StackJumpNav({ items }: StackJumpNavProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [navPhase, setNavPhase] = useState<'opening' | 'active' | 'summary'>('opening');
   const visibleActiveIndex = activeIndex ?? 0;
 
   useEffect(() => {
@@ -37,6 +38,7 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
       );
 
       if (isOpeningScreen || isSummaryScreen) {
+        setNavPhase(isSummaryScreen ? 'summary' : 'opening');
         setActiveIndex(null);
         return;
       }
@@ -49,6 +51,7 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
       });
 
       setActiveIndex(nextIndex);
+      setNavPhase('active');
     };
 
     const requestUpdate = () => {
@@ -84,6 +87,7 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
       className="stack-jump-nav"
       aria-label="Stack section navigation"
       data-visible={activeIndex !== null ? 'true' : 'false'}
+      data-phase={navPhase}
       style={{ '--stack-active-index': activeIndex ?? 0 } as CSSProperties}
     >
       <span className="stack-jump-indicator" aria-hidden />
