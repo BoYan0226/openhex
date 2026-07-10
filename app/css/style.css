@@ -148,7 +148,7 @@ body::-webkit-scrollbar,
   background: transparent;
   padding: 0.36rem 0;
   min-width: 8.5rem;
-  color: rgba(32, 33, 36, 0.74);
+  color: var(--color-honey);
   font: inherit;
   font-size: clamp(1.02rem, 0.9rem + 0.48vw, 1.34rem);
   font-weight: 300;
@@ -224,7 +224,7 @@ body::-webkit-scrollbar,
 }
 
 .stack-jump-label:hover {
-  color: rgba(32, 33, 36, 0.92);
+  color: var(--color-honey);
 }
 
 .sticky-panel--summary {
@@ -237,9 +237,11 @@ body::-webkit-scrollbar,
 }
 
 .stack-jump-label[data-active='true'] {
-  color: rgba(32, 33, 36, 0.76);
+  color: var(--color-honey);
   font-weight: 400;
-  text-shadow: 0 3px 9px rgba(32, 33, 36, 0.12);
+  text-shadow:
+    0 0 0.35rem rgba(241, 212, 34, 0.45),
+    0 0.45rem 1.2rem rgba(241, 212, 34, 0.24);
 }
 
 .stack-jump-label[data-active='true'] .stack-jump-label-text::after {
