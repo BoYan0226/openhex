@@ -7,15 +7,11 @@ const POSITION_EPSILON = 2;
 const MOUSE_GESTURE_IDLE_MS = 180;
 const TRACKPAD_GESTURE_IDLE_MS = 560;
 const MOUSE_SNAP_IDLE_MS = 45;
-const TRACKPAD_SNAP_IDLE_MS = 55;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
 const BACK_TRANSITION_TOLERANCE = 28;
 const MOUSE_GESTURE_DISTANCE_LIMIT = 0.95;
-const TRACKPAD_GESTURE_DISTANCE_LIMIT = 1;
 const MOUSE_DISTANCE_MULTIPLIER = 1.8;
-const TRACKPAD_DISTANCE_MULTIPLIER = 1;
 const MOUSE_MAX_INPUT_STEP = 240;
-const TRACKPAD_MAX_INPUT_STEP = 72;
 const MAX_VELOCITY = 2200;
 const SPRING_STIFFNESS = 120;
 const SPRING_DAMPING = 26;
@@ -25,7 +21,7 @@ const SETTLE_SPEED = 12;
 const EASE_SNAP_MIN_DURATION = 520;
 const EASE_SNAP_MAX_DURATION = 860;
 const EASE_SNAP_PX_PER_MS = 1.55;
-const TRACKPAD_VELOCITY_IMPULSE = 2.7;
+const TRACKPAD_SNAP_DURATION = 680;
 
 function getPageTops(root: HTMLElement) {
   const points = [0, root.clientHeight];
@@ -106,7 +102,7 @@ export function ScrollPager() {
       );
     };
 
-    const easeToTarget = (target: number) => {
+    const easeToTarget = (target: number, durationOverride?: number) => {
       cancelAnimation();
       animationModeRef.current = 'ease';
       const start = root.scrollTop;
@@ -122,10 +118,12 @@ export function ScrollPager() {
         return;
       }
 
-      const duration = Math.min(
-        EASE_SNAP_MAX_DURATION,
-        Math.max(EASE_SNAP_MIN_DURATION, Math.abs(distance) / EASE_SNAP_PX_PER_MS)
-      );
+      const duration =
+        durationOverride ??
+        Math.min(
+          EASE_SNAP_MAX_DURATION,
+          Math.max(EASE_SNAP_MIN_DURATION, Math.abs(distance) / EASE_SNAP_PX_PER_MS)
+        );
       const startedAt = performance.now();
 
       const tick = (now: number) => {
@@ -239,20 +237,6 @@ export function ScrollPager() {
               : upper;
       }
 
-      if (isTrackpadGestureRef.current) {
-        const adjacentTarget = getAdjacentTarget(
-          points,
-          gestureStartRef.current,
-          lastDirectionRef.current
-        );
-        if (adjacentTarget !== undefined) {
-          target =
-            lastDirectionRef.current > 0
-              ? Math.min(target, adjacentTarget)
-              : Math.max(target, adjacentTarget);
-        }
-      }
-
       motionMinRef.current = 0;
       motionMaxRef.current = getLastPoint();
       easeToTarget(target);
@@ -286,15 +270,17 @@ export function ScrollPager() {
       }
 
       cancelSnap();
-      if (animationModeRef.current === 'ease') {
-        cancelAnimation();
-      }
       const now = performance.now();
       const isTrackpadInput =
         isLikelyTrackpad(event, wheelDelta) ||
         (isTrackpadGestureRef.current && now - lastInputTimeRef.current < TRACKPAD_GESTURE_IDLE_MS);
       const gestureIdleMs = isTrackpadInput ? TRACKPAD_GESTURE_IDLE_MS : MOUSE_GESTURE_IDLE_MS;
       const isNewGesture = now - lastInputTimeRef.current > gestureIdleMs;
+      const direction = wheelDelta > 0 ? 1 : -1;
+
+      if (animationModeRef.current === 'ease' && (!isTrackpadInput || isNewGesture)) {
+        cancelAnimation();
+      }
 
       if (
         wheelDelta < 0 &&
@@ -329,13 +315,31 @@ export function ScrollPager() {
         return;
       }
 
+      if (isTrackpadInput) {
+        if (isNewGesture || !isTrackpadGestureRef.current) {
+          const points = getPageTops(root);
+          const target = getAdjacentTarget(points, root.scrollTop, direction);
+          isTrackpadGestureRef.current = true;
+          gestureStartRef.current = root.scrollTop;
+          lastDirectionRef.current = direction;
+          lastInputTimeRef.current = now;
+          motionMinRef.current = 0;
+          motionMaxRef.current = getLastPoint();
+          if (target !== undefined) {
+            easeToTarget(target, TRACKPAD_SNAP_DURATION);
+          }
+          return;
+        }
+
+        lastInputTimeRef.current = now;
+        return;
+      }
+
       if (isNewGesture) {
-        isTrackpadGestureRef.current = isTrackpadInput;
+        isTrackpadGestureRef.current = false;
         gestureStartRef.current = root.scrollTop;
         targetRef.current = root.scrollTop;
-        const gestureLimit =
-          root.clientHeight *
-          (isTrackpadInput ? TRACKPAD_GESTURE_DISTANCE_LIMIT : MOUSE_GESTURE_DISTANCE_LIMIT);
+        const gestureLimit = root.clientHeight * MOUSE_GESTURE_DISTANCE_LIMIT;
         motionMinRef.current = Math.max(0, gestureStartRef.current - gestureLimit);
         motionMaxRef.current = Math.min(
           getLastPoint(),
@@ -344,16 +348,14 @@ export function ScrollPager() {
       }
       lastInputTimeRef.current = now;
 
-      const maxInputStep = isTrackpadInput ? TRACKPAD_MAX_INPUT_STEP : MOUSE_MAX_INPUT_STEP;
-      const distanceMultiplier = isTrackpadInput
-        ? TRACKPAD_DISTANCE_MULTIPLIER
-        : MOUSE_DISTANCE_MULTIPLIER;
-      const velocityImpulse = isTrackpadInput ? TRACKPAD_VELOCITY_IMPULSE : 7;
+      const maxInputStep = MOUSE_MAX_INPUT_STEP;
+      const distanceMultiplier = MOUSE_DISTANCE_MULTIPLIER;
+      const velocityImpulse = 7;
       const step = Math.max(
         -maxInputStep,
         Math.min(maxInputStep, wheelDelta * distanceMultiplier)
       );
-      lastDirectionRef.current = step > 0 ? 1 : -1;
+      lastDirectionRef.current = direction;
 
       if (
         velocityRef.current !== 0 &&
@@ -373,7 +375,7 @@ export function ScrollPager() {
         Math.min(MAX_VELOCITY, velocityRef.current + step * velocityImpulse)
       );
       startAnimation();
-      scheduleSnap(isTrackpadInput ? TRACKPAD_SNAP_IDLE_MS : MOUSE_SNAP_IDLE_MS);
+      scheduleSnap(MOUSE_SNAP_IDLE_MS);
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
