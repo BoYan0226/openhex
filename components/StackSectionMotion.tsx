@@ -11,6 +11,7 @@ type MotionItem = {
 
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
 const smoothstep = (value: number) => value * value * (3 - 2 * value);
+const MOTION_SPAN_VIEWPORTS = 1.05;
 const easeOutCubic = (value: number) => 1 - Math.pow(1 - value, 3);
 const easeOutBack = (value: number) => {
   const c1 = 1.35;
@@ -213,7 +214,7 @@ export function StackSectionMotion() {
       sections.forEach(({ anchor, items }) => {
         if (!anchor) return;
 
-        const start = anchor.offsetTop - viewportHeight * 0.7;
+        const start = anchor.offsetTop - viewportHeight * MOTION_SPAN_VIEWPORTS;
         const end = anchor.offsetTop;
         const sectionProgress = clamp((root.scrollTop - start) / Math.max(1, end - start));
 
