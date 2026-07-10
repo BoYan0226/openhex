@@ -22,9 +22,9 @@ const SPRING_DAMPING = 26;
 const SPRING_MASS = 1.8;
 const SETTLE_DISTANCE = 1;
 const SETTLE_SPEED = 12;
-const SNAP_START_MIN_VELOCITY = 880;
-const SNAP_START_VELOCITY_PER_PX = 3.2;
-const SNAP_START_MAX_VELOCITY = 2100;
+const EASE_SNAP_MIN_DURATION = 520;
+const EASE_SNAP_MAX_DURATION = 860;
+const EASE_SNAP_PX_PER_MS = 1.55;
 
 function getPageTops(root: HTMLElement) {
   const points = [0, root.clientHeight];
@@ -46,6 +46,10 @@ function getPageTops(root: HTMLElement) {
 
 function isLikelyTrackpad(event: WheelEvent, normalizedDelta: number) {
   return event.deltaMode === WheelEvent.DOM_DELTA_PIXEL && Math.abs(normalizedDelta) < 80;
+}
+
+function easeOutQuint(value: number) {
+  return 1 - (1 - value) ** 5;
 }
 
 export function ScrollPager() {
@@ -83,19 +87,51 @@ export function ScrollPager() {
     const clampTarget = (value: number) => Math.min(getLastPoint(), Math.max(0, value));
     const clampMotion = (value: number) =>
       Math.max(motionMinRef.current, Math.min(motionMaxRef.current, clampTarget(value)));
-    const primeVelocityToward = (target: number) => {
-      const distance = target - root.scrollTop;
+
+    const dispatchSettled = () => {
+      window.dispatchEvent(
+        new CustomEvent('landing:scroll-settled', {
+          detail: { top: targetRef.current },
+        })
+      );
+    };
+
+    const easeToTarget = (target: number) => {
+      cancelAnimation();
+      const start = root.scrollTop;
+      const distance = target - start;
+      targetRef.current = target;
+      velocityRef.current = 0;
+
       if (Math.abs(distance) <= POSITION_EPSILON) {
+        root.scrollTop = target;
         velocityRef.current = 0;
+        dispatchSettled();
         return;
       }
 
-      const direction = distance > 0 ? 1 : -1;
-      const initialSpeed = Math.min(
-        SNAP_START_MAX_VELOCITY,
-        Math.max(SNAP_START_MIN_VELOCITY, Math.abs(distance) * SNAP_START_VELOCITY_PER_PX)
+      const duration = Math.min(
+        EASE_SNAP_MAX_DURATION,
+        Math.max(EASE_SNAP_MIN_DURATION, Math.abs(distance) / EASE_SNAP_PX_PER_MS)
       );
-      velocityRef.current = direction * initialSpeed;
+      const startedAt = performance.now();
+
+      const tick = (now: number) => {
+        const progress = Math.min((now - startedAt) / duration, 1);
+        root.scrollTop = clampMotion(start + distance * easeOutQuint(progress));
+
+        if (progress < 1) {
+          animationFrameRef.current = window.requestAnimationFrame(tick);
+          return;
+        }
+
+        root.scrollTop = target;
+        velocityRef.current = 0;
+        animationFrameRef.current = null;
+        dispatchSettled();
+      };
+
+      animationFrameRef.current = window.requestAnimationFrame(tick);
     };
 
     const startAnimation = () => {
@@ -131,11 +167,7 @@ export function ScrollPager() {
           root.scrollTop = targetRef.current;
           velocityRef.current = 0;
           animationFrameRef.current = null;
-          window.dispatchEvent(
-            new CustomEvent('landing:scroll-settled', {
-              detail: { top: targetRef.current },
-            })
-          );
+          dispatchSettled();
           return;
         }
 
@@ -158,9 +190,7 @@ export function ScrollPager() {
         lastDirectionRef.current = direction;
         motionMinRef.current = 0;
         motionMaxRef.current = getLastPoint();
-        targetRef.current = target;
-        primeVelocityToward(target);
-        startAnimation();
+        easeToTarget(target);
       }
     };
 
@@ -196,9 +226,7 @@ export function ScrollPager() {
 
       motionMinRef.current = 0;
       motionMaxRef.current = getLastPoint();
-      targetRef.current = target;
-      primeVelocityToward(target);
-      startAnimation();
+      easeToTarget(target);
     };
 
     const scheduleSnap = (delay: number) => {
@@ -229,6 +257,7 @@ export function ScrollPager() {
       }
 
       cancelSnap();
+      cancelAnimation();
       const now = performance.now();
       const isTrackpadInput =
         isLikelyTrackpad(event, wheelDelta) ||
