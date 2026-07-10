@@ -318,13 +318,11 @@ export function ScrollPager() {
         return;
       }
 
-      if (
-        wheelDelta < 0 &&
-        Math.min(root.scrollTop, targetRef.current) >=
-          root.clientHeight - BACK_TRANSITION_TOLERANCE &&
-        Math.min(root.scrollTop, targetRef.current) <=
-          root.clientHeight + BACK_TRANSITION_TOLERANCE
-      ) {
+      const isSettledOnLiveAgent =
+        Math.abs(root.scrollTop - root.clientHeight) <= BACK_TRANSITION_TOLERANCE &&
+        Math.abs(targetRef.current - root.clientHeight) <= BACK_TRANSITION_TOLERANCE;
+
+      if (wheelDelta < 0 && isSettledOnLiveAgent) {
         cancelAnimation();
         velocityRef.current = 0;
         targetRef.current = root.clientHeight;

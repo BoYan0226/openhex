@@ -271,7 +271,11 @@ export function ScrollPathTransition() {
     };
 
     const onBackRequest = () => {
-      if (!isAnimatingRef.current && isNearScreen(SECOND_SCREEN_INDEX)) {
+      if (
+        !isAnimatingRef.current &&
+        backTransitionArmedRef.current &&
+        isNearScreen(SECOND_SCREEN_INDEX)
+      ) {
         backTransitionArmedRef.current = false;
         void runTransition('back');
       }

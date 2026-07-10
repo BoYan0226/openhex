@@ -31,8 +31,8 @@ type StickyPanelProps = {
   summary?: boolean;
 };
 
-const STICKY_BASE_OFFSET_REM = 4;
-const STICKY_STEP_REM = 1.5;
+const STICKY_BASE_OFFSET_REM = 0;
+const STICKY_STEP_REM = 0;
 const PAGE_SURFACE_LIGHT = '#fafafa';
 const PAGE_SURFACE_SHADE = '#f7f7f7';
 
