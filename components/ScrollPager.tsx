@@ -10,8 +10,6 @@ const TRACKPAD_TAIL_IGNORE_MS = 70;
 const TRACKPAD_TAIL_DELTA = 16;
 const MOUSE_SNAP_IDLE_MS = 45;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
-const BACK_TRANSITION_TOLERANCE = 28;
-const BACK_TRANSITION_REARM_MS = 260;
 const MOUSE_GESTURE_DISTANCE_LIMIT = 0.95;
 const MOUSE_DISTANCE_MULTIPLIER = 1.8;
 const MOUSE_MAX_INPUT_STEP = 240;
@@ -68,8 +66,6 @@ export function ScrollPager() {
   const lastDirectionRef = useRef<-1 | 1>(1);
   const isTrackpadGestureRef = useRef(false);
   const lastTrackpadReleaseRef = useRef(0);
-  const liveAgentBackArmedRef = useRef(false);
-  const liveAgentBackArmedAtRef = useRef(0);
   const snapTimerRef = useRef<number | null>(null);
   const resizeFrameRef = useRef<number | null>(null);
 
@@ -93,8 +89,6 @@ export function ScrollPager() {
     };
 
     const getLastPoint = () => getPageTops(root).at(-1) ?? 0;
-    const isNearLiveAgent = (value: number) =>
-      Math.abs(value - root.clientHeight) <= BACK_TRANSITION_TOLERANCE;
     const clampTarget = (value: number) => Math.min(getLastPoint(), Math.max(0, value));
     const clampMotion = (value: number) =>
       Math.max(motionMinRef.current, Math.min(motionMaxRef.current, clampTarget(value)));
@@ -106,16 +100,7 @@ export function ScrollPager() {
       return [...points].reverse().find(point => point < origin - POSITION_EPSILON);
     };
 
-    const syncLiveAgentBackArm = (position: number) => {
-      const shouldArm = isNearLiveAgent(position);
-      if (shouldArm === liveAgentBackArmedRef.current) return;
-
-      liveAgentBackArmedRef.current = shouldArm;
-      liveAgentBackArmedAtRef.current = shouldArm ? performance.now() : 0;
-    };
-
     const dispatchSettled = () => {
-      syncLiveAgentBackArm(targetRef.current);
       window.dispatchEvent(
         new CustomEvent('landing:scroll-settled', {
           detail: { top: targetRef.current },
@@ -345,39 +330,6 @@ export function ScrollPager() {
         return;
       }
 
-      const isAtLiveAgent = isNearLiveAgent(root.scrollTop);
-      if (isAtLiveAgent && !isNearLiveAgent(targetRef.current)) {
-        targetRef.current = root.clientHeight;
-        syncLiveAgentBackArm(root.clientHeight);
-      }
-
-      if (!isAtLiveAgent) {
-        liveAgentBackArmedRef.current = false;
-        liveAgentBackArmedAtRef.current = 0;
-      }
-
-      if (
-        wheelDelta < 0 &&
-        isAtLiveAgent
-      ) {
-        if (
-          liveAgentBackArmedRef.current &&
-          now - liveAgentBackArmedAtRef.current > BACK_TRANSITION_REARM_MS
-        ) {
-          cancelAnimation();
-          velocityRef.current = 0;
-          targetRef.current = root.clientHeight;
-          root.scrollTop = root.clientHeight;
-          window.dispatchEvent(
-            new CustomEvent('landing:request-path-back', {
-              detail: { source: 'wheel' },
-            })
-          );
-        }
-        lastInputTimeRef.current = now;
-        return;
-      }
-
       if (isTrackpadInput) {
         if (isNewGesture || !isTrackpadGestureRef.current) {
           const points = getPageTops(root);
@@ -472,7 +424,6 @@ export function ScrollPager() {
       }
       if (animationFrameRef.current === null) {
         targetRef.current = root.scrollTop;
-        syncLiveAgentBackArm(root.scrollTop);
       }
     };
 
