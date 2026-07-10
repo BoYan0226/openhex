@@ -7,7 +7,7 @@ const POSITION_EPSILON = 2;
 const MOUSE_GESTURE_IDLE_MS = 180;
 const TRACKPAD_GESTURE_IDLE_MS = 560;
 const MOUSE_SNAP_IDLE_MS = 45;
-const TRACKPAD_SNAP_IDLE_MS = 95;
+const TRACKPAD_SNAP_IDLE_MS = 55;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
 const BACK_TRANSITION_TOLERANCE = 28;
 const MOUSE_GESTURE_DISTANCE_LIMIT = 0.95;
@@ -15,7 +15,7 @@ const TRACKPAD_GESTURE_DISTANCE_LIMIT = 1;
 const MOUSE_DISTANCE_MULTIPLIER = 1.8;
 const TRACKPAD_DISTANCE_MULTIPLIER = 1;
 const MOUSE_MAX_INPUT_STEP = 240;
-const TRACKPAD_MAX_INPUT_STEP = 92;
+const TRACKPAD_MAX_INPUT_STEP = 72;
 const MAX_VELOCITY = 2200;
 const SPRING_STIFFNESS = 120;
 const SPRING_DAMPING = 26;
@@ -25,6 +25,7 @@ const SETTLE_SPEED = 12;
 const EASE_SNAP_MIN_DURATION = 520;
 const EASE_SNAP_MAX_DURATION = 860;
 const EASE_SNAP_PX_PER_MS = 1.55;
+const TRACKPAD_VELOCITY_IMPULSE = 2.7;
 
 function getPageTops(root: HTMLElement) {
   const points = [0, root.clientHeight];
@@ -89,6 +90,13 @@ export function ScrollPager() {
     const clampTarget = (value: number) => Math.min(getLastPoint(), Math.max(0, value));
     const clampMotion = (value: number) =>
       Math.max(motionMinRef.current, Math.min(motionMaxRef.current, clampTarget(value)));
+    const getAdjacentTarget = (points: number[], origin: number, direction: -1 | 1) => {
+      if (direction > 0) {
+        return points.find(point => point > origin + POSITION_EPSILON);
+      }
+
+      return [...points].reverse().find(point => point < origin - POSITION_EPSILON);
+    };
 
     const dispatchSettled = () => {
       window.dispatchEvent(
@@ -231,6 +239,20 @@ export function ScrollPager() {
               : upper;
       }
 
+      if (isTrackpadGestureRef.current) {
+        const adjacentTarget = getAdjacentTarget(
+          points,
+          gestureStartRef.current,
+          lastDirectionRef.current
+        );
+        if (adjacentTarget !== undefined) {
+          target =
+            lastDirectionRef.current > 0
+              ? Math.min(target, adjacentTarget)
+              : Math.max(target, adjacentTarget);
+        }
+      }
+
       motionMinRef.current = 0;
       motionMaxRef.current = getLastPoint();
       easeToTarget(target);
@@ -326,7 +348,7 @@ export function ScrollPager() {
       const distanceMultiplier = isTrackpadInput
         ? TRACKPAD_DISTANCE_MULTIPLIER
         : MOUSE_DISTANCE_MULTIPLIER;
-      const velocityImpulse = isTrackpadInput ? 4.2 : 7;
+      const velocityImpulse = isTrackpadInput ? TRACKPAD_VELOCITY_IMPULSE : 7;
       const step = Math.max(
         -maxInputStep,
         Math.min(maxInputStep, wheelDelta * distanceMultiplier)
