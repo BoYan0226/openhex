@@ -18,6 +18,7 @@ function getRemInPixels() {
 
 export function StackJumpNav({ items }: StackJumpNavProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const visibleActiveIndex = activeIndex ?? 0;
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
@@ -86,19 +87,30 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
       style={{ '--stack-active-index': activeIndex ?? 0 } as CSSProperties}
     >
       <span className="stack-jump-indicator" aria-hidden />
-      {items.map((item, index) => (
-        <button
-          key={item.id}
-          type="button"
-          className="stack-jump-label"
-          data-active={activeIndex === index ? 'true' : 'false'}
-          aria-current={activeIndex === index ? 'page' : undefined}
-          style={{ '--stack-label-index': index } as CSSProperties}
-          onClick={() => handleJump(item.id)}
-        >
-          {item.label}
-        </button>
-      ))}
+      {items.map((item, index) => {
+        const distance = Math.abs(index - visibleActiveIndex);
+        const shift = Math.max(0.55, 4.25 - distance * 0.58);
+
+        return (
+          <button
+            key={item.id}
+            type="button"
+            className="stack-jump-label"
+            data-active={activeIndex === index ? 'true' : 'false'}
+            aria-current={activeIndex === index ? 'page' : undefined}
+            style={
+              {
+                '--stack-label-index': index,
+                '--stack-label-shift': `${shift.toFixed(2)}rem`,
+                '--stack-label-y': `${((index - visibleActiveIndex) * 2.05).toFixed(2)}rem`,
+              } as CSSProperties
+            }
+            onClick={() => handleJump(item.id)}
+          >
+            {item.label}
+          </button>
+        );
+      })}
     </nav>
   );
 }
