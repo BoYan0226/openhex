@@ -26,7 +26,7 @@ const PATH_NUMBER_PATTERN = /-?\d*\.?\d+/g;
 const FIRST_SCREEN_INDEX = 0;
 const SECOND_SCREEN_INDEX = 1;
 const SCREEN_TOLERANCE = 0.16;
-const BACK_WHEEL_TOLERANCE_PX = 6;
+const BACK_WHEEL_TOLERANCE_PX = 36;
 const BACK_TRANSITION_ARM_MS = 80;
 
 function interpolatePath(from: string, to: string, progress: number) {
@@ -171,6 +171,7 @@ export function ScrollPathTransition() {
       root.style.overflowY = 'hidden';
       root.style.scrollSnapType = 'none';
       root.style.scrollBehavior = 'auto';
+      jumpToScreen(direction === 'forward' ? FIRST_SCREEN_INDEX : SECOND_SCREEN_INDEX);
       window.dispatchEvent(
         new CustomEvent('landing:path-transition-start', { detail: { direction } })
       );

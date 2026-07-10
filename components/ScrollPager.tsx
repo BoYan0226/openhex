@@ -468,6 +468,19 @@ export function ScrollPager() {
       });
     };
 
+    const onPathTransitionStart = () => {
+      cancelSnap();
+      cancelAnimation();
+      velocityRef.current = 0;
+      isTrackpadGestureRef.current = false;
+      lastInputTimeRef.current = 0;
+      lastTrackpadReleaseRef.current = 0;
+      targetRef.current = root.scrollTop;
+      gestureStartRef.current = root.scrollTop;
+      motionMinRef.current = 0;
+      motionMaxRef.current = getLastPoint();
+    };
+
     targetRef.current = root.scrollTop;
     gestureStartRef.current = root.scrollTop;
     motionMaxRef.current = getLastPoint();
@@ -476,6 +489,7 @@ export function ScrollPager() {
     root.addEventListener('click', onClick);
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('resize', onResize);
+    window.addEventListener('landing:path-transition-start', onPathTransitionStart);
 
     return () => {
       cancelSnap();
@@ -488,6 +502,7 @@ export function ScrollPager() {
       root.removeEventListener('click', onClick);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('resize', onResize);
+      window.removeEventListener('landing:path-transition-start', onPathTransitionStart);
     };
   }, []);
 
