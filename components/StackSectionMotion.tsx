@@ -49,7 +49,16 @@ export function StackSectionMotion() {
     );
 
     let frame: number | null = null;
+    let previousScrollTop = root.scrollTop;
     const handleTimers = new Map<HTMLElement, number>();
+
+    const clearHandleTimer = (panel: HTMLElement) => {
+      const timer = handleTimers.get(panel);
+      if (timer === undefined) return;
+
+      window.clearTimeout(timer);
+      handleTimers.delete(panel);
+    };
 
     const renderItem = (
       { element, index, type, variant }: MotionItem,
@@ -216,10 +225,28 @@ export function StackSectionMotion() {
     const update = () => {
       frame = null;
       const viewportHeight = root.clientHeight;
+      const scrollTop = root.scrollTop;
+      const isScrollingUp = scrollTop < previousScrollTop - 0.5;
+      previousScrollTop = scrollTop;
 
       handlePanels.forEach(panel => {
         const rect = panel.getBoundingClientRect();
-        const arrivalProgress = clamp(1 - Math.max(0, rect.top) / Math.max(1, viewportHeight));
+        const anchor = panel.previousElementSibling as HTMLElement | null;
+        const nextAnchor = panel.nextElementSibling as HTMLElement | null;
+        const anchorTop = anchor?.classList.contains('stack-anchor') ? anchor.offsetTop : 0;
+        const nextTop = nextAnchor?.classList.contains('stack-anchor')
+          ? nextAnchor.offsetTop
+          : undefined;
+        const isReverseEntering =
+          isScrollingUp &&
+          nextTop !== undefined &&
+          scrollTop > anchorTop + 1 &&
+          scrollTop <= nextTop + 1;
+        const reverseSpan =
+          nextTop === undefined ? viewportHeight : Math.min(viewportHeight, nextTop - anchorTop);
+        const arrivalProgress = isReverseEntering
+          ? clamp((nextTop - scrollTop) / Math.max(1, reverseSpan))
+          : clamp(1 - Math.max(0, rect.top) / Math.max(1, viewportHeight));
         const easedProgress = easeOutCubic(arrivalProgress);
         const width =
           HANDLE_LONG_WIDTH_VW -
@@ -228,12 +255,8 @@ export function StackSectionMotion() {
 
         panel.style.setProperty('--stack-handle-width', `${width.toFixed(2)}vw`);
 
-        if (!isAtTop) {
-          const timer = handleTimers.get(panel);
-          if (timer !== undefined) {
-            window.clearTimeout(timer);
-            handleTimers.delete(panel);
-          }
+        if (!isAtTop || isReverseEntering) {
+          clearHandleTimer(panel);
           panel.dataset.handleHidden = 'false';
           return;
         }
@@ -249,12 +272,25 @@ export function StackSectionMotion() {
         handleTimers.set(panel, timer);
       });
 
-      sections.forEach(({ anchor, items }) => {
+      sections.forEach(({ anchor, items }, index) => {
         if (!anchor) return;
 
-        const start = anchor.offsetTop - viewportHeight * MOTION_SPAN_VIEWPORTS;
-        const end = anchor.offsetTop;
-        const sectionProgress = clamp((root.scrollTop - start) / Math.max(1, end - start));
+        const span = viewportHeight * MOTION_SPAN_VIEWPORTS;
+        const anchorTop = anchor.offsetTop;
+        const start = anchorTop - span;
+        const end = anchorTop;
+        let sectionProgress = clamp((scrollTop - start) / Math.max(1, end - start));
+        const nextAnchor = sections[index + 1]?.anchor;
+
+        if (
+          isScrollingUp &&
+          nextAnchor &&
+          scrollTop >= anchorTop - 1 &&
+          scrollTop <= nextAnchor.offsetTop + 1
+        ) {
+          const reverseSpan = Math.min(span, Math.max(1, nextAnchor.offsetTop - anchorTop));
+          sectionProgress = clamp((nextAnchor.offsetTop - scrollTop) / reverseSpan);
+        }
 
         items.forEach(item => renderItem(item, sectionProgress));
       });
