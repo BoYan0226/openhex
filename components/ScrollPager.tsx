@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 const MIN_WHEEL_DELTA = 4;
 const POSITION_EPSILON = 2;
 const MOUSE_GESTURE_IDLE_MS = 180;
-const TRACKPAD_GESTURE_IDLE_MS = 560;
+const TRACKPAD_GESTURE_IDLE_MS = 220;
 const MOUSE_SNAP_IDLE_MS = 45;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
 const BACK_TRANSITION_TOLERANCE = 28;
@@ -21,7 +21,7 @@ const SETTLE_SPEED = 12;
 const EASE_SNAP_MIN_DURATION = 520;
 const EASE_SNAP_MAX_DURATION = 860;
 const EASE_SNAP_PX_PER_MS = 1.55;
-const TRACKPAD_SNAP_DURATION = 680;
+const TRACKPAD_SNAP_DURATION = 620;
 
 function getPageTops(root: HTMLElement) {
   const points = [0, root.clientHeight];
@@ -47,6 +47,10 @@ function isLikelyTrackpad(event: WheelEvent, normalizedDelta: number) {
 
 function easeOutQuint(value: number) {
   return 1 - (1 - value) ** 5;
+}
+
+function easeOutQuart(value: number) {
+  return 1 - (1 - value) ** 4;
 }
 
 export function ScrollPager() {
@@ -102,7 +106,11 @@ export function ScrollPager() {
       );
     };
 
-    const easeToTarget = (target: number, durationOverride?: number) => {
+    const easeToTarget = (
+      target: number,
+      durationOverride?: number,
+      easing: (value: number) => number = easeOutQuint
+    ) => {
       cancelAnimation();
       animationModeRef.current = 'ease';
       const start = root.scrollTop;
@@ -128,7 +136,7 @@ export function ScrollPager() {
 
       const tick = (now: number) => {
         const progress = Math.min((now - startedAt) / duration, 1);
-        root.scrollTop = clampMotion(start + distance * easeOutQuint(progress));
+        root.scrollTop = clampMotion(start + distance * easing(progress));
 
         if (progress < 1) {
           animationFrameRef.current = window.requestAnimationFrame(tick);
@@ -326,7 +334,7 @@ export function ScrollPager() {
           motionMinRef.current = 0;
           motionMaxRef.current = getLastPoint();
           if (target !== undefined) {
-            easeToTarget(target, TRACKPAD_SNAP_DURATION);
+            easeToTarget(target, TRACKPAD_SNAP_DURATION, easeOutQuart);
           }
           return;
         }
