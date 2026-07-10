@@ -108,7 +108,7 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
             }
             onClick={() => handleJump(item.id)}
           >
-            {item.label}
+            <span className="stack-jump-label-text">{item.label}</span>
           </button>
         );
       })}

@@ -150,7 +150,7 @@ body::-webkit-scrollbar,
   font: inherit;
   font-size: clamp(1.02rem, 0.9rem + 0.48vw, 1.34rem);
   font-weight: 300;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.075em;
   line-height: 1;
   text-align: right;
   text-transform: uppercase;
@@ -159,17 +159,27 @@ body::-webkit-scrollbar,
   pointer-events: auto;
   opacity: var(--stack-label-opacity, 1);
   transform: translate3d(var(--stack-label-shift, 0rem), -50%, 0);
+  text-shadow:
+    0 0.35px 0 rgba(255, 255, 255, 0.35),
+    0 8px 22px rgba(32, 33, 36, 0.08);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
   transition:
-    color 160ms ease,
-    opacity 180ms ease,
-    transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+    color 220ms ease,
+    opacity 260ms ease,
+    transform 560ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.stack-jump-label::after {
+.stack-jump-label-text {
+  position: relative;
+  display: inline-block;
+}
+
+.stack-jump-label-text::after {
   content: '';
   position: absolute;
-  right: 0;
-  bottom: 0.08rem;
+  right: 3px;
+  bottom: -0.24rem;
   width: 100%;
   height: 1px;
   border-radius: 999px;
@@ -197,9 +207,9 @@ body::-webkit-scrollbar,
   font-weight: 400;
 }
 
-.stack-jump-label[data-active='true']::after {
+.stack-jump-label[data-active='true'] .stack-jump-label-text::after {
   opacity: 0.72;
-  animation: stackLabelUnderline 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: stackLabelUnderline 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes stackLabelUnderline {
