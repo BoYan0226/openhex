@@ -54,6 +54,7 @@ function easeOutQuint(value: number) {
 
 export function ScrollPager() {
   const animationFrameRef = useRef<number | null>(null);
+  const animationModeRef = useRef<'ease' | 'spring' | null>(null);
   const targetRef = useRef(0);
   const velocityRef = useRef(0);
   const gestureStartRef = useRef(0);
@@ -74,6 +75,7 @@ export function ScrollPager() {
         window.cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }
+      animationModeRef.current = null;
     };
 
     const cancelSnap = () => {
@@ -98,6 +100,7 @@ export function ScrollPager() {
 
     const easeToTarget = (target: number) => {
       cancelAnimation();
+      animationModeRef.current = 'ease';
       const start = root.scrollTop;
       const distance = target - start;
       targetRef.current = target;
@@ -106,6 +109,7 @@ export function ScrollPager() {
       if (Math.abs(distance) <= POSITION_EPSILON) {
         root.scrollTop = target;
         velocityRef.current = 0;
+        animationModeRef.current = null;
         dispatchSettled();
         return;
       }
@@ -128,6 +132,7 @@ export function ScrollPager() {
         root.scrollTop = target;
         velocityRef.current = 0;
         animationFrameRef.current = null;
+        animationModeRef.current = null;
         dispatchSettled();
       };
 
@@ -136,6 +141,7 @@ export function ScrollPager() {
 
     const startAnimation = () => {
       if (animationFrameRef.current !== null) return;
+      animationModeRef.current = 'spring';
       let previousTime = performance.now();
       const tick = (now: number) => {
         const deltaTime = Math.min((now - previousTime) / 1000, 0.032);
@@ -167,6 +173,7 @@ export function ScrollPager() {
           root.scrollTop = targetRef.current;
           velocityRef.current = 0;
           animationFrameRef.current = null;
+          animationModeRef.current = null;
           dispatchSettled();
           return;
         }
@@ -257,7 +264,9 @@ export function ScrollPager() {
       }
 
       cancelSnap();
-      cancelAnimation();
+      if (animationModeRef.current === 'ease') {
+        cancelAnimation();
+      }
       const now = performance.now();
       const isTrackpadInput =
         isLikelyTrackpad(event, wheelDelta) ||
