@@ -7,7 +7,7 @@ import { AuthAwareCtaButton } from './AuthAwareCtaButton';
 import { BookDemoButton } from './BookDemoButton';
 import { publicPath } from './publicPath';
 
-const HERO_REVEAL_DELAY_MS = 700;
+const HERO_REVEAL_AFTER_TRANSITION_MS = 80;
 
 /**
  * Hero section for the Live Agent landing redesign.
@@ -128,6 +128,7 @@ export function HeroSection() {
       const direction = (event as CustomEvent<{ direction?: 'forward' | 'back' }>).detail
         ?.direction;
       if (direction === 'forward') {
+        reveal(HERO_REVEAL_AFTER_TRANSITION_MS);
         isTransitioningRef.current = false;
       }
 
@@ -142,7 +143,6 @@ export function HeroSection() {
       if (direction === 'forward') {
         isTransitioningRef.current = true;
         resetPanels();
-        reveal(HERO_REVEAL_DELAY_MS);
       }
 
       if (direction === 'back') {
