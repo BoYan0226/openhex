@@ -34,7 +34,7 @@ type StickyPanelProps = {
 const STICKY_BASE_OFFSET_REM = 0;
 const STICKY_STEP_REM = 0;
 const PAGE_SURFACE_LIGHT = '#fafafa';
-const PAGE_SURFACE_SHADE = '#f7f7f7';
+const PAGE_SURFACE_SHADE = PAGE_SURFACE_LIGHT;
 
 const stickyOffset = (index: number) => STICKY_BASE_OFFSET_REM + index * STICKY_STEP_REM;
 
