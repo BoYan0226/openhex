@@ -11,6 +11,12 @@ type MotionItem = {
 
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
 const smoothstep = (value: number) => value * value * (3 - 2 * value);
+const easeOutCubic = (value: number) => 1 - Math.pow(1 - value, 3);
+const easeOutBack = (value: number) => {
+  const c1 = 1.35;
+  const c3 = c1 + 1;
+  return 1 + c3 * Math.pow(value - 1, 3) + c1 * Math.pow(value - 1, 2);
+};
 
 export function StackSectionMotion() {
   useEffect(() => {
@@ -43,20 +49,25 @@ export function StackSectionMotion() {
       sectionProgress: number
     ) => {
       const offset =
-        type === 'header' ? index * 0.04 : type === 'group' ? index * 0.035 : index * 0.04;
-      const itemProgress = smoothstep(clamp((sectionProgress - offset) / (1 - offset)));
+        type === 'header' ? index * 0.035 : type === 'group' ? index * 0.05 : index * 0.035;
+      const rawProgress = clamp((sectionProgress - offset) / (1 - offset));
+      const itemProgress = smoothstep(rawProgress);
+      const impactProgress = clamp(easeOutBack(rawProgress));
+      const fastProgress = easeOutCubic(rawProgress);
       const remaining = 1 - itemProgress;
+      const impactRemaining = 1 - impactProgress;
+      const fastRemaining = 1 - fastProgress;
 
-      element.style.opacity = (0.18 + itemProgress * 0.82).toFixed(3);
+      element.style.opacity = (0.08 + fastProgress * 0.92).toFixed(3);
       element.style.clipPath = '';
       element.style.transformOrigin = '';
 
       if (type === 'split') {
         const direction = index === 0 ? -1 : 1;
-        const scale = 0.92 + itemProgress * 0.08;
-        element.style.transform = `translate3d(${(direction * remaining * 150).toFixed(
+        const scale = 0.84 + impactProgress * 0.16;
+        element.style.transform = `translate3d(${(direction * impactRemaining * 260).toFixed(
           2
-        )}px, 0, 0) scale(${scale.toFixed(4)})`;
+        )}px, ${(fastRemaining * 28).toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
         return;
       }
 
@@ -64,90 +75,135 @@ export function StackSectionMotion() {
         const direction = index % 2 === 0 ? -1 : 1;
 
         if (variant === 'fan') {
-          const scale = 0.92 + itemProgress * 0.08;
-          element.style.transform = `translate3d(${(direction * remaining * 110).toFixed(
+          const scale = 0.88 + impactProgress * 0.12;
+          element.style.transformOrigin = '50% 100%';
+          element.style.transform = `translate3d(${(direction * impactRemaining * 150).toFixed(
             2
-          )}px, ${(remaining * 46).toFixed(2)}px, 0) rotate(${(
+          )}px, ${(fastRemaining * 56).toFixed(2)}px, 0) rotate(${(
             direction *
-            remaining *
-            6
+            impactRemaining *
+            8
           ).toFixed(2)}deg) scale(${scale.toFixed(4)})`;
           return;
         }
 
         if (variant === 'tilt') {
-          const scale = 0.9 + itemProgress * 0.1;
+          const scale = 0.78 + impactProgress * 0.22;
           element.style.transformOrigin = '50% 100%';
-          element.style.transform = `perspective(900px) translate3d(0, ${(
-            remaining * 92
-          ).toFixed(2)}px, 0) rotateX(${(remaining * 20).toFixed(
+          element.style.transform = `perspective(900px) translate3d(${(
+            direction *
+            impactRemaining *
+            34
+          ).toFixed(2)}px, ${(fastRemaining * 120).toFixed(2)}px, 0) rotateX(${(
+            fastRemaining * 30
+          ).toFixed(2)}deg) rotateZ(${(direction * impactRemaining * 2.8).toFixed(
             2
           )}deg) scale(${scale.toFixed(4)})`;
           return;
         }
 
         if (variant === 'steps') {
-          element.style.opacity = '1';
-          element.style.clipPath = `inset(0 ${(remaining * 100).toFixed(2)}% 0 0)`;
-          element.style.transform = `translate3d(${(-remaining * 70).toFixed(2)}px, 0, 0)`;
+          element.style.opacity = (0.16 + fastProgress * 0.84).toFixed(3);
+          element.style.clipPath = `inset(0 ${(fastRemaining * 100).toFixed(2)}% 0 0)`;
+          element.style.transformOrigin = '0 50%';
+          element.style.transform = `translate3d(${(-fastRemaining * 96).toFixed(
+            2
+          )}px, ${(impactRemaining * 18).toFixed(2)}px, 0) scaleX(${(
+            0.9 +
+            impactProgress * 0.1
+          ).toFixed(4)})`;
           return;
         }
 
         if (variant === 'weave') {
-          element.style.transform = `translate3d(${(direction * remaining * 130).toFixed(
+          const rowDirection = index < 3 ? -1 : 1;
+          const scale = 0.86 + impactProgress * 0.14;
+          element.style.transform = `translate3d(${(direction * impactRemaining * 190).toFixed(
             2
-          )}px, ${(remaining * 24).toFixed(2)}px, 0) rotate(${(
+          )}px, ${(rowDirection * impactRemaining * 46).toFixed(2)}px, 0) rotate(${(
             direction *
-            remaining *
-            3
-          ).toFixed(2)}deg)`;
+            impactRemaining *
+            5
+          ).toFixed(2)}deg) scale(${scale.toFixed(4)})`;
           return;
         }
 
         if (variant === 'burst') {
           const columnDirection = index % 2 === 0 ? -1 : 1;
           const rowDirection = index < 2 ? -1 : 1;
-          const scale = 0.84 + itemProgress * 0.16;
+          const scale = 0.7 + impactProgress * 0.3;
+          element.style.transformOrigin = '50% 50%';
           element.style.transform = `translate3d(${(
             columnDirection *
-            remaining *
-            84
-          ).toFixed(2)}px, ${(rowDirection * remaining * 64).toFixed(
+            impactRemaining *
+            132
+          ).toFixed(2)}px, ${(fastRemaining * -24).toFixed(2)}px) rotate(${(
+            columnDirection *
+            impactRemaining *
+            7
+          ).toFixed(2)}deg) scale(${scale.toFixed(4)})`;
+          return;
+        }
+
+        if (variant === 'split') {
+          const columnDirection = index === 0 ? -1 : 1;
+          const scale = 0.84 + impactProgress * 0.16;
+          element.style.transform = `translate3d(${(
+            columnDirection *
+            impactRemaining *
+            240
+          ).toFixed(2)}px, ${(fastRemaining * 34).toFixed(
             2
           )}px, 0) scale(${scale.toFixed(4)})`;
           return;
         }
 
-        const scale = 0.94 + itemProgress * 0.06;
-        element.style.transform = `translate3d(0, ${(remaining * 72).toFixed(
+        const scale = 0.88 + impactProgress * 0.12;
+        element.style.transform = `translate3d(0, ${(fastRemaining * 86).toFixed(
           2
         )}px, 0) scale(${scale.toFixed(4)})`;
         return;
       }
 
       if (variant === 'fan') {
-        element.style.transform = `translate3d(${(-remaining * 86).toFixed(
+        element.style.transform = `translate3d(${(-fastRemaining * 90).toFixed(
           2
-        )}px, 0, 0)`;
+        )}px, ${(fastRemaining * 12).toFixed(2)}px, 0)`;
         return;
       }
 
       if (variant === 'steps') {
-        element.style.opacity = '1';
-        element.style.clipPath = `inset(0 ${(remaining * 100).toFixed(2)}% 0 0)`;
-        element.style.transform = `translate3d(${(-remaining * 42).toFixed(2)}px, 0, 0)`;
+        element.style.opacity = (0.18 + fastProgress * 0.82).toFixed(3);
+        element.style.clipPath = `inset(0 ${(fastRemaining * 100).toFixed(2)}% 0 0)`;
+        element.style.transform = `translate3d(${(-fastRemaining * 58).toFixed(
+          2
+        )}px, ${(fastRemaining * 10).toFixed(2)}px, 0)`;
         return;
       }
 
       if (variant === 'burst') {
-        const scale = 0.86 + itemProgress * 0.14;
-        element.style.transform = `translate3d(0, ${(remaining * 36).toFixed(
+        const scale = 0.82 + impactProgress * 0.18;
+        element.style.transform = `translate3d(0, ${(fastRemaining * 58).toFixed(
           2
         )}px, 0) scale(${scale.toFixed(4)})`;
         return;
       }
 
-      element.style.transform = `translate3d(0, ${(remaining * 48).toFixed(2)}px, 0)`;
+      if (variant === 'tilt') {
+        element.style.transform = `translate3d(0, ${(fastRemaining * 64).toFixed(
+          2
+        )}px, 0)`;
+        return;
+      }
+
+      if (variant === 'weave') {
+        element.style.transform = `translate3d(0, ${(fastRemaining * 48).toFixed(
+          2
+        )}px, 0)`;
+        return;
+      }
+
+      element.style.transform = `translate3d(0, ${(fastRemaining * 52).toFixed(2)}px, 0)`;
     };
 
     const update = () => {
