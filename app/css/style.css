@@ -129,7 +129,7 @@ body::-webkit-scrollbar,
 
 .stack-jump-nav {
   position: fixed;
-  left: -10px;
+  left: -30px;
   top: 50%;
   z-index: 90;
   height: 0;
@@ -211,6 +211,7 @@ body::-webkit-scrollbar,
 
 .stack-jump-nav[data-visible='true'] {
   opacity: 1;
+  transition: opacity 1400ms cubic-bezier(0.22, 1, 0.36, 1) 500ms;
 }
 
 .stack-jump-nav[data-visible='true'] .stack-jump-label {
