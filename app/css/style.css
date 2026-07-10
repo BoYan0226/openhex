@@ -145,13 +145,14 @@ body::-webkit-scrollbar,
   border: 0;
   background: transparent;
   padding: 0.36rem 0;
+  min-width: 8.5rem;
   color: rgba(32, 33, 36, 0.74);
   font: inherit;
   font-size: clamp(1.02rem, 0.9rem + 0.48vw, 1.34rem);
   font-weight: 300;
   letter-spacing: 0.03em;
   line-height: 1;
-  text-align: left;
+  text-align: right;
   text-transform: uppercase;
   white-space: nowrap;
   cursor: pointer;
