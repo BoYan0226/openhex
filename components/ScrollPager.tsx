@@ -22,6 +22,9 @@ const SPRING_DAMPING = 26;
 const SPRING_MASS = 1.8;
 const SETTLE_DISTANCE = 1;
 const SETTLE_SPEED = 12;
+const SNAP_START_MIN_VELOCITY = 880;
+const SNAP_START_VELOCITY_PER_PX = 3.2;
+const SNAP_START_MAX_VELOCITY = 2100;
 
 function getPageTops(root: HTMLElement) {
   const points = [0, root.clientHeight];
@@ -80,6 +83,20 @@ export function ScrollPager() {
     const clampTarget = (value: number) => Math.min(getLastPoint(), Math.max(0, value));
     const clampMotion = (value: number) =>
       Math.max(motionMinRef.current, Math.min(motionMaxRef.current, clampTarget(value)));
+    const primeVelocityToward = (target: number) => {
+      const distance = target - root.scrollTop;
+      if (Math.abs(distance) <= POSITION_EPSILON) {
+        velocityRef.current = 0;
+        return;
+      }
+
+      const direction = distance > 0 ? 1 : -1;
+      const initialSpeed = Math.min(
+        SNAP_START_MAX_VELOCITY,
+        Math.max(SNAP_START_MIN_VELOCITY, Math.abs(distance) * SNAP_START_VELOCITY_PER_PX)
+      );
+      velocityRef.current = direction * initialSpeed;
+    };
 
     const startAnimation = () => {
       if (animationFrameRef.current !== null) return;
@@ -142,7 +159,7 @@ export function ScrollPager() {
         motionMinRef.current = 0;
         motionMaxRef.current = getLastPoint();
         targetRef.current = target;
-        velocityRef.current = 0;
+        primeVelocityToward(target);
         startAnimation();
       }
     };
@@ -180,6 +197,7 @@ export function ScrollPager() {
       motionMinRef.current = 0;
       motionMaxRef.current = getLastPoint();
       targetRef.current = target;
+      primeVelocityToward(target);
       startAnimation();
     };
 
