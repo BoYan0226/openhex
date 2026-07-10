@@ -134,13 +134,13 @@ body::-webkit-scrollbar,
   z-index: 90;
   height: 0;
   pointer-events: none;
-  transform: translateY(calc(-50% - 7.35rem));
+  transform: translateY(calc(-50% - 8.58rem));
 }
 
 .stack-jump-label {
   position: absolute;
   left: clamp(0.8rem, 2.2vw, 2rem);
-  top: calc(var(--stack-label-index) * 2.1rem);
+  top: calc(var(--stack-label-index) * 2.45rem);
   z-index: 1;
   border: 0;
   background: transparent;
@@ -178,7 +178,7 @@ body::-webkit-scrollbar,
 }
 
 .stack-jump-label[data-active='true'] {
-  color: rgba(32, 33, 36, 0.94);
+  color: rgba(32, 33, 36, 0.68);
   font-weight: 400;
 }
 

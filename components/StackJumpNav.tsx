@@ -89,7 +89,8 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
       <span className="stack-jump-indicator" aria-hidden />
       {items.map((item, index) => {
         const distance = Math.abs(index - visibleActiveIndex);
-        const shift = Math.max(0.55, 4.25 - distance * 0.58);
+        const arcDistance = Math.min(distance, 4);
+        const shift = Math.max(0.55, 4.25 - arcDistance * 0.78);
         const opacity = Math.max(0.2, 1 - distance * 0.14);
 
         return (
