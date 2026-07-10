@@ -519,4 +519,8 @@ body::-webkit-scrollbar,
 [data-stack-motion] [data-motion='group'] > *,
 [data-stack-motion] [data-motion='split'] > * {
   will-change: opacity, transform;
+  transition:
+    transform 760ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 520ms ease,
+    clip-path 700ms cubic-bezier(0.16, 1, 0.3, 1);
 }
