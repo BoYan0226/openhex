@@ -38,14 +38,14 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
       );
 
       if (isOpeningScreen) {
-        setNavPhase('opening');
-        setActiveIndex(null);
+        setNavPhase(current => (current === 'opening' ? current : 'opening'));
+        setActiveIndex(current => (current === null ? current : null));
         return;
       }
 
       if (isSummaryScreen) {
-        setNavPhase('summary');
-        setActiveIndex(items.length - 1);
+        setNavPhase(current => (current === 'summary' ? current : 'summary'));
+        setActiveIndex(current => (current === items.length - 1 ? current : items.length - 1));
         return;
       }
 
@@ -56,8 +56,8 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
         if (target && target.offsetTop <= probe) nextIndex = index;
       });
 
-      setActiveIndex(nextIndex);
-      setNavPhase('active');
+      setActiveIndex(current => (current === nextIndex ? current : nextIndex));
+      setNavPhase(current => (current === 'active' ? current : 'active'));
     };
 
     const requestUpdate = () => {
@@ -94,13 +94,13 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
       aria-label="Stack section navigation"
       data-visible={activeIndex !== null ? 'true' : 'false'}
       data-phase={navPhase}
-      style={{ '--stack-active-index': activeIndex ?? 0 } as CSSProperties}
     >
       <span className="stack-jump-indicator" aria-hidden />
       {items.map((item, index) => {
         const distance = Math.abs(index - visibleActiveIndex);
         const shift = 0.55 + 3.7 * Math.exp(-distance * 0.42);
         const opacity = Math.max(0.2, 1 - distance * 0.14);
+        const scale = Math.max(0.74, 1 - distance * 0.055);
 
         return (
           <button
@@ -111,10 +111,10 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
             aria-current={activeIndex === index ? 'page' : undefined}
             style={
               {
-                '--stack-label-index': index,
                 '--stack-label-y': `${((index - visibleActiveIndex) * 2.72).toFixed(2)}rem`,
                 '--stack-label-shift': `${shift.toFixed(2)}rem`,
                 '--stack-label-opacity': opacity.toFixed(2),
+                '--stack-label-scale': scale.toFixed(2),
               } as CSSProperties
             }
             onClick={() => handleJump(item.id)}
