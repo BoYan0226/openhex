@@ -37,9 +37,15 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
         summary && root.scrollTop >= summary.offsetTop - root.clientHeight * 0.15
       );
 
-      if (isOpeningScreen || isSummaryScreen) {
-        setNavPhase(isSummaryScreen ? 'summary' : 'opening');
+      if (isOpeningScreen) {
+        setNavPhase('opening');
         setActiveIndex(null);
+        return;
+      }
+
+      if (isSummaryScreen) {
+        setNavPhase('summary');
+        setActiveIndex(items.length - 1);
         return;
       }
 
@@ -106,6 +112,7 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
             style={
               {
                 '--stack-label-index': index,
+                '--stack-label-y': `${((index - visibleActiveIndex) * 2.72).toFixed(2)}rem`,
                 '--stack-label-shift': `${shift.toFixed(2)}rem`,
                 '--stack-label-opacity': opacity.toFixed(2),
               } as CSSProperties
