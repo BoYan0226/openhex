@@ -345,29 +345,35 @@ export function ScrollPager() {
         return;
       }
 
-      const isSettledOnLiveAgent =
-        isNearLiveAgent(root.scrollTop) && isNearLiveAgent(targetRef.current);
-      if (!isSettledOnLiveAgent) {
+      const isAtLiveAgent = isNearLiveAgent(root.scrollTop);
+      if (isAtLiveAgent && !isNearLiveAgent(targetRef.current)) {
+        targetRef.current = root.clientHeight;
+        syncLiveAgentBackArm(root.clientHeight);
+      }
+
+      if (!isAtLiveAgent) {
         liveAgentBackArmedRef.current = false;
         liveAgentBackArmedAtRef.current = 0;
       }
 
       if (
         wheelDelta < 0 &&
-        isSettledOnLiveAgent &&
-        liveAgentBackArmedRef.current &&
-        now - liveAgentBackArmedAtRef.current > BACK_TRANSITION_REARM_MS &&
-        isNewGesture
+        isAtLiveAgent
       ) {
-        cancelAnimation();
-        velocityRef.current = 0;
-        targetRef.current = root.clientHeight;
-        root.scrollTop = root.clientHeight;
-        window.dispatchEvent(
-          new CustomEvent('landing:request-path-back', {
-            detail: { source: 'wheel' },
-          })
-        );
+        if (
+          liveAgentBackArmedRef.current &&
+          now - liveAgentBackArmedAtRef.current > BACK_TRANSITION_REARM_MS
+        ) {
+          cancelAnimation();
+          velocityRef.current = 0;
+          targetRef.current = root.clientHeight;
+          root.scrollTop = root.clientHeight;
+          window.dispatchEvent(
+            new CustomEvent('landing:request-path-back', {
+              detail: { source: 'wheel' },
+            })
+          );
+        }
         lastInputTimeRef.current = now;
         return;
       }
