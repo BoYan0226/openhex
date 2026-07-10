@@ -19,14 +19,14 @@ const PATHS = {
 
 const TRANSITION_LAYERS = [
   { id: 'yellow', fill: '#ffde4a', delay: 0 },
-  { id: 'ink', fill: '#202124', delay: 60 },
+  { id: 'ink', fill: '#303030', delay: 60 },
 ] as const;
 
 const PATH_NUMBER_PATTERN = /-?\d*\.?\d+/g;
 const FIRST_SCREEN_INDEX = 0;
 const SECOND_SCREEN_INDEX = 1;
 const SCREEN_TOLERANCE = 0.16;
-const BACK_TRANSITION_ARM_MS = 180;
+const BACK_TRANSITION_ARM_MS = 80;
 
 function interpolatePath(from: string, to: string, progress: number) {
   const fromNumbers = from.match(PATH_NUMBER_PATTERN)?.map(Number) ?? [];

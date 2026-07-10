@@ -4,10 +4,10 @@ import { useEffect, useRef } from 'react';
 
 const MIN_WHEEL_DELTA = 4;
 const POSITION_EPSILON = 2;
-const GESTURE_IDLE_MS = 320;
-const SNAP_IDLE_MS = 110;
+const GESTURE_IDLE_MS = 180;
+const SNAP_IDLE_MS = 45;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
-const BACK_TRANSITION_TOLERANCE = 12;
+const BACK_TRANSITION_TOLERANCE = 28;
 const GESTURE_DISTANCE_LIMIT = 0.95;
 const WHEEL_DISTANCE_MULTIPLIER = 1.8;
 const MAX_INPUT_STEP = 240;
@@ -18,33 +18,15 @@ const SPRING_MASS = 1.8;
 const SETTLE_DISTANCE = 1;
 const SETTLE_SPEED = 12;
 
-function getRemInPixels() {
-  return Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-}
-
 function getPageTops(root: HTMLElement) {
-  const rem = getRemInPixels();
   const points = [0, root.clientHeight];
 
   document.querySelectorAll<HTMLElement>('.stack-anchor').forEach(anchor => {
     if (anchor.id === 'stack-live-agent') return;
 
     if (anchor.id === 'stack-summary') {
-      const offsetRem =
-        Number.parseFloat(getComputedStyle(anchor).getPropertyValue('--sticky-offset')) || 0;
-      const offset = offsetRem * rem;
-      const summaryTop = Math.max(0, anchor.offsetTop - offset);
+      const summaryTop = Math.max(0, anchor.offsetTop);
       points.push(summaryTop);
-
-      const summaryScreen =
-        anchor.nextElementSibling?.querySelector<HTMLElement>('.summary-screen');
-      if (summaryScreen) {
-        const visibleHeight = root.clientHeight - offset;
-        const summaryBottom = summaryTop + Math.max(0, summaryScreen.scrollHeight - visibleHeight);
-        if (summaryBottom > summaryTop + POSITION_EPSILON) {
-          points.push(summaryBottom);
-        }
-      }
       return;
     }
 
@@ -224,12 +206,18 @@ export function ScrollPager() {
 
       if (
         wheelDelta < 0 &&
-        isNewGesture &&
-        Math.abs(root.scrollTop - root.clientHeight) <= BACK_TRANSITION_TOLERANCE
+        Math.min(root.scrollTop, targetRef.current) <=
+          root.clientHeight + BACK_TRANSITION_TOLERANCE
       ) {
         cancelAnimation();
         velocityRef.current = 0;
-        window.dispatchEvent(new CustomEvent('landing:request-path-back'));
+        targetRef.current = root.clientHeight;
+        root.scrollTop = root.clientHeight;
+        window.dispatchEvent(
+          new CustomEvent('landing:request-path-back', {
+            detail: { source: 'wheel' },
+          })
+        );
         lastInputTimeRef.current = now;
         return;
       }
