@@ -4,13 +4,18 @@ import { useEffect, useRef } from 'react';
 
 const MIN_WHEEL_DELTA = 4;
 const POSITION_EPSILON = 2;
-const GESTURE_IDLE_MS = 180;
-const SNAP_IDLE_MS = 45;
+const MOUSE_GESTURE_IDLE_MS = 180;
+const TRACKPAD_GESTURE_IDLE_MS = 560;
+const MOUSE_SNAP_IDLE_MS = 45;
+const TRACKPAD_SNAP_IDLE_MS = 95;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
 const BACK_TRANSITION_TOLERANCE = 28;
-const GESTURE_DISTANCE_LIMIT = 0.95;
-const WHEEL_DISTANCE_MULTIPLIER = 1.8;
-const MAX_INPUT_STEP = 240;
+const MOUSE_GESTURE_DISTANCE_LIMIT = 0.95;
+const TRACKPAD_GESTURE_DISTANCE_LIMIT = 0.68;
+const MOUSE_DISTANCE_MULTIPLIER = 1.8;
+const TRACKPAD_DISTANCE_MULTIPLIER = 0.72;
+const MOUSE_MAX_INPUT_STEP = 240;
+const TRACKPAD_MAX_INPUT_STEP = 92;
 const MAX_VELOCITY = 2200;
 const SPRING_STIFFNESS = 120;
 const SPRING_DAMPING = 26;
@@ -36,6 +41,10 @@ function getPageTops(root: HTMLElement) {
   return Array.from(new Set(points.map(point => Math.round(point)))).sort((a, b) => a - b);
 }
 
+function isLikelyTrackpad(event: WheelEvent, normalizedDelta: number) {
+  return event.deltaMode === WheelEvent.DOM_DELTA_PIXEL && Math.abs(normalizedDelta) < 80;
+}
+
 export function ScrollPager() {
   const animationFrameRef = useRef<number | null>(null);
   const targetRef = useRef(0);
@@ -45,6 +54,7 @@ export function ScrollPager() {
   const motionMinRef = useRef(0);
   const motionMaxRef = useRef(Number.POSITIVE_INFINITY);
   const lastDirectionRef = useRef<-1 | 1>(1);
+  const isTrackpadGestureRef = useRef(false);
   const snapTimerRef = useRef<number | null>(null);
   const resizeFrameRef = useRef<number | null>(null);
 
@@ -173,9 +183,9 @@ export function ScrollPager() {
       startAnimation();
     };
 
-    const scheduleSnap = () => {
+    const scheduleSnap = (delay: number) => {
       cancelSnap();
-      snapTimerRef.current = window.setTimeout(settleToPage, SNAP_IDLE_MS);
+      snapTimerRef.current = window.setTimeout(settleToPage, delay);
     };
 
     const onWheel = (event: WheelEvent) => {
@@ -202,7 +212,11 @@ export function ScrollPager() {
 
       cancelSnap();
       const now = performance.now();
-      const isNewGesture = now - lastInputTimeRef.current > GESTURE_IDLE_MS;
+      const isTrackpadInput =
+        isLikelyTrackpad(event, wheelDelta) ||
+        (isTrackpadGestureRef.current && now - lastInputTimeRef.current < TRACKPAD_GESTURE_IDLE_MS);
+      const gestureIdleMs = isTrackpadInput ? TRACKPAD_GESTURE_IDLE_MS : MOUSE_GESTURE_IDLE_MS;
+      const isNewGesture = now - lastInputTimeRef.current > gestureIdleMs;
 
       if (
         wheelDelta < 0 &&
@@ -238,9 +252,12 @@ export function ScrollPager() {
       }
 
       if (isNewGesture) {
+        isTrackpadGestureRef.current = isTrackpadInput;
         gestureStartRef.current = root.scrollTop;
         targetRef.current = root.scrollTop;
-        const gestureLimit = root.clientHeight * GESTURE_DISTANCE_LIMIT;
+        const gestureLimit =
+          root.clientHeight *
+          (isTrackpadInput ? TRACKPAD_GESTURE_DISTANCE_LIMIT : MOUSE_GESTURE_DISTANCE_LIMIT);
         motionMinRef.current = Math.max(0, gestureStartRef.current - gestureLimit);
         motionMaxRef.current = Math.min(
           getLastPoint(),
@@ -249,9 +266,14 @@ export function ScrollPager() {
       }
       lastInputTimeRef.current = now;
 
+      const maxInputStep = isTrackpadInput ? TRACKPAD_MAX_INPUT_STEP : MOUSE_MAX_INPUT_STEP;
+      const distanceMultiplier = isTrackpadInput
+        ? TRACKPAD_DISTANCE_MULTIPLIER
+        : MOUSE_DISTANCE_MULTIPLIER;
+      const velocityImpulse = isTrackpadInput ? 4.2 : 7;
       const step = Math.max(
-        -MAX_INPUT_STEP,
-        Math.min(MAX_INPUT_STEP, wheelDelta * WHEEL_DISTANCE_MULTIPLIER)
+        -maxInputStep,
+        Math.min(maxInputStep, wheelDelta * distanceMultiplier)
       );
       lastDirectionRef.current = step > 0 ? 1 : -1;
 
@@ -270,10 +292,10 @@ export function ScrollPager() {
       );
       velocityRef.current = Math.max(
         -MAX_VELOCITY,
-        Math.min(MAX_VELOCITY, velocityRef.current + step * 7)
+        Math.min(MAX_VELOCITY, velocityRef.current + step * velocityImpulse)
       );
       startAnimation();
-      scheduleSnap();
+      scheduleSnap(isTrackpadInput ? TRACKPAD_SNAP_IDLE_MS : MOUSE_SNAP_IDLE_MS);
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
