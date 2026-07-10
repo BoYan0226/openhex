@@ -50,6 +50,7 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -62,6 +63,8 @@ body,
 }
 
 [data-landing-scroll-root] {
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
   scroll-behavior: auto;
 }
 

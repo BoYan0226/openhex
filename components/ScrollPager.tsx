@@ -206,6 +206,19 @@ export function ScrollPager() {
 
       if (
         wheelDelta < 0 &&
+        root.scrollTop <= POSITION_EPSILON &&
+        targetRef.current <= POSITION_EPSILON
+      ) {
+        cancelAnimation();
+        root.scrollTop = 0;
+        targetRef.current = 0;
+        velocityRef.current = 0;
+        lastInputTimeRef.current = now;
+        return;
+      }
+
+      if (
+        wheelDelta < 0 &&
         Math.min(root.scrollTop, targetRef.current) >=
           root.clientHeight - BACK_TRANSITION_TOLERANCE &&
         Math.min(root.scrollTop, targetRef.current) <=
