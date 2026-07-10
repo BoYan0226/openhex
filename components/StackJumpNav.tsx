@@ -90,6 +90,7 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
       {items.map((item, index) => {
         const distance = Math.abs(index - visibleActiveIndex);
         const shift = Math.max(0.55, 4.25 - distance * 0.58);
+        const opacity = Math.max(0.2, 1 - distance * 0.14);
 
         return (
           <button
@@ -102,7 +103,7 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
               {
                 '--stack-label-index': index,
                 '--stack-label-shift': `${shift.toFixed(2)}rem`,
-                '--stack-label-y': `${((index - visibleActiveIndex) * 2.05).toFixed(2)}rem`,
+                '--stack-label-opacity': opacity.toFixed(2),
               } as CSSProperties
             }
             onClick={() => handleJump(item.id)}
