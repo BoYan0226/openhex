@@ -13,7 +13,7 @@ const clamp = (value: number) => Math.min(1, Math.max(0, value));
 const smoothstep = (value: number) => value * value * (3 - 2 * value);
 const MOTION_SPAN_VIEWPORTS = 1.05;
 const HANDLE_LONG_WIDTH_VW = 72;
-const HANDLE_REST_WIDTH_VW = 25;
+const HANDLE_REST_WIDTH_VW = 22;
 const easeOutCubic = (value: number) => 1 - Math.pow(1 - value, 3);
 const easeOutBack = (value: number) => {
   const c1 = 1.35;
