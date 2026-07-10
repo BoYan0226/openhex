@@ -206,6 +206,8 @@ export function ScrollPager() {
 
       if (
         wheelDelta < 0 &&
+        Math.min(root.scrollTop, targetRef.current) >=
+          root.clientHeight - BACK_TRANSITION_TOLERANCE &&
         Math.min(root.scrollTop, targetRef.current) <=
           root.clientHeight + BACK_TRANSITION_TOLERANCE
       ) {
