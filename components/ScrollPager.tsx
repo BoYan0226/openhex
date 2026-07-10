@@ -106,11 +106,16 @@ export function ScrollPager() {
       return [...points].reverse().find(point => point < origin - POSITION_EPSILON);
     };
 
+    const syncLiveAgentBackArm = (position: number) => {
+      const shouldArm = isNearLiveAgent(position);
+      if (shouldArm === liveAgentBackArmedRef.current) return;
+
+      liveAgentBackArmedRef.current = shouldArm;
+      liveAgentBackArmedAtRef.current = shouldArm ? performance.now() : 0;
+    };
+
     const dispatchSettled = () => {
-      liveAgentBackArmedRef.current = isNearLiveAgent(targetRef.current);
-      liveAgentBackArmedAtRef.current = liveAgentBackArmedRef.current
-        ? performance.now()
-        : 0;
+      syncLiveAgentBackArm(targetRef.current);
       window.dispatchEvent(
         new CustomEvent('landing:scroll-settled', {
           detail: { top: targetRef.current },
@@ -448,6 +453,7 @@ export function ScrollPager() {
       }
       if (animationFrameRef.current === null) {
         targetRef.current = root.scrollTop;
+        syncLiveAgentBackArm(root.scrollTop);
       }
     };
 
