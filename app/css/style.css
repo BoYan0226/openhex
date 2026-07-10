@@ -101,10 +101,11 @@ body::-webkit-scrollbar,
   top: 4rem;
   left: 50%;
   z-index: 12;
-  width: 24vw;
-  min-width: 14rem;
-  max-width: 26rem;
-  height: 0.24rem;
+  width: var(--stack-handle-width, 74vw);
+  min-width: 8rem;
+  max-width: 78vw;
+  height: 0.25rem;
+  opacity: var(--stack-handle-opacity, 1);
   pointer-events: none;
   border-radius: 999px;
   background: linear-gradient(
@@ -117,6 +118,13 @@ body::-webkit-scrollbar,
     inset 0 1px 0 rgba(255, 255, 255, 0.38),
     0 0.2rem 0.48rem rgba(32, 33, 36, 0.12);
   transform: translateX(-50%);
+  transition:
+    opacity 1800ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sticky-panel--light[data-handle-hidden='true']::before {
+  --stack-handle-opacity: 0;
 }
 
 .stack-jump-nav {

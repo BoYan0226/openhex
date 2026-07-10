@@ -12,6 +12,8 @@ type MotionItem = {
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
 const smoothstep = (value: number) => value * value * (3 - 2 * value);
 const MOTION_SPAN_VIEWPORTS = 1.05;
+const HANDLE_LONG_WIDTH_VW = 72;
+const HANDLE_REST_WIDTH_VW = 25;
 const easeOutCubic = (value: number) => 1 - Math.pow(1 - value, 3);
 const easeOutBack = (value: number) => {
   const c1 = 1.35;
@@ -42,8 +44,12 @@ export function StackSectionMotion() {
 
       return { anchor, items };
     });
+    const handlePanels = Array.from(
+      document.querySelectorAll<HTMLElement>('.sticky-panel--light')
+    );
 
     let frame: number | null = null;
+    const handleTimers = new Map<HTMLElement, number>();
 
     const renderItem = (
       { element, index, type, variant }: MotionItem,
@@ -211,6 +217,38 @@ export function StackSectionMotion() {
       frame = null;
       const viewportHeight = root.clientHeight;
 
+      handlePanels.forEach(panel => {
+        const rect = panel.getBoundingClientRect();
+        const arrivalProgress = clamp(1 - Math.max(0, rect.top) / Math.max(1, viewportHeight));
+        const easedProgress = easeOutCubic(arrivalProgress);
+        const width =
+          HANDLE_LONG_WIDTH_VW -
+          (HANDLE_LONG_WIDTH_VW - HANDLE_REST_WIDTH_VW) * easedProgress;
+        const isAtTop = Math.abs(rect.top) <= 1;
+
+        panel.style.setProperty('--stack-handle-width', `${width.toFixed(2)}vw`);
+
+        if (!isAtTop) {
+          const timer = handleTimers.get(panel);
+          if (timer !== undefined) {
+            window.clearTimeout(timer);
+            handleTimers.delete(panel);
+          }
+          panel.dataset.handleHidden = 'false';
+          return;
+        }
+
+        if (panel.dataset.handleHidden === 'true' || handleTimers.has(panel)) {
+          return;
+        }
+
+        const timer = window.setTimeout(() => {
+          handleTimers.delete(panel);
+          panel.dataset.handleHidden = 'true';
+        }, 120);
+        handleTimers.set(panel, timer);
+      });
+
       sections.forEach(({ anchor, items }) => {
         if (!anchor) return;
 
@@ -233,6 +271,7 @@ export function StackSectionMotion() {
 
     return () => {
       if (frame !== null) window.cancelAnimationFrame(frame);
+      handleTimers.forEach(timer => window.clearTimeout(timer));
       root.removeEventListener('scroll', requestUpdate);
       window.removeEventListener('resize', requestUpdate);
     };
