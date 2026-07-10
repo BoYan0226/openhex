@@ -255,7 +255,13 @@ export function StackSectionMotion() {
 
         panel.style.setProperty('--stack-handle-width', `${width.toFixed(2)}vw`);
 
-        if (!isAtTop || isReverseEntering) {
+        if (isAtTop && isReverseEntering) {
+          clearHandleTimer(panel);
+          panel.dataset.handleHidden = 'true';
+          return;
+        }
+
+        if (!isAtTop) {
           clearHandleTimer(panel);
           panel.dataset.handleHidden = 'false';
           return;
