@@ -74,7 +74,7 @@ export function WhichSideSection() {
               width={150}
               height={150}
               alt=""
-              className="pointer-events-none absolute -bottom-1 right-2 h-32 w-32 2xl:h-40 2xl:w-40"
+              className="pointer-events-none absolute -bottom-1 right-2 h-24 w-24 object-contain md:h-32 md:w-32 2xl:h-40 2xl:w-40"
             />
           </div>
 
@@ -114,7 +114,7 @@ export function WhichSideSection() {
               height={150}
               unoptimized
               alt=""
-              className="pointer-events-none absolute -bottom-1 right-2 h-32 w-32 2xl:h-40 2xl:w-40 object-contain"
+              className="pointer-events-none absolute -bottom-1 right-2 h-24 w-24 object-contain md:h-32 md:w-32 2xl:h-40 2xl:w-40"
             />
           </div>
         </div>
