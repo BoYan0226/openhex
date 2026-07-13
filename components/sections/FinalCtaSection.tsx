@@ -38,7 +38,7 @@ export function FinalCtaSection() {
           <span>{titleBeforeAgent}</span>
           <span className="relative inline-block whitespace-nowrap">
             Agent
-            <span className="pointer-events-none absolute left-1/2 top-[-1.02em] -translate-x-1/2">
+            <span className="pointer-events-none absolute left-1/2 top-[-0.86em] -translate-x-1/2">
               <Image
                 src={publicPath('/landing/bee-running.gif')}
                 width={200}
