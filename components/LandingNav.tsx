@@ -31,7 +31,7 @@ export function LandingNav() {
             width={52}
             height={52}
             priority
-            className="h-8 w-8 shrink-0 brightness-0 invert"
+            className="h-[35px] w-[35px] shrink-0 brightness-0 invert"
           />
           <div className="inline-grid grid-cols-[max-content] grid-rows-[max-content] place-items-start leading-[0]">
             <Image
@@ -40,9 +40,9 @@ export function LandingNav() {
               width={114}
               height={24}
               priority
-              className="col-start-1 row-start-1 block h-[16px] w-[80px] brightness-0 invert"
+              className="col-start-1 row-start-1 block h-[18px] w-[88px] brightness-0 invert"
             />
-            <p className="col-start-1 row-start-1 ml-[2px] mt-[15px] whitespace-nowrap text-[7px] font-medium leading-[1.5] tracking-[6.2px] text-white/70">
+            <p className="col-start-1 row-start-1 ml-[2px] mt-[17px] whitespace-nowrap text-[7.5px] font-medium leading-[1.5] tracking-[6.8px] text-white/70">
               迷境智塔旗下
             </p>
           </div>
