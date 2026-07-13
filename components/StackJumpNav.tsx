@@ -20,6 +20,15 @@ function easeOutCubic(value: number) {
   return 1 - (1 - value) ** 3;
 }
 
+function getSummaryTop(anchor: HTMLElement) {
+  const summaryPanel = anchor.nextElementSibling;
+  const navHeight = document.querySelector<HTMLElement>('nav')?.getBoundingClientRect().height ?? 0;
+  const panelTop =
+    summaryPanel instanceof HTMLElement ? summaryPanel.offsetTop : anchor.offsetTop;
+
+  return Math.max(0, panelTop - navHeight);
+}
+
 export function StackJumpNav({ items }: StackJumpNavProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [navPhase, setNavPhase] = useState<'opening' | 'active' | 'summary'>('opening');
@@ -36,8 +45,10 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
 
     let frame: number | null = null;
     const refreshTargetTops = () => {
-      targetTopsRef.current = targets.map(target => target?.offsetTop ?? 0);
-      summaryTopRef.current = summary?.offsetTop ?? 0;
+      targetTopsRef.current = targets.map(target =>
+        target?.id === 'stack-summary' ? getSummaryTop(target) : target?.offsetTop ?? 0
+      );
+      summaryTopRef.current = summary ? getSummaryTop(summary) : 0;
     };
 
     const update = () => {
@@ -145,7 +156,10 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
 
     const topValue = getComputedStyle(target).getPropertyValue('--sticky-offset');
     const offsetRem = Number.parseFloat(topValue) || 0;
-    const targetTop = target.offsetTop - offsetRem * getRemInPixels();
+    const targetTop =
+      id === 'stack-summary'
+        ? getSummaryTop(target)
+        : target.offsetTop - offsetRem * getRemInPixels();
     animateJump(root, Math.max(0, targetTop));
   };
 
