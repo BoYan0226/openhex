@@ -27,6 +27,7 @@ const MOUSE_GESTURE_DISTANCE_LIMIT = 0.95;
 const MOUSE_DISTANCE_MULTIPLIER = 1.8;
 const MOUSE_MAX_INPUT_STEP = 240;
 const MAX_VELOCITY = 2200;
+const TRACKPAD_MAX_VELOCITY = 4000;
 const SPRING_STIFFNESS = 120;
 const SPRING_DAMPING = 26;
 const SPRING_MASS = 1.8;
@@ -230,7 +231,7 @@ export function ScrollPager() {
       gestureStartRef.current = scrollRoot.scrollTop;
       motionMinRef.current = 0;
       motionMaxRef.current = getLastPoint();
-      easeToTarget(target, undefined, easeOutQuint, undefined, MAX_VELOCITY);
+      easeToTarget(target, undefined, easeOutQuint, undefined, TRACKPAD_MAX_VELOCITY);
     }
     const requestHomeTransition = (
       options: { freshGesture?: boolean; fromCurrent?: boolean } = {}
