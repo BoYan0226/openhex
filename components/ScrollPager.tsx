@@ -49,6 +49,7 @@ export function ScrollPager() {
   const lastDirectionRef = useRef<-1 | 1>(1);
   const isTrackpadGestureRef = useRef(false);
   const lastTrackpadReleaseRef = useRef(0);
+  const trackpadReleaseTimerRef = useRef<number | null>(null);
   const snapTimerRef = useRef<number | null>(null);
   const resizeFrameRef = useRef<number | null>(null);
   const pageTopsRef = useRef<number[]>([]);
@@ -70,6 +71,23 @@ export function ScrollPager() {
         window.clearTimeout(snapTimerRef.current);
         snapTimerRef.current = null;
       }
+    };
+
+    const cancelTrackpadRelease = () => {
+      if (trackpadReleaseTimerRef.current !== null) {
+        window.clearTimeout(trackpadReleaseTimerRef.current);
+        trackpadReleaseTimerRef.current = null;
+      }
+    };
+
+    const releaseTrackpadAfterIdle = () => {
+      cancelTrackpadRelease();
+      trackpadReleaseTimerRef.current = window.setTimeout(() => {
+        trackpadReleaseTimerRef.current = null;
+        isTrackpadGestureRef.current = false;
+        lastInputTimeRef.current = 0;
+        lastTrackpadReleaseRef.current = performance.now();
+      }, TRACKPAD_GESTURE_IDLE_MS);
     };
 
     const refreshPageTops = () => {
@@ -100,6 +118,7 @@ export function ScrollPager() {
     const requestHomeTransition = () => {
       cancelSnap();
       cancelAnimation();
+      cancelTrackpadRelease();
       velocityRef.current = 0;
       isTrackpadGestureRef.current = false;
       lastInputTimeRef.current = 0;
@@ -367,7 +386,13 @@ export function ScrollPager() {
       }
 
       if (isTrackpadInput) {
-        if (isNewGesture || !isTrackpadGestureRef.current) {
+        const canReverseAfterTrackpadSettles =
+          animationModeRef.current !== 'ease' &&
+          direction !== lastDirectionRef.current &&
+          Math.abs(wheelDelta) >= TRACKPAD_TAIL_DELTA;
+
+        if (isNewGesture || !isTrackpadGestureRef.current || canReverseAfterTrackpadSettles) {
+          cancelTrackpadRelease();
           const points = getPageTops();
           const target = getAdjacentTarget(points, root.scrollTop, direction);
           isTrackpadGestureRef.current = true;
@@ -383,19 +408,19 @@ export function ScrollPager() {
             }
 
             easeToTarget(target, TRACKPAD_SNAP_DURATION, easeOutQuart, () => {
-              isTrackpadGestureRef.current = false;
-              lastInputTimeRef.current = 0;
-              lastTrackpadReleaseRef.current = performance.now();
+              releaseTrackpadAfterIdle();
             });
           } else {
             isTrackpadGestureRef.current = false;
             lastInputTimeRef.current = 0;
+            lastTrackpadReleaseRef.current = performance.now();
           }
           return;
         }
 
         if (animationModeRef.current !== 'ease') {
           lastInputTimeRef.current = now;
+          releaseTrackpadAfterIdle();
         }
         return;
       }
@@ -481,6 +506,7 @@ export function ScrollPager() {
       }
       cancelSnap();
       cancelAnimation();
+      cancelTrackpadRelease();
       velocityRef.current = 0;
       window.setTimeout(() => {
         targetRef.current = root.scrollTop;
@@ -520,6 +546,7 @@ export function ScrollPager() {
     const onPathTransitionStart = () => {
       cancelSnap();
       cancelAnimation();
+      cancelTrackpadRelease();
       velocityRef.current = 0;
       isTrackpadGestureRef.current = false;
       lastInputTimeRef.current = 0;
@@ -544,6 +571,7 @@ export function ScrollPager() {
     return () => {
       cancelSnap();
       cancelAnimation();
+      cancelTrackpadRelease();
       if (resizeFrameRef.current !== null) {
         window.cancelAnimationFrame(resizeFrameRef.current);
       }
