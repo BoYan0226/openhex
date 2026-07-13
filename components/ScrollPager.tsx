@@ -6,6 +6,11 @@ const MIN_WHEEL_DELTA = 4;
 const POSITION_EPSILON = 2;
 const MOUSE_GESTURE_IDLE_MS = 180;
 const MOUSE_SNAP_IDLE_MS = 45;
+const TRACKPAD_DELTA_LIMIT = 90;
+const TRACKPAD_TRIGGER_DELTA = 58;
+const TRACKPAD_REVERSE_TRIGGER_DELTA = 42;
+const TRACKPAD_GESTURE_IDLE_MS = 160;
+const TRACKPAD_EASE_DURATION = 640;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
 const SNAP_MIN_DISTANCE_PX = 195;
 const MOUSE_GESTURE_DISTANCE_LIMIT = 0.95;
@@ -27,6 +32,10 @@ function easeOutQuint(value: number) {
   return 1 - (1 - value) ** 5;
 }
 
+function isLikelyTrackpad(event: WheelEvent, normalizedDelta: number) {
+  return event.deltaMode === WheelEvent.DOM_DELTA_PIXEL && Math.abs(normalizedDelta) < TRACKPAD_DELTA_LIMIT;
+}
+
 export function ScrollPager() {
   const animationFrameRef = useRef<number | null>(null);
   const animationModeRef = useRef<'ease' | 'spring' | null>(null);
@@ -37,6 +46,10 @@ export function ScrollPager() {
   const motionMinRef = useRef(0);
   const motionMaxRef = useRef(Number.POSITIVE_INFINITY);
   const lastDirectionRef = useRef<-1 | 1>(1);
+  const trackpadDeltaRef = useRef(0);
+  const trackpadConsumedRef = useRef(false);
+  const trackpadLastInputRef = useRef(0);
+  const trackpadLastDirectionRef = useRef<-1 | 1 | null>(null);
   const snapTimerRef = useRef<number | null>(null);
   const resizeFrameRef = useRef<number | null>(null);
   const pageTopsRef = useRef<number[]>([]);
@@ -122,16 +135,30 @@ export function ScrollPager() {
     };
     const isHomeTarget = (value: number | undefined) =>
       value !== undefined && value <= POSITION_EPSILON;
+    const resetTrackpadGesture = () => {
+      trackpadDeltaRef.current = 0;
+      trackpadConsumedRef.current = false;
+      trackpadLastInputRef.current = 0;
+      trackpadLastDirectionRef.current = null;
+    };
     const requestHomeTransition = () => {
       cancelSnap();
       cancelAnimation();
       velocityRef.current = 0;
       lastInputTimeRef.current = 0;
+      resetTrackpadGesture();
       window.dispatchEvent(
         new CustomEvent('landing:request-path-back', {
           detail: { force: true, fromCurrent: false },
         })
       );
+    };
+    const getAdjacentTarget = (points: number[], origin: number, direction: -1 | 1) => {
+      if (direction > 0) {
+        return points.find(point => point > origin + POSITION_EPSILON);
+      }
+
+      return [...points].reverse().find(point => point < origin - POSITION_EPSILON);
     };
     const dispatchSettled = () => {
       window.dispatchEvent(
@@ -334,6 +361,7 @@ export function ScrollPager() {
       const now = performance.now();
       const isNewGesture = now - lastInputTimeRef.current > MOUSE_GESTURE_IDLE_MS;
       const direction = wheelDelta > 0 ? 1 : -1;
+      const isTrackpadInput = isLikelyTrackpad(event, wheelDelta);
 
       if (
         direction < 0 &&
@@ -363,6 +391,7 @@ export function ScrollPager() {
 
       if (isScrollableSummaryArea(direction)) {
         cancelAnimation();
+        resetTrackpadGesture();
         const scrollMax = getScrollMax();
         const summaryTop = summaryTopRef.current;
         const nextTop = Math.max(summaryTop, Math.min(scrollMax, root.scrollTop + wheelDelta));
@@ -377,6 +406,64 @@ export function ScrollPager() {
         motionMaxRef.current = scrollMax;
         return;
       }
+
+      if (isTrackpadInput) {
+        const isTrackpadIdle =
+          now - trackpadLastInputRef.current > TRACKPAD_GESTURE_IDLE_MS;
+        const directionChanged = trackpadLastDirectionRef.current !== null &&
+          trackpadLastDirectionRef.current !== direction;
+        const isReversingEase =
+          animationModeRef.current === 'ease' && direction !== lastDirectionRef.current;
+
+        if (isTrackpadIdle || directionChanged) {
+          trackpadDeltaRef.current = 0;
+          trackpadConsumedRef.current = false;
+        }
+
+        trackpadLastInputRef.current = now;
+        trackpadLastDirectionRef.current = direction;
+        lastInputTimeRef.current = now;
+
+        if (!trackpadConsumedRef.current || isReversingEase) {
+          trackpadDeltaRef.current += wheelDelta;
+        }
+
+        const triggerDelta = isReversingEase
+          ? TRACKPAD_REVERSE_TRIGGER_DELTA
+          : TRACKPAD_TRIGGER_DELTA;
+
+        if (trackpadConsumedRef.current && !isReversingEase) {
+          return;
+        }
+
+        if (Math.abs(trackpadDeltaRef.current) < triggerDelta) {
+          return;
+        }
+
+        const points = getPageTops();
+        const target = getAdjacentTarget(points, root.scrollTop, direction);
+        trackpadConsumedRef.current = true;
+        trackpadDeltaRef.current = 0;
+
+        if (target === undefined) {
+          return;
+        }
+
+        if (direction < 0 && isHomeTarget(target) && root.scrollTop > POSITION_EPSILON) {
+          requestHomeTransition();
+          return;
+        }
+
+        cancelAnimation();
+        lastDirectionRef.current = direction;
+        gestureStartRef.current = root.scrollTop;
+        motionMinRef.current = 0;
+        motionMaxRef.current = getLastPoint();
+        easeToTarget(target, TRACKPAD_EASE_DURATION);
+        return;
+      }
+
+      resetTrackpadGesture();
 
       if (isNewGesture) {
         gestureStartRef.current = root.scrollTop;
@@ -458,6 +545,7 @@ export function ScrollPager() {
       }
       cancelSnap();
       cancelAnimation();
+      resetTrackpadGesture();
       velocityRef.current = 0;
       window.setTimeout(() => {
         targetRef.current = root.scrollTop;
@@ -470,6 +558,7 @@ export function ScrollPager() {
     const onResize = () => {
       cancelSnap();
       cancelAnimation();
+      resetTrackpadGesture();
       velocityRef.current = 0;
 
       if (resizeFrameRef.current !== null) {
@@ -497,6 +586,7 @@ export function ScrollPager() {
     const onPathTransitionStart = () => {
       cancelSnap();
       cancelAnimation();
+      resetTrackpadGesture();
       velocityRef.current = 0;
       lastInputTimeRef.current = 0;
       targetRef.current = root.scrollTop;
@@ -519,6 +609,7 @@ export function ScrollPager() {
     return () => {
       cancelSnap();
       cancelAnimation();
+      resetTrackpadGesture();
       if (resizeFrameRef.current !== null) {
         window.cancelAnimationFrame(resizeFrameRef.current);
       }
