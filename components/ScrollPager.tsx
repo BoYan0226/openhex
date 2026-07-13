@@ -387,7 +387,7 @@ export function ScrollPager() {
         return;
       }
 
-      if (animationModeRef.current === 'ease' && isNewGesture) {
+      if (!isTrackpadInput && animationModeRef.current === 'ease' && isNewGesture) {
         cancelAnimation();
       }
 
