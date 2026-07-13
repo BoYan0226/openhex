@@ -477,6 +477,8 @@ export function ScrollPager() {
     };
 
     const onWheel = (event: WheelEvent) => {
+      if (isMobileViewport()) return;
+
       if (
         event.defaultPrevented ||
         event.ctrlKey ||
@@ -625,6 +627,8 @@ export function ScrollPager() {
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (isMobileViewport()) return;
+
       if (event.defaultPrevented) return;
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
         return;
@@ -639,7 +643,7 @@ export function ScrollPager() {
       }
     };
     const onTouchStart = (event: TouchEvent) => {
-      if (!isMobileViewport()) return;
+      if (isMobileViewport()) return;
 
       touchStartYRef.current = event.touches[0]?.clientY ?? null;
       touchStartTopRef.current = root.scrollTop;
@@ -651,7 +655,7 @@ export function ScrollPager() {
         currentPanelBottom - MOBILE_PANEL_END_TOLERANCE;
     };
     const onTouchMove = (event: TouchEvent) => {
-      if (!isMobileViewport() || touchStartYRef.current === null) return;
+      if (isMobileViewport() || touchStartYRef.current === null) return;
 
       const y = event.touches[0]?.clientY;
       if (y === undefined) return;
@@ -675,7 +679,7 @@ export function ScrollPager() {
       }
     };
     const onTouchEnd = (event: TouchEvent) => {
-      if (!isMobileViewport()) return;
+      if (isMobileViewport()) return;
 
       const startY = touchStartYRef.current;
       touchStartYRef.current = null;
@@ -741,6 +745,15 @@ export function ScrollPager() {
       resizeFrameRef.current = window.requestAnimationFrame(() => {
         resizeFrameRef.current = null;
         refreshPageTops();
+        if (isMobileViewport()) {
+          targetRef.current = root.scrollTop;
+          gestureStartRef.current = root.scrollTop;
+          lastInputTimeRef.current = 0;
+          motionMinRef.current = 0;
+          motionMaxRef.current = getLastPoint();
+          return;
+        }
+
         const points = getPageTops();
         const nearest =
           points.reduce((best, point) =>

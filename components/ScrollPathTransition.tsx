@@ -28,6 +28,7 @@ const SECOND_SCREEN_INDEX = 1;
 const SCREEN_TOLERANCE = 0.16;
 const BACK_TRANSITION_ARM_MS = 80;
 const TOUCH_TRANSITION_DELTA = 1;
+const MOBILE_BREAKPOINT_PX = 767;
 
 function compilePath(path: string) {
   const parts: string[] = [];
@@ -106,6 +107,7 @@ export function ScrollPathTransition() {
 
     let isDisposed = false;
     const getViewportHeight = () => root.clientHeight || window.innerHeight;
+    const isMobileViewport = () => window.innerWidth <= MOBILE_BREAKPOINT_PX;
     const getScreenTop = (screenIndex: number) => screenIndex * getViewportHeight();
     const isNearScreen = (screenIndex: number) => {
       const tolerance = getViewportHeight() * SCREEN_TOLERANCE;
@@ -233,6 +235,8 @@ export function ScrollPathTransition() {
     };
 
     const onWheel = (event: WheelEvent) => {
+      if (isMobileViewport()) return;
+
       if (isAnimatingRef.current) {
         event.preventDefault();
         return;
@@ -252,10 +256,14 @@ export function ScrollPathTransition() {
     };
 
     const onTouchStart = (event: TouchEvent) => {
+      if (isMobileViewport()) return;
+
       touchStartYRef.current = event.touches[0]?.clientY ?? null;
     };
 
     const onTouchMove = (event: TouchEvent) => {
+      if (isMobileViewport()) return;
+
       if (isAnimatingRef.current) {
         event.preventDefault();
         return;
@@ -287,6 +295,8 @@ export function ScrollPathTransition() {
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (isMobileViewport()) return;
+
       if (isAnimatingRef.current) {
         event.preventDefault();
         return;
@@ -329,6 +339,8 @@ export function ScrollPathTransition() {
     };
 
     const onBackRequest = (event: Event) => {
+      if (isMobileViewport()) return;
+
       const detail = (event as CustomEvent<{ force?: boolean; fromCurrent?: boolean }>).detail;
       const shouldForce = Boolean(detail?.force);
       const fromCurrent = detail?.fromCurrent ?? shouldForce;
