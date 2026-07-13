@@ -38,7 +38,7 @@ export function FinalCtaSection() {
           <span>{titleBeforeAgent}</span>
           <span className="relative inline-block whitespace-nowrap">
             Agent
-            <span className="final-cta-bee pointer-events-none absolute left-1/2 top-[-1.02em] -translate-x-1/2">
+            <span className="pointer-events-none absolute left-1/2 top-[-0.94em] -translate-x-1/2 md:hidden">
               <Image
                 src={publicPath('/landing/bee-running.gif')}
                 width={200}
@@ -55,6 +55,18 @@ export function FinalCtaSection() {
             {titleAfterAgent}
             <span className="relative inline-block">
               <FlipWord words={highlights} />
+              <span className="pointer-events-none absolute left-1/2 top-[-1.65em] hidden -translate-x-1/2 md:block">
+                <Image
+                  src={publicPath('/landing/bee-running.gif')}
+                  width={200}
+                  height={200}
+                  unoptimized
+                  priority
+                  alt=""
+                  aria-hidden
+                  className="animate-run-x block h-[1.9em] w-[1.9em] select-none"
+                />
+              </span>
             </span>
           </span>
         </h2>
