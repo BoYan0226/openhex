@@ -25,24 +25,6 @@ const EASE_SNAP_PX_PER_MS = 1.55;
 const TRACKPAD_SNAP_DURATION = 480;
 const HOME_TRANSITION_GUARD_RATIO = 1.15;
 
-function getPageTops(root: HTMLElement) {
-  const points = [0, root.clientHeight];
-
-  document.querySelectorAll<HTMLElement>('.stack-anchor').forEach(anchor => {
-    if (anchor.id === 'stack-live-agent') return;
-
-    if (anchor.id === 'stack-summary') {
-      const summaryTop = Math.max(0, anchor.offsetTop);
-      points.push(summaryTop);
-      return;
-    }
-
-    points.push(anchor.offsetTop);
-  });
-
-  return Array.from(new Set(points.map(point => Math.round(point)))).sort((a, b) => a - b);
-}
-
 function isLikelyTrackpad(event: WheelEvent, normalizedDelta: number) {
   return event.deltaMode === WheelEvent.DOM_DELTA_PIXEL && Math.abs(normalizedDelta) < 80;
 }
@@ -69,6 +51,7 @@ export function ScrollPager() {
   const lastTrackpadReleaseRef = useRef(0);
   const snapTimerRef = useRef<number | null>(null);
   const resizeFrameRef = useRef<number | null>(null);
+  const pageTopsRef = useRef<number[]>([]);
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
@@ -89,7 +72,26 @@ export function ScrollPager() {
       }
     };
 
-    const getLastPoint = () => getPageTops(root).at(-1) ?? 0;
+    const refreshPageTops = () => {
+      const points = [0, root.clientHeight];
+
+      document.querySelectorAll<HTMLElement>('.stack-anchor').forEach(anchor => {
+        if (anchor.id === 'stack-live-agent') return;
+
+        if (anchor.id === 'stack-summary') {
+          points.push(Math.max(0, anchor.offsetTop));
+          return;
+        }
+
+        points.push(anchor.offsetTop);
+      });
+
+      pageTopsRef.current = Array.from(new Set(points.map(point => Math.round(point)))).sort(
+        (a, b) => a - b
+      );
+    };
+    const getPageTops = () => pageTopsRef.current;
+    const getLastPoint = () => pageTopsRef.current.at(-1) ?? 0;
     const clampTarget = (value: number) => Math.min(getLastPoint(), Math.max(0, value));
     const clampMotion = (value: number) =>
       Math.max(motionMinRef.current, Math.min(motionMaxRef.current, clampTarget(value)));
@@ -220,7 +222,7 @@ export function ScrollPager() {
 
     const movePage = (direction: -1 | 1) => {
       cancelSnap();
-      const points = getPageTops(root);
+      const points = getPageTops();
       const current = root.scrollTop;
       const target =
         direction > 0
@@ -242,7 +244,7 @@ export function ScrollPager() {
 
     const settleToPage = () => {
       snapTimerRef.current = null;
-      const points = getPageTops(root);
+      const points = getPageTops();
       if (points.length === 0) return;
 
       const position = targetRef.current;
@@ -366,7 +368,7 @@ export function ScrollPager() {
 
       if (isTrackpadInput) {
         if (isNewGesture || !isTrackpadGestureRef.current) {
-          const points = getPageTops(root);
+          const points = getPageTops();
           const target = getAdjacentTarget(points, root.scrollTop, direction);
           isTrackpadGestureRef.current = true;
           gestureStartRef.current = root.scrollTop;
@@ -499,7 +501,8 @@ export function ScrollPager() {
 
       resizeFrameRef.current = window.requestAnimationFrame(() => {
         resizeFrameRef.current = null;
-        const points = getPageTops(root);
+        refreshPageTops();
+        const points = getPageTops();
         const nearest =
           points.reduce((best, point) =>
             Math.abs(point - root.scrollTop) < Math.abs(best - root.scrollTop) ? point : best
@@ -527,6 +530,7 @@ export function ScrollPager() {
       motionMaxRef.current = getLastPoint();
     };
 
+    refreshPageTops();
     targetRef.current = root.scrollTop;
     gestureStartRef.current = root.scrollTop;
     motionMaxRef.current = getLastPoint();

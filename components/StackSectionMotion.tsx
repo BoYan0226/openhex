@@ -9,6 +9,19 @@ type MotionItem = {
   variant: 'burst' | 'fan' | 'rise' | 'split' | 'steps' | 'tilt' | 'weave';
 };
 
+type SectionMotion = {
+  anchor: HTMLElement | null;
+  anchorTop: number;
+  items: MotionItem[];
+  nextAnchorTop?: number;
+};
+
+type HandlePanelMotion = {
+  anchorTop: number;
+  nextTop?: number;
+  panel: HTMLElement;
+};
+
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
 const smoothstep = (value: number) => value * value * (3 - 2 * value);
 const MOTION_SPAN_VIEWPORTS = 1.05;
@@ -26,7 +39,7 @@ export function StackSectionMotion() {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
     if (!root) return undefined;
 
-    const sections = Array.from(
+    const sections: SectionMotion[] = Array.from(
       document.querySelectorAll<HTMLElement>('[data-stack-motion]')
     ).map(section => {
       const anchor = section.closest('.sticky-panel')?.previousElementSibling as HTMLElement | null;
@@ -42,15 +55,31 @@ export function StackSectionMotion() {
         });
       });
 
-      return { anchor, items };
+      return { anchor, anchorTop: 0, items };
     });
-    const handlePanels = Array.from(
+    const handlePanels: HandlePanelMotion[] = Array.from(
       document.querySelectorAll<HTMLElement>('.sticky-panel--light')
-    );
+    ).map(panel => ({ anchorTop: 0, panel }));
 
     let frame: number | null = null;
     let previousScrollTop = root.scrollTop;
     const handleTimers = new Map<HTMLElement, number>();
+
+    const refreshMetrics = () => {
+      sections.forEach((section, index) => {
+        section.anchorTop = section.anchor?.offsetTop ?? 0;
+        section.nextAnchorTop = sections[index + 1]?.anchor?.offsetTop;
+      });
+
+      handlePanels.forEach(entry => {
+        const anchor = entry.panel.previousElementSibling as HTMLElement | null;
+        const nextAnchor = entry.panel.nextElementSibling as HTMLElement | null;
+        entry.anchorTop = anchor?.classList.contains('stack-anchor') ? anchor.offsetTop : 0;
+        entry.nextTop = nextAnchor?.classList.contains('stack-anchor')
+          ? nextAnchor.offsetTop
+          : undefined;
+      });
+    };
 
     const clearHandleTimer = (panel: HTMLElement) => {
       const timer = handleTimers.get(panel);
@@ -229,14 +258,8 @@ export function StackSectionMotion() {
       const isScrollingUp = scrollTop < previousScrollTop - 0.5;
       previousScrollTop = scrollTop;
 
-      handlePanels.forEach(panel => {
+      handlePanels.forEach(({ anchorTop, nextTop, panel }) => {
         const rect = panel.getBoundingClientRect();
-        const anchor = panel.previousElementSibling as HTMLElement | null;
-        const nextAnchor = panel.nextElementSibling as HTMLElement | null;
-        const anchorTop = anchor?.classList.contains('stack-anchor') ? anchor.offsetTop : 0;
-        const nextTop = nextAnchor?.classList.contains('stack-anchor')
-          ? nextAnchor.offsetTop
-          : undefined;
         const isReverseEntering =
           isScrollingUp &&
           nextTop !== undefined &&
@@ -278,24 +301,22 @@ export function StackSectionMotion() {
         handleTimers.set(panel, timer);
       });
 
-      sections.forEach(({ anchor, items }, index) => {
+      sections.forEach(({ anchor, anchorTop, items, nextAnchorTop }) => {
         if (!anchor) return;
 
         const span = viewportHeight * MOTION_SPAN_VIEWPORTS;
-        const anchorTop = anchor.offsetTop;
         const start = anchorTop - span;
         const end = anchorTop;
         let sectionProgress = clamp((scrollTop - start) / Math.max(1, end - start));
-        const nextAnchor = sections[index + 1]?.anchor;
 
         if (
           isScrollingUp &&
-          nextAnchor &&
+          nextAnchorTop !== undefined &&
           scrollTop >= anchorTop - 1 &&
-          scrollTop <= nextAnchor.offsetTop + 1
+          scrollTop <= nextAnchorTop + 1
         ) {
-          const reverseSpan = Math.min(span, Math.max(1, nextAnchor.offsetTop - anchorTop));
-          sectionProgress = clamp((nextAnchor.offsetTop - scrollTop) / reverseSpan);
+          const reverseSpan = Math.min(span, Math.max(1, nextAnchorTop - anchorTop));
+          sectionProgress = clamp((nextAnchorTop - scrollTop) / reverseSpan);
         }
 
         items.forEach(item => renderItem(item, sectionProgress));
@@ -307,15 +328,21 @@ export function StackSectionMotion() {
       frame = window.requestAnimationFrame(update);
     };
 
+    const onResize = () => {
+      refreshMetrics();
+      requestUpdate();
+    };
+
+    refreshMetrics();
     root.addEventListener('scroll', requestUpdate, { passive: true });
-    window.addEventListener('resize', requestUpdate);
+    window.addEventListener('resize', onResize);
     requestUpdate();
 
     return () => {
       if (frame !== null) window.cancelAnimationFrame(frame);
       handleTimers.forEach(timer => window.clearTimeout(timer));
       root.removeEventListener('scroll', requestUpdate);
-      window.removeEventListener('resize', requestUpdate);
+      window.removeEventListener('resize', onResize);
     };
   }, []);
 

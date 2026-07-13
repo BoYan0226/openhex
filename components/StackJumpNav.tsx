@@ -24,6 +24,8 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [navPhase, setNavPhase] = useState<'opening' | 'active' | 'summary'>('opening');
   const jumpFrameRef = useRef<number | null>(null);
+  const targetTopsRef = useRef<number[]>([]);
+  const summaryTopRef = useRef(0);
   const visibleActiveIndex = activeIndex ?? 0;
 
   useEffect(() => {
@@ -33,13 +35,17 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
     if (!root) return undefined;
 
     let frame: number | null = null;
+    const refreshTargetTops = () => {
+      targetTopsRef.current = targets.map(target => target?.offsetTop ?? 0);
+      summaryTopRef.current = summary?.offsetTop ?? 0;
+    };
 
     const update = () => {
       frame = null;
 
       const isOpeningScreen = root.scrollTop < root.clientHeight * 0.65;
       const isSummaryScreen = Boolean(
-        summary && root.scrollTop >= summary.offsetTop - root.clientHeight * 0.15
+        summary && root.scrollTop >= summaryTopRef.current - root.clientHeight * 0.15
       );
 
       if (isOpeningScreen) {
@@ -57,8 +63,8 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
       const probe = root.scrollTop + Math.min(root.clientHeight * 0.38, 280);
       let nextIndex = 0;
 
-      targets.forEach((target, index) => {
-        if (target && target.offsetTop <= probe) nextIndex = index;
+      targetTopsRef.current.forEach((targetTop, index) => {
+        if (targets[index] && targetTop <= probe) nextIndex = index;
       });
 
       setActiveIndex(current => (current === nextIndex ? current : nextIndex));
@@ -70,14 +76,20 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
       frame = window.requestAnimationFrame(update);
     };
 
+    const onResize = () => {
+      refreshTargetTops();
+      requestUpdate();
+    };
+
+    refreshTargetTops();
     root.addEventListener('scroll', requestUpdate, { passive: true });
-    window.addEventListener('resize', requestUpdate);
+    window.addEventListener('resize', onResize);
     requestUpdate();
 
     return () => {
       if (frame !== null) window.cancelAnimationFrame(frame);
       root.removeEventListener('scroll', requestUpdate);
-      window.removeEventListener('resize', requestUpdate);
+      window.removeEventListener('resize', onResize);
       if (jumpFrameRef.current !== null) window.cancelAnimationFrame(jumpFrameRef.current);
     };
   }, [items]);
