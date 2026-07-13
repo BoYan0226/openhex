@@ -419,6 +419,10 @@ body::-webkit-scrollbar,
 }
 
 @media (max-width: 767px) {
+  .stack-jump-nav {
+    display: none;
+  }
+
   .hero-split-left,
   .hero-split-right {
     transform: translate3d(0, 3rem, 0);
