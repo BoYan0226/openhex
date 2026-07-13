@@ -28,6 +28,7 @@ const SECOND_SCREEN_INDEX = 1;
 const SCREEN_TOLERANCE = 0.16;
 const BACK_TRANSITION_ARM_MS = 80;
 const BACK_TRANSITION_REENTRY_GUARD_MS = 280;
+const BACK_TRANSITION_FRESH_GESTURE_GAP_MS = 100;
 const TOUCH_TRANSITION_DELTA = 1;
 const MOBILE_BREAKPOINT_PX = 767;
 
@@ -98,6 +99,7 @@ export function ScrollPathTransition() {
   const isAnimatingRef = useRef(false);
   const backTransitionArmedRef = useRef(false);
   const backTransitionTimerRef = useRef<number | null>(null);
+  const lastWheelEventAtRef = useRef(0);
   const touchStartYRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -260,6 +262,10 @@ export function ScrollPathTransition() {
     const onWheel = (event: WheelEvent) => {
       if (isMobileViewport()) return;
 
+      const now = performance.now();
+      const wheelEventGap = now - lastWheelEventAtRef.current;
+      lastWheelEventAtRef.current = now;
+
       if (isAnimatingRef.current) {
         event.preventDefault();
         return;
@@ -274,7 +280,12 @@ export function ScrollPathTransition() {
       if (event.deltaY < 0 && isNearScreen(SECOND_SCREEN_INDEX)) {
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (!backTransitionArmedRef.current) {
+        if (
+          !backTransitionArmedRef.current ||
+          wheelEventGap < BACK_TRANSITION_FRESH_GESTURE_GAP_MS
+        ) {
+          backTransitionArmedRef.current = false;
+          clearBackTransitionTimer();
           armBackTransition(BACK_TRANSITION_REENTRY_GUARD_MS);
           return;
         }
@@ -359,6 +370,7 @@ export function ScrollPathTransition() {
       const screenTop = getScreenTop(SECOND_SCREEN_INDEX);
       const tolerance = getViewportHeight() * SCREEN_TOLERANCE;
       if (Math.abs(settledTop - screenTop) <= tolerance) {
+        lastWheelEventAtRef.current = performance.now();
         armBackTransition(BACK_TRANSITION_REENTRY_GUARD_MS);
         return;
       }
@@ -377,8 +389,7 @@ export function ScrollPathTransition() {
       if (
         shouldForce &&
         fromCurrent === false &&
-        isNearScreen(SECOND_SCREEN_INDEX) &&
-        !backTransitionArmedRef.current
+        (!isNearScreen(SECOND_SCREEN_INDEX) || !backTransitionArmedRef.current)
       ) {
         return;
       }
