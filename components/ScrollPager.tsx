@@ -10,6 +10,10 @@ const TRACKPAD_DELTA_LIMIT = 90;
 const TRACKPAD_START_DELAY_MS = 36;
 const TRACKPAD_RELEASE_IDLE_MS = 120;
 const TRACKPAD_EASE_DURATION = 560;
+const MOBILE_BREAKPOINT_PX = 767;
+const MOBILE_TOUCH_TRIGGER_PX = 42;
+const MOBILE_PAGE_EDGE_TOLERANCE = 24;
+const MOBILE_PAGE_DURATION = 560;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
 const SNAP_MIN_DISTANCE_PX = 195;
 const MOUSE_GESTURE_DISTANCE_LIMIT = 0.95;
@@ -55,6 +59,8 @@ export function ScrollPager() {
   const pageTopsRef = useRef<number[]>([]);
   const summaryTopRef = useRef(Number.POSITIVE_INFINITY);
   const summaryBottomRef = useRef(Number.POSITIVE_INFINITY);
+  const touchStartYRef = useRef<number | null>(null);
+  const touchStartTopRef = useRef(0);
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
@@ -135,6 +141,7 @@ export function ScrollPager() {
     };
     const isHomeTarget = (value: number | undefined) =>
       value !== undefined && value <= POSITION_EPSILON;
+    const isMobileViewport = () => window.innerWidth <= MOBILE_BREAKPOINT_PX;
     const clearTrackpadRelease = () => {
       if (trackpadReleaseTimerRef.current !== null) {
         window.clearTimeout(trackpadReleaseTimerRef.current);
@@ -378,6 +385,46 @@ export function ScrollPager() {
       cancelSnap();
       snapTimerRef.current = window.setTimeout(settleToPage, delay);
     };
+    const getMobileAdjacentTarget = (direction: -1 | 1) => {
+      const points = getPageTops();
+      const current = root.scrollTop;
+      const viewportHeight = root.clientHeight;
+
+      if (direction > 0) {
+        const target = points.find(point => point > current + POSITION_EPSILON);
+        if (target === undefined) return undefined;
+
+        const hasReadCurrentPanel =
+          current + viewportHeight >= target - MOBILE_PAGE_EDGE_TOLERANCE;
+        return hasReadCurrentPanel ? target : undefined;
+      }
+
+      const currentPanelTop =
+        [...points].reverse().find(point => point <= current + POSITION_EPSILON) ?? 0;
+      const target = [...points].reverse().find(point => point < currentPanelTop - POSITION_EPSILON);
+      if (target === undefined) return undefined;
+
+      const isAtCurrentPanelTop = current <= currentPanelTop + MOBILE_PAGE_EDGE_TOLERANCE;
+      return isAtCurrentPanelTop ? target : undefined;
+    };
+    const pageMobileSection = (direction: -1 | 1) => {
+      const target = getMobileAdjacentTarget(direction);
+      if (target === undefined) return;
+
+      cancelSnap();
+      cancelAnimation();
+      resetTrackpadGesture();
+
+      if (direction < 0 && isHomeTarget(target) && root.scrollTop > POSITION_EPSILON) {
+        requestHomeTransition();
+        return;
+      }
+
+      lastDirectionRef.current = direction;
+      motionMinRef.current = 0;
+      motionMaxRef.current = getLastPoint();
+      easeToTarget(target, MOBILE_PAGE_DURATION);
+    };
 
     const onWheel = (event: WheelEvent) => {
       if (
@@ -541,6 +588,33 @@ export function ScrollPager() {
         movePage(-1);
       }
     };
+    const onTouchStart = (event: TouchEvent) => {
+      if (!isMobileViewport()) return;
+
+      touchStartYRef.current = event.touches[0]?.clientY ?? null;
+      touchStartTopRef.current = root.scrollTop;
+    };
+    const onTouchEnd = (event: TouchEvent) => {
+      if (!isMobileViewport()) return;
+
+      const startY = touchStartYRef.current;
+      touchStartYRef.current = null;
+      if (startY === null || root.style.overflowY === 'hidden') return;
+
+      const endY = event.changedTouches[0]?.clientY;
+      if (endY === undefined) return;
+
+      const deltaY = startY - endY;
+      if (Math.abs(deltaY) < MOBILE_TOUCH_TRIGGER_PX) return;
+
+      const nativeScrollDistance = Math.abs(root.scrollTop - touchStartTopRef.current);
+      if (nativeScrollDistance > root.clientHeight * 0.72) return;
+
+      pageMobileSection(deltaY > 0 ? 1 : -1);
+    };
+    const onTouchCancel = () => {
+      touchStartYRef.current = null;
+    };
 
     const onScroll = () => {
       const lastPoint = getLastPoint();
@@ -615,6 +689,9 @@ export function ScrollPager() {
     root.addEventListener('wheel', onWheel, { passive: false });
     root.addEventListener('scroll', onScroll, { passive: true });
     root.addEventListener('click', onClick);
+    root.addEventListener('touchstart', onTouchStart, { passive: true });
+    root.addEventListener('touchend', onTouchEnd, { passive: true });
+    root.addEventListener('touchcancel', onTouchCancel, { passive: true });
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('resize', onResize);
     window.addEventListener('landing:path-transition-start', onPathTransitionStart);
@@ -629,6 +706,9 @@ export function ScrollPager() {
       root.removeEventListener('wheel', onWheel);
       root.removeEventListener('scroll', onScroll);
       root.removeEventListener('click', onClick);
+      root.removeEventListener('touchstart', onTouchStart);
+      root.removeEventListener('touchend', onTouchEnd);
+      root.removeEventListener('touchcancel', onTouchCancel);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('landing:path-transition-start', onPathTransitionStart);
