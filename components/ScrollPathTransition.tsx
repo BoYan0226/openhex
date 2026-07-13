@@ -27,7 +27,7 @@ const FIRST_SCREEN_INDEX = 0;
 const SECOND_SCREEN_INDEX = 1;
 const SCREEN_TOLERANCE = 0.16;
 const BACK_TRANSITION_ARM_MS = 80;
-const TOUCH_TRANSITION_DELTA = 10;
+const TOUCH_TRANSITION_DELTA = 1;
 
 function compilePath(path: string) {
   const parts: string[] = [];
@@ -266,16 +266,17 @@ export function ScrollPathTransition() {
       if (startY === null || currentY === undefined) return;
 
       const deltaY = startY - currentY;
-      if (deltaY > TOUCH_TRANSITION_DELTA && isNearScreen(FIRST_SCREEN_INDEX)) {
+      if (deltaY > 0 && isNearScreen(FIRST_SCREEN_INDEX)) {
         event.preventDefault();
-        touchStartYRef.current = null;
-        void runTransition('forward');
+        if (deltaY > TOUCH_TRANSITION_DELTA) {
+          touchStartYRef.current = null;
+          void runTransition('forward');
+        }
         return;
       }
 
       if (
         deltaY < -TOUCH_TRANSITION_DELTA &&
-        backTransitionArmedRef.current &&
         isNearScreen(SECOND_SCREEN_INDEX)
       ) {
         event.preventDefault();

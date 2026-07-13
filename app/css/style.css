@@ -430,8 +430,8 @@ body::-webkit-scrollbar,
   .sticky-panel,
   .sticky-panel--pre-summary,
   .sticky-panel--summary {
-    position: relative;
-    top: auto;
+    position: sticky;
+    top: 0;
     min-height: auto;
   }
 
@@ -452,7 +452,7 @@ body::-webkit-scrollbar,
 
   .summary-screen {
     height: auto;
-    min-height: auto;
+    min-height: 100svh;
     overflow: visible;
   }
 
