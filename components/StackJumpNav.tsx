@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 
 type StackJumpItem = {
@@ -16,9 +16,14 @@ function getRemInPixels() {
   return Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
 }
 
+function easeOutCubic(value: number) {
+  return 1 - (1 - value) ** 3;
+}
+
 export function StackJumpNav({ items }: StackJumpNavProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [navPhase, setNavPhase] = useState<'opening' | 'active' | 'summary'>('opening');
+  const jumpFrameRef = useRef<number | null>(null);
   const visibleActiveIndex = activeIndex ?? 0;
 
   useEffect(() => {
@@ -73,8 +78,41 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
       if (frame !== null) window.cancelAnimationFrame(frame);
       root.removeEventListener('scroll', requestUpdate);
       window.removeEventListener('resize', requestUpdate);
+      if (jumpFrameRef.current !== null) window.cancelAnimationFrame(jumpFrameRef.current);
     };
   }, [items]);
+
+  const animateJump = (root: HTMLElement, targetTop: number) => {
+    if (jumpFrameRef.current !== null) {
+      window.cancelAnimationFrame(jumpFrameRef.current);
+      jumpFrameRef.current = null;
+    }
+
+    const startTop = root.scrollTop;
+    const distance = targetTop - startTop;
+    const duration = Math.min(720, Math.max(360, Math.abs(distance) / 3.4));
+    const startedAt = performance.now();
+
+    if (Math.abs(distance) < 2) {
+      root.scrollTop = targetTop;
+      return;
+    }
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - startedAt) / duration, 1);
+      root.scrollTop = startTop + distance * easeOutCubic(progress);
+
+      if (progress < 1) {
+        jumpFrameRef.current = window.requestAnimationFrame(tick);
+        return;
+      }
+
+      root.scrollTop = targetTop;
+      jumpFrameRef.current = null;
+    };
+
+    jumpFrameRef.current = window.requestAnimationFrame(tick);
+  };
 
   const handleJump = (id: string) => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
@@ -94,7 +132,7 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
     const topValue = getComputedStyle(target).getPropertyValue('--sticky-offset');
     const offsetRem = Number.parseFloat(topValue) || 0;
     const targetTop = target.offsetTop - offsetRem * getRemInPixels();
-    root.scrollTop = Math.max(0, targetTop);
+    animateJump(root, Math.max(0, targetTop));
   };
 
   return (

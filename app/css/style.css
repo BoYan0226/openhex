@@ -189,13 +189,14 @@ body::-webkit-scrollbar,
 }
 
 .stack-jump-nav[data-phase='summary'] {
+  z-index: 180;
   opacity: 1;
   transition: none;
 }
 
 .stack-jump-nav[data-phase='summary'] .stack-jump-label {
   opacity: var(--stack-label-opacity, 1);
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .stack-jump-label:hover {

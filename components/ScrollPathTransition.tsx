@@ -164,14 +164,21 @@ export function ScrollPathTransition() {
       await animatePath(path, PATHS.step1.curve2, PATHS.step1.unfilled, 520, power4Out);
     };
 
-    const runTransition = async (direction: 'forward' | 'back') => {
+    const runTransition = async (
+      direction: 'forward' | 'back',
+      options: { fromCurrent?: boolean } = {}
+    ) => {
       if (isAnimatingRef.current) return;
 
       isAnimatingRef.current = true;
       root.style.overflowY = 'hidden';
       root.style.scrollSnapType = 'none';
       root.style.scrollBehavior = 'auto';
-      jumpToScreen(direction === 'forward' ? FIRST_SCREEN_INDEX : SECOND_SCREEN_INDEX);
+      if (direction === 'forward') {
+        jumpToScreen(FIRST_SCREEN_INDEX);
+      } else if (!options.fromCurrent) {
+        jumpToScreen(SECOND_SCREEN_INDEX);
+      }
       window.dispatchEvent(
         new CustomEvent('landing:path-transition-start', { detail: { direction } })
       );
@@ -298,7 +305,7 @@ export function ScrollPathTransition() {
 
       if (!isAnimatingRef.current && (shouldForce || isNearScreen(SECOND_SCREEN_INDEX))) {
         backTransitionArmedRef.current = false;
-        void runTransition('back');
+        void runTransition('back', { fromCurrent: shouldForce });
       }
     };
 
