@@ -229,14 +229,14 @@ body::-webkit-scrollbar,
 @media (max-width: 1800px) {
   .stack-jump-nav {
     --stack-label-size-factor: 0.6667;
-    left: 50px;
+    left: 20px;
   }
 }
 
 @media (max-width: 1180px) {
   .stack-jump-nav {
     --stack-label-size-factor: 0.6667;
-    left: 50px;
+    left: 20px;
   }
 }
 
