@@ -7,15 +7,14 @@ const POSITION_EPSILON = 2;
 const MOUSE_GESTURE_IDLE_MS = 180;
 const MOUSE_SNAP_IDLE_MS = 45;
 const TRACKPAD_DELTA_LIMIT = 90;
-const TRACKPAD_START_DELAY_MS = 36;
+const TRACKPAD_START_DELAY_MS = 12;
 const TRACKPAD_RELEASE_IDLE_MS = 90;
-const TRACKPAD_EASE_DURATION = 430;
+const TRACKPAD_EASE_DURATION = 340;
 const TRACKPAD_REINTENT_MIN_INTERVAL_MS = 120;
 const TRACKPAD_REINTENT_MIN_DELTA = 8;
 const TRACKPAD_REINTENT_DELTA_RATIO = 1.65;
 const TRACKPAD_REINTENT_DELTA_RISE = 6;
 const TRACKPAD_FRESH_BURST_GAP_MS = 72;
-const TRACKPAD_MAX_QUEUED_PAGES = 3;
 const MOBILE_BREAKPOINT_PX = 767;
 const MOBILE_TOUCH_TRIGGER_PX = 42;
 const MOBILE_PAGE_EDGE_TOLERANCE = 24;
@@ -34,7 +33,7 @@ const SETTLE_SPEED = 12;
 const EASE_SNAP_MIN_DURATION = 520;
 const EASE_SNAP_MAX_DURATION = 860;
 const EASE_SNAP_PX_PER_MS = 1.55;
-const HOME_TRANSITION_GUARD_RATIO = 1.15;
+const HOME_TRANSITION_PAGE_TOLERANCE = 8;
 const SUMMARY_TOP_OVERLAP = 2;
 
 function easeOutQuint(value: number) {
@@ -59,7 +58,6 @@ export function ScrollPager() {
   const trackpadPendingDirectionRef = useRef<-1 | 1 | null>(null);
   const trackpadStartTimerRef = useRef<number | null>(null);
   const trackpadReleaseTimerRef = useRef<number | null>(null);
-  const trackpadQueueRef = useRef<Array<-1 | 1>>([]);
   const trackpadLastEventAtRef = useRef(0);
   const trackpadLastIntentAtRef = useRef(0);
   const trackpadLastDeltaRef = useRef(0);
@@ -171,7 +169,6 @@ export function ScrollPager() {
       clearTrackpadRelease();
       trackpadConsumedRef.current = false;
       trackpadPendingDirectionRef.current = null;
-      trackpadQueueRef.current = [];
       trackpadLastEventAtRef.current = 0;
       trackpadLastIntentAtRef.current = 0;
       trackpadLastDeltaRef.current = 0;
@@ -186,26 +183,20 @@ export function ScrollPager() {
         trackpadPendingDirectionRef.current = null;
       }, releaseDelay);
     };
-    function continueTrackpadQueue() {
-      const queuedDirection = trackpadQueueRef.current.shift();
-      if (queuedDirection !== undefined) {
-        window.requestAnimationFrame(() => startTrackpadPage(queuedDirection));
-        return;
-      }
-
-      scheduleTrackpadRelease();
-    }
-    function startTrackpadPage(direction: -1 | 1) {
+    function startTrackpadPage(direction: -1 | 1, intentOrigin = scrollRoot.scrollTop) {
       const points = getPageTops();
-      const target = getAdjacentTarget(points, scrollRoot.scrollTop, direction);
+      const target = getAdjacentTarget(points, intentOrigin, direction);
 
       if (target === undefined) {
-        continueTrackpadQueue();
+        scheduleTrackpadRelease();
         return;
       }
 
       if (direction < 0 && isHomeTarget(target) && scrollRoot.scrollTop > POSITION_EPSILON) {
-        requestHomeTransition({ freshGesture: true });
+        requestHomeTransition({
+          freshGesture: true,
+          fromCurrent: Math.abs(scrollRoot.scrollTop - scrollRoot.clientHeight) > POSITION_EPSILON,
+        });
         return;
       }
 
@@ -215,10 +206,12 @@ export function ScrollPager() {
       motionMinRef.current = 0;
       motionMaxRef.current = getLastPoint();
       easeToTarget(target, TRACKPAD_EASE_DURATION, easeOutQuint, () => {
-        continueTrackpadQueue();
+        scheduleTrackpadRelease();
       });
     }
-    const requestHomeTransition = (options: { freshGesture?: boolean } = {}) => {
+    const requestHomeTransition = (
+      options: { freshGesture?: boolean; fromCurrent?: boolean } = {}
+    ) => {
       cancelSnap();
       cancelAnimation();
       velocityRef.current = 0;
@@ -228,7 +221,7 @@ export function ScrollPager() {
         new CustomEvent('landing:request-path-back', {
           detail: {
             force: true,
-            fromCurrent: false,
+            fromCurrent: Boolean(options.fromCurrent),
             freshGesture: Boolean(options.freshGesture),
           },
         })
@@ -549,10 +542,9 @@ export function ScrollPager() {
       if (
         !isTrackpadInput &&
         direction < 0 &&
-        root.scrollTop > POSITION_EPSILON &&
-        root.scrollTop <= root.clientHeight * HOME_TRANSITION_GUARD_RATIO
+        Math.abs(root.scrollTop - root.clientHeight) <= HOME_TRANSITION_PAGE_TOLERANCE
       ) {
-        requestHomeTransition();
+        requestHomeTransition({ freshGesture: true });
         return;
       }
 
@@ -621,12 +613,9 @@ export function ScrollPager() {
           if (isFreshBurst || isRenewedImpulse) {
             clearTrackpadRelease();
             trackpadLastIntentAtRef.current = now;
-
-            if (animationModeRef.current === null && trackpadQueueRef.current.length === 0) {
-              startTrackpadPage(direction);
-            } else if (trackpadQueueRef.current.length < TRACKPAD_MAX_QUEUED_PAGES) {
-              trackpadQueueRef.current.push(direction);
-            }
+            const intentOrigin =
+              animationModeRef.current === 'ease' ? targetRef.current : scrollRoot.scrollTop;
+            startTrackpadPage(direction, intentOrigin);
             return;
           }
 
@@ -638,14 +627,13 @@ export function ScrollPager() {
 
         trackpadConsumedRef.current = true;
         trackpadLastIntentAtRef.current = now;
-        trackpadQueueRef.current = [];
         trackpadPendingDirectionRef.current = direction;
         clearTrackpadRelease();
         trackpadStartTimerRef.current = window.setTimeout(() => {
           trackpadStartTimerRef.current = null;
-          const queuedDirection = trackpadPendingDirectionRef.current ?? direction;
+          const intendedDirection = trackpadPendingDirectionRef.current ?? direction;
           trackpadPendingDirectionRef.current = null;
-          startTrackpadPage(queuedDirection);
+          startTrackpadPage(intendedDirection);
         }, TRACKPAD_START_DELAY_MS);
         return;
       }
