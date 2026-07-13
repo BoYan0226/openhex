@@ -506,6 +506,16 @@ export function ScrollPager() {
       const direction = wheelDelta > 0 ? 1 : -1;
       const isTrackpadInput = isLikelyTrackpad(event, wheelDelta);
 
+      if (animationModeRef.current !== null && direction !== lastDirectionRef.current) {
+        cancelAnimation();
+        resetTrackpadGesture();
+        targetRef.current = root.scrollTop;
+        gestureStartRef.current = root.scrollTop;
+        velocityRef.current = 0;
+        motionMinRef.current = 0;
+        motionMaxRef.current = getLastPoint();
+      }
+
       if (
         direction < 0 &&
         root.scrollTop > POSITION_EPSILON &&

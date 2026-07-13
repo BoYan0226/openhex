@@ -269,15 +269,10 @@ export function ScrollPathTransition() {
       }
 
       if (event.deltaY < 0 && isNearScreen(SECOND_SCREEN_INDEX)) {
-        if (!backTransitionArmedRef.current) {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-          return;
-        }
-
         event.preventDefault();
         event.stopImmediatePropagation();
         backTransitionArmedRef.current = false;
+        clearBackTransitionTimer();
         void runTransition('back');
       }
     };
