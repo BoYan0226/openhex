@@ -226,7 +226,7 @@ body::-webkit-scrollbar,
   text-shadow: 0 3px 9px rgba(32, 33, 36, 0.12);
 }
 
-@media (max-width: 1500px) {
+@media (max-width: 1800px) {
   .stack-jump-nav {
     --stack-label-size-factor: 0.88;
     left: -32px;
@@ -351,7 +351,7 @@ body::-webkit-scrollbar,
   }
 }
 
-@media (max-width: 1500px) {
+@media (max-width: 1800px) {
   .sticky-panel > section {
     --section-content-scale: clamp(0.42, calc(-0.18 + 0.82 * (100vw / 1920)), 0.5);
   }
