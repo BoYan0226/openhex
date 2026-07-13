@@ -129,7 +129,7 @@ body::-webkit-scrollbar,
 
 .stack-jump-nav {
   position: fixed;
-  left: -30px;
+  left: -50px;
   top: 50%;
   z-index: 90;
   height: 0;
@@ -235,7 +235,7 @@ body::-webkit-scrollbar,
 }
 
 .sticky-panel > section {
-  --section-content-scale: 1;
+  --section-content-scale: clamp(0.9, calc(0.72 + 0.28 * (100vw / 1440)), 1);
   box-shadow: none !important;
   filter: none !important;
   min-height: 100vh;
@@ -314,13 +314,13 @@ body::-webkit-scrollbar,
 
 @media (max-height: 860px), (max-width: 900px) {
   .sticky-panel--light > section {
-    --section-content-scale: 0.94;
+    --section-content-scale: min(0.94, clamp(0.9, calc(0.72 + 0.28 * (100vw / 1440)), 1));
   }
 }
 
 @media (max-height: 740px), (max-width: 700px) {
   .sticky-panel--light > section {
-    --section-content-scale: 0.88;
+    --section-content-scale: min(0.88, clamp(0.84, calc(0.66 + 0.3 * (100vw / 1440)), 1));
   }
 }
 
