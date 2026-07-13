@@ -176,11 +176,15 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
                 '--stack-label-y': `${((index - visibleActiveIndex) * 2.72).toFixed(2)}rem`,
                 '--stack-label-shift': `${shift.toFixed(2)}rem`,
                 '--stack-label-opacity': opacity.toFixed(2),
-                '--stack-label-font-size': `clamp(${(0.5 * scale).toFixed(
+                '--stack-label-font-size': `clamp(calc(${(0.94 * scale).toFixed(
                   3
-                )}rem, ${(0.46 * scale).toFixed(3)}rem + ${(0.2 * scale).toFixed(
+                )}rem * var(--stack-label-size-factor, 1)), calc((${(0.83 * scale).toFixed(
                   3
-                )}vw, ${(0.78 * scale).toFixed(3)}rem)`,
+                )}rem + ${(0.44 * scale).toFixed(
+                  3
+                )}vw) * var(--stack-label-size-factor, 1)), calc(${(1.24 * scale).toFixed(
+                  3
+                )}rem * var(--stack-label-size-factor, 1)))`,
                 '--stack-label-blur': `${blur.toFixed(2)}px`,
               } as CSSProperties
             }

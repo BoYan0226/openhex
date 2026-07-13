@@ -129,6 +129,7 @@ body::-webkit-scrollbar,
 
 .stack-jump-nav {
   position: fixed;
+  --stack-label-size-factor: 1;
   left: -50px;
   top: 50%;
   z-index: 90;
@@ -227,6 +228,7 @@ body::-webkit-scrollbar,
 
 @media (max-width: 1500px) {
   .stack-jump-nav {
+    --stack-label-size-factor: 0.88;
     left: -68px;
   }
 
@@ -239,6 +241,7 @@ body::-webkit-scrollbar,
 
 @media (max-width: 1180px) {
   .stack-jump-nav {
+    --stack-label-size-factor: 0.82;
     left: -78px;
   }
 
