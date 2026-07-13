@@ -248,12 +248,12 @@ export function HeroSection() {
           {/* Bee mascot peeking out the card's top-left corner */}
           <Image
             src={publicPath('/landing/bee-hero.gif')}
-            width={120}
-            height={120}
+            width={132}
+            height={108}
             unoptimized
             alt=""
             aria-hidden
-            className="animate-float pointer-events-none absolute -top-14 left-1 z-20 h-[108px] w-auto max-w-none object-contain"
+            className="animate-float pointer-events-none absolute -top-14 left-1 z-20 h-[108px] w-[108px] max-w-none object-fill md:w-[132px]"
           />
           {/* Floating toast chips overlapping the card corners */}
           <div className="absolute -top-4 right-2 z-20 inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-1.5 text-[11px] font-medium text-ink shadow-[0_8px_24px_rgba(34,28,19,.12)] md:right-4 md:px-3.5 md:py-2 md:text-[13px]">
