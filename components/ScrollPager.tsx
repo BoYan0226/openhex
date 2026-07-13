@@ -102,7 +102,11 @@ export function ScrollPager() {
         if (anchor.id === 'stack-live-agent') return;
 
         if (anchor.id === 'stack-summary') {
-          summaryTopRef.current = Math.max(0, anchor.offsetTop);
+          const summaryPanel = anchor.nextElementSibling;
+          summaryTopRef.current = Math.max(
+            0,
+            summaryPanel instanceof HTMLElement ? summaryPanel.offsetTop : anchor.offsetTop
+          );
           points.push(summaryTopRef.current);
           return;
         }
@@ -411,38 +415,19 @@ export function ScrollPager() {
       }
 
       if (isScrollableSummaryArea(direction)) {
-        if (animationModeRef.current === 'ease') {
-          cancelAnimation();
-        }
-
-        const maxInputStep = isTrackpadInput ? 140 : MOUSE_MAX_INPUT_STEP;
-        const distanceMultiplier = isTrackpadInput ? 1.15 : MOUSE_DISTANCE_MULTIPLIER;
-        const velocityImpulse = isTrackpadInput ? 5 : 7;
-        const step = Math.max(
-          -maxInputStep,
-          Math.min(maxInputStep, wheelDelta * distanceMultiplier)
-        );
+        cancelAnimation();
         const scrollMax = getScrollMax();
         const summaryTop = summaryTopRef.current;
+        const nextTop = Math.max(summaryTop, Math.min(scrollMax, root.scrollTop + wheelDelta));
 
-        if (animationFrameRef.current === null) {
-          targetRef.current = root.scrollTop;
-        }
-
-        if (velocityRef.current !== 0 && Math.sign(step) !== Math.sign(velocityRef.current)) {
-          velocityRef.current = 0;
-        }
-
+        root.scrollTop = nextTop;
+        targetRef.current = nextTop;
+        gestureStartRef.current = nextTop;
+        velocityRef.current = 0;
         lastDirectionRef.current = direction;
         lastInputTimeRef.current = now;
         motionMinRef.current = summaryTop;
         motionMaxRef.current = scrollMax;
-        targetRef.current = Math.max(summaryTop, Math.min(scrollMax, targetRef.current + step));
-        velocityRef.current = Math.max(
-          -MAX_VELOCITY,
-          Math.min(MAX_VELOCITY, velocityRef.current + step * velocityImpulse)
-        );
-        startAnimation();
 
         if (isTrackpadInput) {
           isTrackpadGestureRef.current = true;
