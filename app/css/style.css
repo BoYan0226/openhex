@@ -320,6 +320,7 @@ body::-webkit-scrollbar,
   }
 
   .summary-screen {
+    --section-content-scale: 0.8;
     height: auto;
     min-height: calc(100vh - var(--sticky-offset, 0px));
     overflow: visible;
@@ -332,6 +333,11 @@ body::-webkit-scrollbar,
     overflow: visible;
     padding-top: 4rem !important;
     padding-bottom: 3rem !important;
+  }
+
+  .summary-screen > footer > div {
+    transform: scale(var(--section-content-scale, 1));
+    transform-origin: center center;
   }
 }
 
