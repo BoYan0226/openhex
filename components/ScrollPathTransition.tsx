@@ -28,17 +28,44 @@ const SECOND_SCREEN_INDEX = 1;
 const SCREEN_TOLERANCE = 0.16;
 const BACK_TRANSITION_ARM_MS = 80;
 
-function interpolatePath(from: string, to: string, progress: number) {
-  const fromNumbers = from.match(PATH_NUMBER_PATTERN)?.map(Number) ?? [];
-  const toNumbers = to.match(PATH_NUMBER_PATTERN)?.map(Number) ?? [];
-  let index = 0;
+function compilePath(path: string) {
+  const parts: string[] = [];
+  const numbers: number[] = [];
+  let lastIndex = 0;
 
-  return from.replace(PATH_NUMBER_PATTERN, () => {
-    const current = fromNumbers[index] ?? 0;
-    const next = toNumbers[index] ?? current;
-    index += 1;
-    return (current + (next - current) * progress).toFixed(3).replace(/\.?0+$/, '');
+  path.replace(PATH_NUMBER_PATTERN, (match, offset: number) => {
+    parts.push(path.slice(lastIndex, offset));
+    numbers.push(Number(match));
+    lastIndex = offset + match.length;
+    return match;
   });
+
+  parts.push(path.slice(lastIndex));
+  return { parts, numbers };
+}
+
+function formatPathNumber(value: number) {
+  return value.toFixed(3).replace(/\.?0+$/, '');
+}
+
+function interpolateCompiledPath(
+  from: ReturnType<typeof compilePath>,
+  to: ReturnType<typeof compilePath>,
+  progress: number
+) {
+  let result = '';
+
+  for (let index = 0; index < from.parts.length; index += 1) {
+    result += from.parts[index];
+
+    if (index < from.numbers.length) {
+      const current = from.numbers[index] ?? 0;
+      const next = to.numbers[index] ?? current;
+      result += formatPathNumber(current + (next - current) * progress);
+    }
+  }
+
+  return result;
 }
 
 function power4In(value: number) {
@@ -116,6 +143,8 @@ export function ScrollPathTransition() {
     ) =>
       new Promise<void>(resolve => {
         const start = performance.now();
+        const compiledFrom = compilePath(from);
+        const compiledTo = compilePath(to);
         path.setAttribute('d', from);
 
         const tick = (now: number) => {
@@ -125,7 +154,10 @@ export function ScrollPathTransition() {
           }
 
           const progress = Math.min((now - start) / duration, 1);
-          path.setAttribute('d', interpolatePath(from, to, easing(progress)));
+          path.setAttribute(
+            'd',
+            interpolateCompiledPath(compiledFrom, compiledTo, easing(progress))
+          );
 
           if (progress < 1) {
             frameRef.current = window.requestAnimationFrame(tick);
@@ -335,7 +367,7 @@ export function ScrollPathTransition() {
   return (
     <svg
       ref={overlayRef}
-      className="pointer-events-none fixed inset-0 z-[9999] h-screen w-screen opacity-0"
+      className="scroll-path-transition-overlay pointer-events-none fixed inset-0 z-[9999] h-screen w-screen opacity-0"
       viewBox="0 0 100 100"
       preserveAspectRatio="none"
       aria-hidden="true"

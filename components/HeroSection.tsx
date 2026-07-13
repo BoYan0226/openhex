@@ -251,7 +251,6 @@ export function HeroSection() {
             width={120}
             height={120}
             unoptimized
-            priority
             alt=""
             aria-hidden
             className="animate-float pointer-events-none absolute -top-14 left-1 z-20 h-[108px] w-[108px]"

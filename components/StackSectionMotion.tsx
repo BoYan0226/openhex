@@ -13,11 +13,13 @@ type SectionMotion = {
   anchor: HTMLElement | null;
   anchorTop: number;
   items: MotionItem[];
+  lastProgress?: number;
   nextAnchorTop?: number;
 };
 
 type HandlePanelMotion = {
   anchorTop: number;
+  lastWidth?: string;
   nextTop?: number;
   panel: HTMLElement;
 };
@@ -258,7 +260,8 @@ export function StackSectionMotion() {
       const isScrollingUp = scrollTop < previousScrollTop - 0.5;
       previousScrollTop = scrollTop;
 
-      handlePanels.forEach(({ anchorTop, nextTop, panel }) => {
+      handlePanels.forEach(entry => {
+        const { anchorTop, nextTop, panel } = entry;
         const rect = panel.getBoundingClientRect();
         const isReverseEntering =
           isScrollingUp &&
@@ -274,9 +277,13 @@ export function StackSectionMotion() {
         const width =
           HANDLE_LONG_WIDTH_VW -
           (HANDLE_LONG_WIDTH_VW - HANDLE_REST_WIDTH_VW) * easedProgress;
+        const widthValue = `${width.toFixed(2)}vw`;
         const isAtTop = Math.abs(rect.top) <= 1;
 
-        panel.style.setProperty('--stack-handle-width', `${width.toFixed(2)}vw`);
+        if (entry.lastWidth !== widthValue) {
+          panel.style.setProperty('--stack-handle-width', widthValue);
+          entry.lastWidth = widthValue;
+        }
 
         if (isAtTop && isReverseEntering) {
           clearHandleTimer(panel);
@@ -301,7 +308,8 @@ export function StackSectionMotion() {
         handleTimers.set(panel, timer);
       });
 
-      sections.forEach(({ anchor, anchorTop, items, nextAnchorTop }) => {
+      sections.forEach(section => {
+        const { anchor, anchorTop, items, nextAnchorTop } = section;
         if (!anchor) return;
 
         const span = viewportHeight * MOTION_SPAN_VIEWPORTS;
@@ -319,7 +327,11 @@ export function StackSectionMotion() {
           sectionProgress = clamp((nextAnchorTop - scrollTop) / reverseSpan);
         }
 
-        items.forEach(item => renderItem(item, sectionProgress));
+        const quantizedProgress = Math.round(sectionProgress * 1000) / 1000;
+        if (section.lastProgress === quantizedProgress) return;
+
+        section.lastProgress = quantizedProgress;
+        items.forEach(item => renderItem(item, quantizedProgress));
       });
     };
 
