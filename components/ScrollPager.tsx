@@ -12,8 +12,6 @@ const TRACKPAD_RELEASE_IDLE_MS = 90;
 const TRACKPAD_EASE_DURATION = 340;
 const TRACKPAD_REINTENT_MIN_INTERVAL_MS = 120;
 const TRACKPAD_REINTENT_MIN_DELTA = 8;
-const TRACKPAD_REINTENT_DELTA_RATIO = 1.65;
-const TRACKPAD_REINTENT_DELTA_RISE = 6;
 const TRACKPAD_FRESH_BURST_GAP_MS = 72;
 const MOBILE_BREAKPOINT_PX = 767;
 const MOBILE_TOUCH_TRIGGER_PX = 42;
@@ -595,11 +593,6 @@ export function ScrollPager() {
           eventGap >= TRACKPAD_FRESH_BURST_GAP_MS &&
           deltaMagnitude >= TRACKPAD_REINTENT_MIN_DELTA &&
           deltaMagnitude >= previousDelta * 0.85;
-        const isRenewedImpulse =
-          timeSinceIntent >= TRACKPAD_REINTENT_MIN_INTERVAL_MS &&
-          deltaMagnitude >= TRACKPAD_REINTENT_MIN_DELTA &&
-          deltaMagnitude >= previousDelta * TRACKPAD_REINTENT_DELTA_RATIO &&
-          deltaMagnitude - previousDelta >= TRACKPAD_REINTENT_DELTA_RISE;
 
         trackpadLastEventAtRef.current = now;
         trackpadLastDeltaRef.current = deltaMagnitude;
@@ -611,7 +604,7 @@ export function ScrollPager() {
         }
 
         if (trackpadConsumedRef.current) {
-          if (isFreshBurst || isRenewedImpulse) {
+          if (isFreshBurst) {
             clearTrackpadRelease();
             trackpadLastIntentAtRef.current = now;
             const intentOrigin =
