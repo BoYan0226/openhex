@@ -82,6 +82,15 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
 
     if (!root || !target) return;
 
+    if (id === 'stack-home') {
+      window.dispatchEvent(
+        new CustomEvent('landing:request-path-back', {
+          detail: { force: true },
+        })
+      );
+      return;
+    }
+
     const topValue = getComputedStyle(target).getPropertyValue('--sticky-offset');
     const offsetRem = Number.parseFloat(topValue) || 0;
     const targetTop = target.offsetTop - offsetRem * getRemInPixels();
