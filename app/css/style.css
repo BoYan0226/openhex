@@ -225,6 +225,30 @@ body::-webkit-scrollbar,
   text-shadow: 0 3px 9px rgba(32, 33, 36, 0.12);
 }
 
+@media (max-width: 1500px) {
+  .stack-jump-nav {
+    left: -68px;
+  }
+
+  .stack-jump-label {
+    left: clamp(0.35rem, 1.2vw, 1rem);
+    min-width: 6.25rem;
+    padding-block: 0.28rem;
+  }
+}
+
+@media (max-width: 1180px) {
+  .stack-jump-nav {
+    left: -78px;
+  }
+
+  .stack-jump-label {
+    left: 0.35rem;
+    min-width: 5.3rem;
+    letter-spacing: 0.055em;
+  }
+}
+
 .stack-jump-indicator {
   display: none;
 }
