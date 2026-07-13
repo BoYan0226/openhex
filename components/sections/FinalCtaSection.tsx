@@ -18,7 +18,10 @@ export function FinalCtaSection() {
   const t = useTranslations('landing.cta');
   const highlights = t.raw('highlights') as string[];
   const titlePrefix = t('titlePrefix');
-  const titleLead = titlePrefix.replace(/出去$/, '').trimEnd();
+  const agentIndex = titlePrefix.indexOf('Agent');
+  const titleBeforeAgent = agentIndex >= 0 ? titlePrefix.slice(0, agentIndex) : titlePrefix;
+  const titleAfterAgent =
+    agentIndex >= 0 ? titlePrefix.slice(agentIndex + 'Agent'.length).trimStart() : '';
 
   return (
     <section className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-night py-20 text-center text-white">
@@ -32,18 +35,10 @@ export function FinalCtaSection() {
 
       <div className="final-cta-content relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
         <h2 className="text-[42px] font-semibold md:text-[58px] 2xl:text-[72px]">
-          <span>{titleLead}</span>{' '}
-          <span className="inline-block whitespace-nowrap">
-            出去
-            <span className="relative inline-block">
-            <FlipWord words={highlights} />
-            {/* Running-bee mascot perched centered above the highlight box.
-                Wrapper handles horizontal centering (left-1/2 + -translate-x-1/2)
-                so the inner img is free to run its float animation. Sized in
-                `em` to scale with the heading font. top is raised enough that
-                the (bigger) bee sits clearly ON TOP of the box instead of
-                sinking into it (the "往下跑" look). */}
-            <span className="pointer-events-none absolute left-1/2 top-[-1.65em] -translate-x-1/2">
+          <span>{titleBeforeAgent}</span>
+          <span className="relative inline-block whitespace-nowrap">
+            Agent
+            <span className="pointer-events-none absolute left-1/2 top-[-1.02em] -translate-x-1/2">
               <Image
                 src={publicPath('/landing/bee-running.gif')}
                 width={200}
@@ -52,9 +47,14 @@ export function FinalCtaSection() {
                 priority
                 alt=""
                 aria-hidden
-                className="animate-run-x block h-[1.9em] w-[1.9em] select-none"
+                className="animate-run-x block h-[1.6em] w-[1.6em] select-none"
               />
             </span>
+          </span>{' '}
+          <span className="inline-block whitespace-nowrap">
+            {titleAfterAgent}
+            <span className="relative inline-block">
+              <FlipWord words={highlights} />
             </span>
           </span>
         </h2>
