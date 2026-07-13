@@ -39,6 +39,7 @@ const PAGE_SURFACE_SHADE = PAGE_SURFACE_LIGHT;
 const stickyOffset = (index: number) => STICKY_BASE_OFFSET_REM + index * STICKY_STEP_REM;
 
 const STACK_NAV_ITEMS = [
+  { id: 'stack-home', label: '首页' },
   { id: 'stack-live-agent', label: 'Live Agent' },
   { id: 'stack-live-four', label: 'LIVE 四要素' },
   { id: 'stack-capabilities', label: '核心能力' },
@@ -47,6 +48,7 @@ const STACK_NAV_ITEMS = [
   { id: 'stack-connectors', label: '连接器' },
   { id: 'stack-infra', label: '技术底座' },
   { id: 'stack-which-side', label: '适合谁' },
+  { id: 'stack-summary', label: 'OPS × A2A' },
 ] as const;
 
 const stickyStyle = (
@@ -106,6 +108,7 @@ export default function HomePage() {
       <ScrollPathTransition />
       <ScrollPager />
       <StackSectionMotion />
+      <div id="stack-home" className="stack-anchor" />
       <FinalCtaSection />
       <div className="sticky-flow">
         <StackJumpNav items={STACK_NAV_ITEMS} />
