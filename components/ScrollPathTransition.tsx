@@ -27,7 +27,7 @@ const FIRST_SCREEN_INDEX = 0;
 const SECOND_SCREEN_INDEX = 1;
 const SCREEN_TOLERANCE = 0.16;
 const BACK_TRANSITION_ARM_MS = 80;
-const BACK_TRANSITION_REENTRY_GUARD_MS = 520;
+const BACK_TRANSITION_REENTRY_GUARD_MS = 280;
 const TOUCH_TRANSITION_DELTA = 1;
 const MOBILE_BREAKPOINT_PX = 767;
 
@@ -146,6 +146,8 @@ export function ScrollPathTransition() {
     };
 
     const armBackTransition = (delay = BACK_TRANSITION_ARM_MS) => {
+      if (backTransitionArmedRef.current || backTransitionTimerRef.current !== null) return;
+
       clearBackTransitionTimer();
       backTransitionArmedRef.current = false;
       backTransitionTimerRef.current = window.setTimeout(() => {
@@ -267,9 +269,14 @@ export function ScrollPathTransition() {
       }
 
       if (event.deltaY < 0 && isNearScreen(SECOND_SCREEN_INDEX)) {
-        if (!backTransitionArmedRef.current) return;
+        if (!backTransitionArmedRef.current) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          return;
+        }
 
         event.preventDefault();
+        event.stopImmediatePropagation();
         backTransitionArmedRef.current = false;
         void runTransition('back');
       }
