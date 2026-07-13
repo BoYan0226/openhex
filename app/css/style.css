@@ -231,7 +231,7 @@ body::-webkit-scrollbar,
   .stack-jump-nav {
     --stack-label-size-factor: 0.8;
     --stack-label-left: 0px;
-    left: 0;
+    left: -20px;
   }
 }
 
@@ -239,7 +239,7 @@ body::-webkit-scrollbar,
   .stack-jump-nav {
     --stack-label-size-factor: 0.8;
     --stack-label-left: 0px;
-    left: 0;
+    left: -20px;
   }
 }
 
