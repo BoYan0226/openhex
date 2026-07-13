@@ -8,7 +8,7 @@ const MOUSE_GESTURE_IDLE_MS = 180;
 const MOUSE_SNAP_IDLE_MS = 45;
 const TRACKPAD_DELTA_LIMIT = 90;
 const TRACKPAD_START_DELAY_MS = 36;
-const TRACKPAD_RELEASE_IDLE_MS = 120;
+const TRACKPAD_RELEASE_IDLE_MS = 70;
 const TRACKPAD_EASE_DURATION = 560;
 const MOBILE_BREAKPOINT_PX = 767;
 const MOBILE_TOUCH_TRIGGER_PX = 42;
@@ -166,11 +166,14 @@ export function ScrollPager() {
     };
     const scheduleTrackpadRelease = () => {
       clearTrackpadRelease();
+      const idleFor = performance.now() - lastInputTimeRef.current;
+      const releaseDelay = Math.max(0, TRACKPAD_RELEASE_IDLE_MS - idleFor);
       trackpadReleaseTimerRef.current = window.setTimeout(() => {
         trackpadReleaseTimerRef.current = null;
         trackpadConsumedRef.current = false;
         trackpadLastDirectionRef.current = null;
-      }, TRACKPAD_RELEASE_IDLE_MS);
+        trackpadPendingDirectionRef.current = null;
+      }, releaseDelay);
     };
     const startTrackpadPage = (direction: -1 | 1) => {
       const points = getPageTops();
@@ -570,6 +573,9 @@ export function ScrollPager() {
         }
 
         if (trackpadConsumedRef.current) {
+          if (animationModeRef.current === null) {
+            scheduleTrackpadRelease();
+          }
           return;
         }
 
