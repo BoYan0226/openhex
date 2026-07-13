@@ -9,7 +9,7 @@ const MOUSE_SNAP_IDLE_MS = 45;
 const TRACKPAD_DELTA_LIMIT = 90;
 const TRACKPAD_START_DELAY_MS = 36;
 const TRACKPAD_RELEASE_IDLE_MS = 90;
-const TRACKPAD_EASE_DURATION = 560;
+const TRACKPAD_EASE_DURATION = 430;
 const TRACKPAD_REINTENT_MIN_INTERVAL_MS = 120;
 const TRACKPAD_REINTENT_MIN_DELTA = 8;
 const TRACKPAD_REINTENT_DELTA_RATIO = 1.65;
@@ -23,7 +23,6 @@ const MOBILE_PANEL_END_TOLERANCE = 4;
 const MOBILE_PAGE_DURATION = 560;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
 const SNAP_MIN_DISTANCE_PX = 195;
-const MOUSE_GESTURE_DISTANCE_LIMIT = 0.95;
 const MOUSE_DISTANCE_MULTIPLIER = 1.8;
 const MOUSE_MAX_INPUT_STEP = 240;
 const MAX_VELOCITY = 2200;
@@ -656,12 +655,11 @@ export function ScrollPager() {
       if (isNewGesture) {
         gestureStartRef.current = root.scrollTop;
         targetRef.current = root.scrollTop;
-        const gestureLimit = root.clientHeight * MOUSE_GESTURE_DISTANCE_LIMIT;
-        motionMinRef.current = Math.max(0, gestureStartRef.current - gestureLimit);
-        motionMaxRef.current = Math.min(
-          getLastPoint(),
-          gestureStartRef.current + gestureLimit
-        );
+        const points = getPageTops();
+        motionMinRef.current =
+          getAdjacentTarget(points, gestureStartRef.current, -1) ?? 0;
+        motionMaxRef.current =
+          getAdjacentTarget(points, gestureStartRef.current, 1) ?? getLastPoint();
       }
       lastInputTimeRef.current = now;
 
