@@ -38,6 +38,34 @@ export function ConnectorsSection() {
       );
     }
 
+    if (key === 'tikhub') {
+      return (
+        <div className="conn-logos shrink-0" aria-hidden>
+          <span className="lt" title="TikHub">
+            <img src="landing/connectors/tikhub.svg" alt="" loading="lazy" decoding="async" />
+          </span>
+          <span className="lt" title="抖音商家号">
+            <svg viewBox="0 0 24 24">
+              <path
+                fill="#25F4EE"
+                transform="translate(-1 -.6)"
+                d="M13 4c.2 2.4 1.9 4 4 4.3v2.8c-1.4-.1-2.8-.6-3.9-1.4v5.1a4.6 4.6 0 11-3-4.3V4z"
+              />
+              <path
+                fill="#FE2C55"
+                transform="translate(1 .6)"
+                d="M13 4c.2 2.4 1.9 4 4 4.3v2.8c-1.4-.1-2.8-.6-3.9-1.4v5.1a4.6 4.6 0 11-3-4.3V4z"
+              />
+              <path
+                fill="#0A0A0A"
+                d="M13 4c.2 2.4 1.9 4 4 4.3v2.8c-1.4-.1-2.8-.6-3.9-1.4v5.1a4.6 4.6 0 11-3-4.3V4z"
+              />
+            </svg>
+          </span>
+        </div>
+      );
+    }
+
     return (
       <div
         className="conn-logos shrink-0"
