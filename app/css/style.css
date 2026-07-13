@@ -130,6 +130,7 @@ body::-webkit-scrollbar,
 .stack-jump-nav {
   position: fixed;
   --stack-label-size-factor: 1;
+  --stack-label-left: clamp(0.8rem, 2.2vw, 2rem);
   left: -10px;
   top: 50%;
   z-index: 90;
@@ -142,7 +143,7 @@ body::-webkit-scrollbar,
 
 .stack-jump-label {
   position: absolute;
-  left: clamp(0.8rem, 2.2vw, 2rem);
+  left: var(--stack-label-left);
   top: 0;
   z-index: 1;
   border: 0;
@@ -229,6 +230,7 @@ body::-webkit-scrollbar,
 @media (max-width: 1800px) {
   .stack-jump-nav {
     --stack-label-size-factor: 0.6667;
+    --stack-label-left: 0px;
     left: 20px;
   }
 }
@@ -236,6 +238,7 @@ body::-webkit-scrollbar,
 @media (max-width: 1180px) {
   .stack-jump-nav {
     --stack-label-size-factor: 0.6667;
+    --stack-label-left: 0px;
     left: 20px;
   }
 }
