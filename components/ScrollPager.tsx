@@ -61,6 +61,7 @@ export function ScrollPager() {
   const summaryBottomRef = useRef(Number.POSITIVE_INFINITY);
   const touchStartYRef = useRef<number | null>(null);
   const touchStartTopRef = useRef(0);
+  const touchPanelBottomRef = useRef(Number.POSITIVE_INFINITY);
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
@@ -419,6 +420,11 @@ export function ScrollPager() {
         .sort((a, b) => a.top - b.top);
     };
 
+    const getCurrentMobilePanel = () =>
+      [...getMobilePanelPoints()]
+        .reverse()
+        .find(point => point.top <= root.scrollTop + MOBILE_PAGE_EDGE_TOLERANCE);
+
     const getMobileAdjacentTarget = (direction: -1 | 1) => {
       const panels = getMobilePanelPoints();
       const current = root.scrollTop;
@@ -635,12 +641,39 @@ export function ScrollPager() {
 
       touchStartYRef.current = event.touches[0]?.clientY ?? null;
       touchStartTopRef.current = root.scrollTop;
+      touchPanelBottomRef.current =
+        getCurrentMobilePanel()?.bottom ?? Number.POSITIVE_INFINITY;
+    };
+    const onTouchMove = (event: TouchEvent) => {
+      if (!isMobileViewport() || touchStartYRef.current === null) return;
+
+      const y = event.touches[0]?.clientY;
+      if (y === undefined) return;
+
+      const deltaY = touchStartYRef.current - y;
+      if (deltaY <= 0) return;
+
+      const maxCurrentPanelTop = touchPanelBottomRef.current - root.clientHeight;
+      if (!Number.isFinite(maxCurrentPanelTop)) return;
+
+      const panelBottomIsVisible =
+        touchStartTopRef.current + root.clientHeight >=
+        touchPanelBottomRef.current - MOBILE_PAGE_EDGE_TOLERANCE;
+      if (panelBottomIsVisible) return;
+
+      const clampedTop = Math.max(touchStartTopRef.current, maxCurrentPanelTop);
+      if (root.scrollTop >= clampedTop - POSITION_EPSILON) {
+        event.preventDefault();
+        root.scrollTop = clampedTop;
+        targetRef.current = clampedTop;
+      }
     };
     const onTouchEnd = (event: TouchEvent) => {
       if (!isMobileViewport()) return;
 
       const startY = touchStartYRef.current;
       touchStartYRef.current = null;
+      touchPanelBottomRef.current = Number.POSITIVE_INFINITY;
       if (startY === null || root.style.overflowY === 'hidden') return;
 
       const endY = event.changedTouches[0]?.clientY;
@@ -656,6 +689,7 @@ export function ScrollPager() {
     };
     const onTouchCancel = () => {
       touchStartYRef.current = null;
+      touchPanelBottomRef.current = Number.POSITIVE_INFINITY;
     };
 
     const onScroll = () => {
@@ -732,6 +766,7 @@ export function ScrollPager() {
     root.addEventListener('scroll', onScroll, { passive: true });
     root.addEventListener('click', onClick);
     root.addEventListener('touchstart', onTouchStart, { passive: true });
+    root.addEventListener('touchmove', onTouchMove, { passive: false });
     root.addEventListener('touchend', onTouchEnd, { passive: true });
     root.addEventListener('touchcancel', onTouchCancel, { passive: true });
     window.addEventListener('keydown', onKeyDown);
@@ -749,6 +784,7 @@ export function ScrollPager() {
       root.removeEventListener('scroll', onScroll);
       root.removeEventListener('click', onClick);
       root.removeEventListener('touchstart', onTouchStart);
+      root.removeEventListener('touchmove', onTouchMove);
       root.removeEventListener('touchend', onTouchEnd);
       root.removeEventListener('touchcancel', onTouchCancel);
       window.removeEventListener('keydown', onKeyDown);
