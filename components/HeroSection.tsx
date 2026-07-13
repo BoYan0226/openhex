@@ -41,7 +41,7 @@ export function HeroSection() {
     const getStartTransforms = () => {
       const isMobile = window.matchMedia('(max-width: 767px)').matches;
       return isMobile
-        ? { left: 'translate3d(0, 3rem, 0)', right: 'translate3d(0, 3rem, 0)' }
+        ? { left: 'translate3d(0, 0, 0)', right: 'translate3d(0, 0, 0)' }
         : { left: 'translate3d(-32vw, 0, 0)', right: 'translate3d(32vw, 0, 0)' };
     };
 

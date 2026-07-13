@@ -17,6 +17,8 @@ import { HONEYCOMB_STYLE } from '@/components/ui/textures';
 export function FinalCtaSection() {
   const t = useTranslations('landing.cta');
   const highlights = t.raw('highlights') as string[];
+  const titlePrefix = t('titlePrefix');
+  const titleLead = titlePrefix.replace(/出去$/, '').trimEnd();
 
   return (
     <section className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-night py-20 text-center text-white">
@@ -30,8 +32,10 @@ export function FinalCtaSection() {
 
       <div className="final-cta-content relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
         <h2 className="text-[42px] font-semibold md:text-[58px] 2xl:text-[72px]">
-          {t('titlePrefix')}
-          <span className="relative inline-block">
+          <span>{titleLead}</span>{' '}
+          <span className="inline-block whitespace-nowrap">
+            出去
+            <span className="relative inline-block">
             <FlipWord words={highlights} />
             {/* Running-bee mascot perched centered above the highlight box.
                 Wrapper handles horizontal centering (left-1/2 + -translate-x-1/2)
@@ -50,6 +54,7 @@ export function FinalCtaSection() {
                 aria-hidden
                 className="animate-run-x block h-[1.9em] w-[1.9em] select-none"
               />
+            </span>
             </span>
           </span>
         </h2>
