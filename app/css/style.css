@@ -228,27 +228,15 @@ body::-webkit-scrollbar,
 
 @media (max-width: 1800px) {
   .stack-jump-nav {
-    --stack-label-size-factor: 0.88;
+    --stack-label-size-factor: 0.6667;
     left: -32px;
-  }
-
-  .stack-jump-label {
-    left: clamp(0.35rem, 1.2vw, 1rem);
-    min-width: 6.25rem;
-    padding-block: 0.28rem;
   }
 }
 
 @media (max-width: 1180px) {
   .stack-jump-nav {
-    --stack-label-size-factor: 0.82;
+    --stack-label-size-factor: 0.6667;
     left: -24px;
-  }
-
-  .stack-jump-label {
-    left: 0.35rem;
-    min-width: 5.3rem;
-    letter-spacing: 0.055em;
   }
 }
 
@@ -262,7 +250,7 @@ body::-webkit-scrollbar,
 }
 
 .sticky-panel > section {
-  --section-content-scale: 0.6667;
+  --section-content-scale: 1;
   box-shadow: none !important;
   filter: none !important;
   min-height: 100vh;
@@ -314,6 +302,10 @@ body::-webkit-scrollbar,
 }
 
 @media (max-width: 1800px) {
+  .sticky-panel > section {
+    --section-content-scale: 0.6667;
+  }
+
   .sticky-panel--summary {
     position: relative;
     top: auto;
