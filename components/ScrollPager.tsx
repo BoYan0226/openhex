@@ -8,8 +8,7 @@ const MOUSE_GESTURE_IDLE_MS = 180;
 const MOUSE_SNAP_IDLE_MS = 45;
 const TRACKPAD_DELTA_LIMIT = 90;
 const TRACKPAD_TRIGGER_DELTA = 58;
-const TRACKPAD_REVERSE_TRIGGER_DELTA = 42;
-const TRACKPAD_GESTURE_IDLE_MS = 160;
+const TRACKPAD_RELEASE_IDLE_MS = 360;
 const TRACKPAD_EASE_DURATION = 640;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
 const SNAP_MIN_DISTANCE_PX = 195;
@@ -48,8 +47,8 @@ export function ScrollPager() {
   const lastDirectionRef = useRef<-1 | 1>(1);
   const trackpadDeltaRef = useRef(0);
   const trackpadConsumedRef = useRef(false);
-  const trackpadLastInputRef = useRef(0);
   const trackpadLastDirectionRef = useRef<-1 | 1 | null>(null);
+  const trackpadReleaseTimerRef = useRef<number | null>(null);
   const snapTimerRef = useRef<number | null>(null);
   const resizeFrameRef = useRef<number | null>(null);
   const pageTopsRef = useRef<number[]>([]);
@@ -135,11 +134,26 @@ export function ScrollPager() {
     };
     const isHomeTarget = (value: number | undefined) =>
       value !== undefined && value <= POSITION_EPSILON;
+    const clearTrackpadRelease = () => {
+      if (trackpadReleaseTimerRef.current !== null) {
+        window.clearTimeout(trackpadReleaseTimerRef.current);
+        trackpadReleaseTimerRef.current = null;
+      }
+    };
     const resetTrackpadGesture = () => {
+      clearTrackpadRelease();
       trackpadDeltaRef.current = 0;
       trackpadConsumedRef.current = false;
-      trackpadLastInputRef.current = 0;
       trackpadLastDirectionRef.current = null;
+    };
+    const scheduleTrackpadRelease = () => {
+      clearTrackpadRelease();
+      trackpadReleaseTimerRef.current = window.setTimeout(() => {
+        trackpadReleaseTimerRef.current = null;
+        trackpadDeltaRef.current = 0;
+        trackpadConsumedRef.current = false;
+        trackpadLastDirectionRef.current = null;
+      }, TRACKPAD_RELEASE_IDLE_MS);
     };
     const requestHomeTransition = () => {
       cancelSnap();
@@ -408,35 +422,25 @@ export function ScrollPager() {
       }
 
       if (isTrackpadInput) {
-        const isTrackpadIdle =
-          now - trackpadLastInputRef.current > TRACKPAD_GESTURE_IDLE_MS;
         const directionChanged = trackpadLastDirectionRef.current !== null &&
           trackpadLastDirectionRef.current !== direction;
-        const isReversingEase =
-          animationModeRef.current === 'ease' && direction !== lastDirectionRef.current;
 
-        if (isTrackpadIdle || directionChanged) {
+        scheduleTrackpadRelease();
+
+        if (directionChanged && !trackpadConsumedRef.current) {
           trackpadDeltaRef.current = 0;
-          trackpadConsumedRef.current = false;
         }
 
-        trackpadLastInputRef.current = now;
         trackpadLastDirectionRef.current = direction;
         lastInputTimeRef.current = now;
 
-        if (!trackpadConsumedRef.current || isReversingEase) {
-          trackpadDeltaRef.current += wheelDelta;
-        }
-
-        const triggerDelta = isReversingEase
-          ? TRACKPAD_REVERSE_TRIGGER_DELTA
-          : TRACKPAD_TRIGGER_DELTA;
-
-        if (trackpadConsumedRef.current && !isReversingEase) {
+        if (trackpadConsumedRef.current) {
           return;
         }
 
-        if (Math.abs(trackpadDeltaRef.current) < triggerDelta) {
+        trackpadDeltaRef.current += wheelDelta;
+
+        if (Math.abs(trackpadDeltaRef.current) < TRACKPAD_TRIGGER_DELTA) {
           return;
         }
 
