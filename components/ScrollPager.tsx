@@ -23,6 +23,7 @@ const EASE_SNAP_MIN_DURATION = 520;
 const EASE_SNAP_MAX_DURATION = 860;
 const EASE_SNAP_PX_PER_MS = 1.55;
 const TRACKPAD_SNAP_DURATION = 480;
+const HOME_TRANSITION_GUARD_RATIO = 1.15;
 
 function getPageTops(root: HTMLElement) {
   const points = [0, root.clientHeight];
@@ -102,7 +103,7 @@ export function ScrollPager() {
       lastInputTimeRef.current = 0;
       window.dispatchEvent(
         new CustomEvent('landing:request-path-back', {
-          detail: { force: true },
+          detail: { force: true, fromCurrent: false },
         })
       );
     };
@@ -314,6 +315,15 @@ export function ScrollPager() {
       const gestureIdleMs = isTrackpadInput ? TRACKPAD_GESTURE_IDLE_MS : MOUSE_GESTURE_IDLE_MS;
       const isNewGesture = now - lastInputTimeRef.current > gestureIdleMs;
       const direction = wheelDelta > 0 ? 1 : -1;
+
+      if (
+        direction < 0 &&
+        root.scrollTop > POSITION_EPSILON &&
+        root.scrollTop <= root.clientHeight * HOME_TRANSITION_GUARD_RATIO
+      ) {
+        requestHomeTransition();
+        return;
+      }
 
       if (
         isTrackpadInput &&

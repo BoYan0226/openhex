@@ -125,7 +125,7 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
 
       window.dispatchEvent(
         new CustomEvent('landing:request-path-back', {
-          detail: { force: true },
+          detail: { force: true, fromCurrent: true },
         })
       );
       return;

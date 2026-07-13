@@ -295,13 +295,13 @@ export function ScrollPathTransition() {
     };
 
     const onBackRequest = (event: Event) => {
-      const shouldForce = Boolean(
-        (event as CustomEvent<{ force?: boolean }>).detail?.force
-      );
+      const detail = (event as CustomEvent<{ force?: boolean; fromCurrent?: boolean }>).detail;
+      const shouldForce = Boolean(detail?.force);
+      const fromCurrent = detail?.fromCurrent ?? shouldForce;
 
       if (!isAnimatingRef.current && (shouldForce || isNearScreen(SECOND_SCREEN_INDEX))) {
         backTransitionArmedRef.current = false;
-        void runTransition('back', { fromCurrent: shouldForce });
+        void runTransition('back', { fromCurrent });
       }
     };
 
