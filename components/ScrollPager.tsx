@@ -57,6 +57,7 @@ export function ScrollPager() {
   const resizeFrameRef = useRef<number | null>(null);
   const pageTopsRef = useRef<number[]>([]);
   const summaryTopRef = useRef(Number.POSITIVE_INFINITY);
+  const summaryBottomRef = useRef(Number.POSITIVE_INFINITY);
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
@@ -97,16 +98,22 @@ export function ScrollPager() {
     const refreshPageTops = () => {
       const points = [0, root.clientHeight];
       summaryTopRef.current = Number.POSITIVE_INFINITY;
+      summaryBottomRef.current = Number.POSITIVE_INFINITY;
 
       document.querySelectorAll<HTMLElement>('.stack-anchor').forEach(anchor => {
         if (anchor.id === 'stack-live-agent') return;
 
         if (anchor.id === 'stack-summary') {
           const summaryPanel = anchor.nextElementSibling;
-          summaryTopRef.current = Math.max(
-            0,
-            summaryPanel instanceof HTMLElement ? summaryPanel.offsetTop : anchor.offsetTop
-          );
+          const navHeight =
+            document.querySelector<HTMLElement>('nav')?.getBoundingClientRect().height ?? 0;
+          const panelTop =
+            summaryPanel instanceof HTMLElement ? summaryPanel.offsetTop : anchor.offsetTop;
+          const panelHeight =
+            summaryPanel instanceof HTMLElement ? summaryPanel.offsetHeight : root.clientHeight;
+
+          summaryTopRef.current = Math.max(0, panelTop - navHeight);
+          summaryBottomRef.current = panelTop + panelHeight;
           points.push(summaryTopRef.current);
           return;
         }
@@ -119,7 +126,18 @@ export function ScrollPager() {
       );
     };
     const getPageTops = () => pageTopsRef.current;
-    const getScrollMax = () => Math.max(0, root.scrollHeight - root.clientHeight);
+    const getScrollMax = () => {
+      const naturalMax = Math.max(0, root.scrollHeight - root.clientHeight);
+      if (!Number.isFinite(summaryBottomRef.current)) return naturalMax;
+
+      return Math.max(
+        0,
+        Math.min(
+          naturalMax,
+          Math.max(summaryTopRef.current, summaryBottomRef.current - root.clientHeight)
+        )
+      );
+    };
     const getLastPoint = () => Math.max(pageTopsRef.current.at(-1) ?? 0, getScrollMax());
     const clampTarget = (value: number) => Math.min(getLastPoint(), Math.max(0, value));
     const clampMotion = (value: number) =>
