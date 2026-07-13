@@ -464,15 +464,6 @@ body::-webkit-scrollbar,
   .hero-split-right {
     transform: translate3d(0, 0, 0) !important;
   }
-
-  [data-stack-motion] [data-motion='header'] > *,
-  [data-stack-motion] [data-motion='group'] > *,
-  [data-stack-motion] [data-motion='split'] > * {
-    opacity: 1 !important;
-    clip-path: none !important;
-    transform: none !important;
-    transition: none !important;
-  }
 }
 
 .animate-run-x {
