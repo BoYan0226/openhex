@@ -22,6 +22,7 @@ const MOBILE_PANEL_END_TOLERANCE = 4;
 const MOBILE_PAGE_DURATION = 560;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
 const SNAP_MIN_DISTANCE_PX = 195;
+const MOUSE_GESTURE_DISTANCE_LIMIT = 0.95;
 const MOUSE_DISTANCE_MULTIPLIER = 1.8;
 const MOUSE_MAX_INPUT_STEP = 240;
 const MAX_VELOCITY = 2200;
@@ -643,11 +644,12 @@ export function ScrollPager() {
       if (isNewGesture) {
         gestureStartRef.current = root.scrollTop;
         targetRef.current = root.scrollTop;
-        const points = getPageTops();
-        motionMinRef.current =
-          getAdjacentTarget(points, gestureStartRef.current, -1) ?? 0;
-        motionMaxRef.current =
-          getAdjacentTarget(points, gestureStartRef.current, 1) ?? getLastPoint();
+        const gestureLimit = root.clientHeight * MOUSE_GESTURE_DISTANCE_LIMIT;
+        motionMinRef.current = Math.max(0, gestureStartRef.current - gestureLimit);
+        motionMaxRef.current = Math.min(
+          getLastPoint(),
+          gestureStartRef.current + gestureLimit
+        );
       }
       lastInputTimeRef.current = now;
 
