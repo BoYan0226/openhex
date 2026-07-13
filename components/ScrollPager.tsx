@@ -230,7 +230,7 @@ export function ScrollPager() {
       gestureStartRef.current = scrollRoot.scrollTop;
       motionMinRef.current = 0;
       motionMaxRef.current = getLastPoint();
-      easeToTarget(target);
+      easeToTarget(target, undefined, easeOutQuint, undefined, MAX_VELOCITY);
     }
     const requestHomeTransition = (
       options: { freshGesture?: boolean; fromCurrent?: boolean } = {}
@@ -269,7 +269,8 @@ export function ScrollPager() {
       target: number,
       durationOverride?: number,
       easing: (value: number) => number = easeOutQuint,
-      onComplete?: () => void
+      onComplete?: () => void,
+      maxSpeed = Number.POSITIVE_INFINITY
     ) => {
       cancelAnimation();
       animationModeRef.current = 'ease';
@@ -294,12 +295,27 @@ export function ScrollPager() {
           Math.max(EASE_SNAP_MIN_DURATION, Math.abs(distance) / EASE_SNAP_PX_PER_MS)
         );
       const startedAt = performance.now();
+      let previousTime = startedAt;
 
       const tick = (now: number) => {
         const progress = Math.min((now - startedAt) / duration, 1);
-        root.scrollTop = clampMotion(start + distance * easing(progress));
+        const desiredPosition = clampMotion(start + distance * easing(progress));
+        const elapsed = Math.max(0, now - previousTime) / 1000;
+        const maxStep = Number.isFinite(maxSpeed)
+          ? maxSpeed * elapsed
+          : Number.POSITIVE_INFINITY;
+        const remainingStep = desiredPosition - root.scrollTop;
+        const nextPosition =
+          Math.abs(remainingStep) <= maxStep
+            ? desiredPosition
+            : root.scrollTop + Math.sign(remainingStep) * maxStep;
+        previousTime = now;
+        root.scrollTop = clampMotion(nextPosition);
 
-        if (progress < 1) {
+        if (
+          progress < 1 ||
+          Math.abs(target - root.scrollTop) > POSITION_EPSILON
+        ) {
           animationFrameRef.current = window.requestAnimationFrame(tick);
           return;
         }
