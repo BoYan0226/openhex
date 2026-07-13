@@ -98,7 +98,7 @@ body::-webkit-scrollbar,
 .sticky-panel--light::before {
   content: '';
   position: absolute;
-  top: 4rem;
+  top: 0;
   left: 50%;
   z-index: 12;
   width: var(--stack-handle-width, 74vw);
