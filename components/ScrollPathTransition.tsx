@@ -26,7 +26,6 @@ const PATH_NUMBER_PATTERN = /-?\d*\.?\d+/g;
 const FIRST_SCREEN_INDEX = 0;
 const SECOND_SCREEN_INDEX = 1;
 const SCREEN_TOLERANCE = 0.16;
-const BACK_WHEEL_TOLERANCE_PX = 36;
 const BACK_TRANSITION_ARM_MS = 80;
 
 function interpolatePath(from: string, to: string, progress: number) {
@@ -84,9 +83,6 @@ export function ScrollPathTransition() {
       const tolerance = getViewportHeight() * SCREEN_TOLERANCE;
       return Math.abs(root.scrollTop - getScreenTop(screenIndex)) <= tolerance;
     };
-    const isOnScreen = (screenIndex: number) =>
-      Math.abs(root.scrollTop - getScreenTop(screenIndex)) <= BACK_WHEEL_TOLERANCE_PX;
-
     const setOverlayVisible = (visible: boolean) => {
       overlay.style.opacity = visible ? '1' : '0';
     };
@@ -215,7 +211,7 @@ export function ScrollPathTransition() {
         return;
       }
 
-      if (event.deltaY < 0 && isOnScreen(SECOND_SCREEN_INDEX)) {
+      if (event.deltaY < 0 && isNearScreen(SECOND_SCREEN_INDEX)) {
         event.preventDefault();
         backTransitionArmedRef.current = false;
         void runTransition('back');

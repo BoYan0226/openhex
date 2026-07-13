@@ -195,8 +195,14 @@ body::-webkit-scrollbar,
 }
 
 .stack-jump-nav[data-phase='summary'] .stack-jump-label {
+  color: rgba(255, 255, 255, 0.66);
   opacity: var(--stack-label-opacity, 1);
   pointer-events: auto;
+}
+
+.stack-jump-nav[data-phase='summary'] .stack-jump-label:hover,
+.stack-jump-nav[data-phase='summary'] .stack-jump-label[data-active='true'] {
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .stack-jump-label:hover {
