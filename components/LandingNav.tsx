@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
 import { AuthAwareCtaButton } from './AuthAwareCtaButton';
 import { LANDING_PLATFORM_DOC_URL } from './landingLinks';
 import { publicPath } from './publicPath';
@@ -20,56 +19,10 @@ import { publicPath } from './publicPath';
  */
 export function LandingNav() {
   const t = useTranslations('landing.nav');
-  const lastScrollTopRef = useRef(0);
-  const [isHidden, setIsHidden] = useState(false);
-
-  useEffect(() => {
-    const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
-    if (!root) return undefined;
-
-    const isMobileViewport = () => window.innerWidth <= 767;
-
-    const updateVisibility = () => {
-      if (!isMobileViewport()) {
-        setIsHidden(false);
-        lastScrollTopRef.current = root.scrollTop;
-        return;
-      }
-
-      const currentTop = root.scrollTop;
-      const delta = currentTop - lastScrollTopRef.current;
-
-      if (currentTop <= 8) {
-        setIsHidden(false);
-      } else if (delta > 8) {
-        setIsHidden(true);
-      } else if (delta < -8) {
-        setIsHidden(false);
-      }
-
-      lastScrollTopRef.current = currentTop;
-    };
-
-    const onResize = () => {
-      if (!isMobileViewport()) setIsHidden(false);
-      lastScrollTopRef.current = root.scrollTop;
-    };
-
-    root.addEventListener('scroll', updateVisibility, { passive: true });
-    window.addEventListener('resize', onResize);
-    updateVisibility();
-
-    return () => {
-      root.removeEventListener('scroll', updateVisibility);
-      window.removeEventListener('resize', onResize);
-    };
-  }, []);
 
   return (
     <nav
-      className={`fixed left-0 right-0 top-0 z-50 h-16 bg-[#303030] shadow-none transition-transform duration-300 ease-out max-sm:h-14 ${
-        isHidden ? 'max-sm:-translate-y-full' : 'translate-y-0'
-      }`}
+      className="fixed left-0 right-0 top-0 z-50 h-16 bg-[#303030] shadow-none max-sm:h-14"
     >
       <div className="relative flex h-full items-center px-[clamp(1rem,3vw,3rem)]">
         {/* Logo: icon + wordmark + 迷境智塔旗下 tagline */}
