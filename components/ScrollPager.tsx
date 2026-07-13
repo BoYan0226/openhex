@@ -250,6 +250,14 @@ export function ScrollPager() {
         })
       );
     };
+    const requestMouseHomeTransition = () => {
+      requestHomeTransition({
+        freshGesture: true,
+        fromCurrent:
+          Math.abs(scrollRoot.scrollTop - scrollRoot.clientHeight) >
+          HOME_TRANSITION_PAGE_TOLERANCE,
+      });
+    };
     const getAdjacentTarget = (points: number[], origin: number, direction: -1 | 1) => {
       if (direction > 0) {
         return points.find(point => point > origin + POSITION_EPSILON);
@@ -434,7 +442,7 @@ export function ScrollPager() {
       }
 
       if (lastDirectionRef.current < 0 && isHomeTarget(target) && root.scrollTop > POSITION_EPSILON) {
-        requestHomeTransition();
+        requestMouseHomeTransition();
         return;
       }
 
@@ -588,7 +596,7 @@ export function ScrollPager() {
         direction < 0 &&
         Math.abs(root.scrollTop - root.clientHeight) <= HOME_TRANSITION_PAGE_TOLERANCE
       ) {
-        requestHomeTransition({ freshGesture: true });
+        requestMouseHomeTransition();
         return;
       }
 
@@ -762,7 +770,7 @@ export function ScrollPager() {
       );
 
       if (direction < 0 && isHomeTarget(nextTarget) && root.scrollTop > POSITION_EPSILON) {
-        requestHomeTransition();
+        requestMouseHomeTransition();
         return;
       }
 
