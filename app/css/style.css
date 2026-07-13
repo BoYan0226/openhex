@@ -312,7 +312,7 @@ body::-webkit-scrollbar,
   padding-bottom: 1.5rem;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1800px) {
   .sticky-panel--summary {
     position: relative;
     top: auto;

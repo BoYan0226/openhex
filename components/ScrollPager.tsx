@@ -56,6 +56,7 @@ export function ScrollPager() {
   const snapTimerRef = useRef<number | null>(null);
   const resizeFrameRef = useRef<number | null>(null);
   const pageTopsRef = useRef<number[]>([]);
+  const summaryTopRef = useRef(Number.POSITIVE_INFINITY);
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
@@ -95,12 +96,14 @@ export function ScrollPager() {
 
     const refreshPageTops = () => {
       const points = [0, root.clientHeight];
+      summaryTopRef.current = Number.POSITIVE_INFINITY;
 
       document.querySelectorAll<HTMLElement>('.stack-anchor').forEach(anchor => {
         if (anchor.id === 'stack-live-agent') return;
 
         if (anchor.id === 'stack-summary') {
-          points.push(Math.max(0, anchor.offsetTop));
+          summaryTopRef.current = Math.max(0, anchor.offsetTop);
+          points.push(summaryTopRef.current);
           return;
         }
 
@@ -112,10 +115,22 @@ export function ScrollPager() {
       );
     };
     const getPageTops = () => pageTopsRef.current;
-    const getLastPoint = () => pageTopsRef.current.at(-1) ?? 0;
+    const getScrollMax = () => Math.max(0, root.scrollHeight - root.clientHeight);
+    const getLastPoint = () => Math.max(pageTopsRef.current.at(-1) ?? 0, getScrollMax());
     const clampTarget = (value: number) => Math.min(getLastPoint(), Math.max(0, value));
     const clampMotion = (value: number) =>
       Math.max(motionMinRef.current, Math.min(motionMaxRef.current, clampTarget(value)));
+    const isScrollableSummaryArea = (direction: -1 | 1) => {
+      const summaryTop = summaryTopRef.current;
+      if (!Number.isFinite(summaryTop)) return false;
+
+      const scrollMax = getScrollMax();
+      if (scrollMax <= summaryTop + POSITION_EPSILON) return false;
+
+      return direction > 0
+        ? root.scrollTop >= summaryTop - POSITION_EPSILON
+        : root.scrollTop > summaryTop + POSITION_EPSILON;
+    };
     const isHomeTarget = (value: number | undefined) =>
       value !== undefined && value <= POSITION_EPSILON;
     const requestHomeTransition = () => {
@@ -392,6 +407,47 @@ export function ScrollPager() {
         targetRef.current = 0;
         velocityRef.current = 0;
         lastInputTimeRef.current = now;
+        return;
+      }
+
+      if (isScrollableSummaryArea(direction)) {
+        if (animationModeRef.current === 'ease') {
+          cancelAnimation();
+        }
+
+        const maxInputStep = isTrackpadInput ? 140 : MOUSE_MAX_INPUT_STEP;
+        const distanceMultiplier = isTrackpadInput ? 1.15 : MOUSE_DISTANCE_MULTIPLIER;
+        const velocityImpulse = isTrackpadInput ? 5 : 7;
+        const step = Math.max(
+          -maxInputStep,
+          Math.min(maxInputStep, wheelDelta * distanceMultiplier)
+        );
+        const scrollMax = getScrollMax();
+        const summaryTop = summaryTopRef.current;
+
+        if (animationFrameRef.current === null) {
+          targetRef.current = root.scrollTop;
+        }
+
+        if (velocityRef.current !== 0 && Math.sign(step) !== Math.sign(velocityRef.current)) {
+          velocityRef.current = 0;
+        }
+
+        lastDirectionRef.current = direction;
+        lastInputTimeRef.current = now;
+        motionMinRef.current = summaryTop;
+        motionMaxRef.current = scrollMax;
+        targetRef.current = Math.max(summaryTop, Math.min(scrollMax, targetRef.current + step));
+        velocityRef.current = Math.max(
+          -MAX_VELOCITY,
+          Math.min(MAX_VELOCITY, velocityRef.current + step * velocityImpulse)
+        );
+        startAnimation();
+
+        if (isTrackpadInput) {
+          isTrackpadGestureRef.current = true;
+          releaseTrackpadAfterIdle();
+        }
         return;
       }
 
