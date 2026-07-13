@@ -229,7 +229,7 @@ body::-webkit-scrollbar,
 @media (max-width: 1500px) {
   .stack-jump-nav {
     --stack-label-size-factor: 0.88;
-    left: -68px;
+    left: -42px;
   }
 
   .stack-jump-label {
@@ -242,7 +242,7 @@ body::-webkit-scrollbar,
 @media (max-width: 1180px) {
   .stack-jump-nav {
     --stack-label-size-factor: 0.82;
-    left: -78px;
+    left: -34px;
   }
 
   .stack-jump-label {
@@ -262,7 +262,7 @@ body::-webkit-scrollbar,
 }
 
 .sticky-panel > section {
-  --section-content-scale: clamp(0.68, calc(0.12 + 0.88 * (100vw / 1920)), 1);
+  --section-content-scale: clamp(0.6, calc(-0.08 + 1.08 * (100vw / 1920)), 1);
   box-shadow: none !important;
   filter: none !important;
   min-height: 100vh;
@@ -341,13 +341,13 @@ body::-webkit-scrollbar,
 
 @media (max-height: 860px), (max-width: 900px) {
   .sticky-panel--light > section {
-    --section-content-scale: min(0.8, clamp(0.68, calc(0.12 + 0.88 * (100vw / 1920)), 1));
+    --section-content-scale: min(0.72, clamp(0.6, calc(-0.08 + 1.08 * (100vw / 1920)), 1));
   }
 }
 
 @media (max-height: 740px), (max-width: 700px) {
   .sticky-panel--light > section {
-    --section-content-scale: min(0.72, clamp(0.64, calc(0.1 + 0.82 * (100vw / 1920)), 1));
+    --section-content-scale: min(0.66, clamp(0.56, calc(-0.08 + 1 * (100vw / 1920)), 1));
   }
 }
 

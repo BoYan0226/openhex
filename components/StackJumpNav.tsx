@@ -173,7 +173,9 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
             aria-current={activeIndex === index ? 'page' : undefined}
             style={
               {
-                '--stack-label-y': `${((index - visibleActiveIndex) * 2.72).toFixed(2)}rem`,
+                '--stack-label-y': `calc(${((index - visibleActiveIndex) * 2.72).toFixed(
+                  2
+                )}rem * var(--stack-label-size-factor, 1))`,
                 '--stack-label-shift': `${shift.toFixed(2)}rem`,
                 '--stack-label-opacity': opacity.toFixed(2),
                 '--stack-label-font-size': `clamp(calc(${(0.94 * scale).toFixed(
