@@ -212,6 +212,7 @@ body::-webkit-scrollbar,
 }
 
 .sticky-panel--summary {
+  background: var(--color-night);
   z-index: 160 !important;
 }
 
@@ -229,7 +230,7 @@ body::-webkit-scrollbar,
 
 @media (max-width: 1800px) {
   .stack-jump-nav {
-    --stack-label-size-factor: 0.8;
+    --stack-label-size-factor: 0.9;
     --stack-label-left: 0px;
     left: -20px;
   }
@@ -237,7 +238,7 @@ body::-webkit-scrollbar,
 
 @media (max-width: 1180px) {
   .stack-jump-nav {
-    --stack-label-size-factor: 0.8;
+    --stack-label-size-factor: 0.9;
     --stack-label-left: 0px;
     left: -20px;
   }
@@ -306,12 +307,12 @@ body::-webkit-scrollbar,
 
 @media (max-width: 1800px) {
   .final-cta-content {
-    transform: scale(0.8);
+    transform: scale(0.9);
     transform-origin: center center;
   }
 
   .sticky-panel > section {
-    --section-content-scale: 0.8;
+    --section-content-scale: 0.9;
   }
 
   .sticky-panel--summary {
@@ -320,7 +321,7 @@ body::-webkit-scrollbar,
   }
 
   .summary-screen {
-    --section-content-scale: 0.8;
+    --section-content-scale: 0.9;
     height: auto;
     min-height: calc(100vh - var(--sticky-offset, 0px));
     overflow: visible;
@@ -348,7 +349,7 @@ body::-webkit-scrollbar,
 
 @media (max-width: 1180px) {
   .sticky-panel > section {
-    --section-content-scale: 0.8;
+    --section-content-scale: 0.9;
   }
 }
 

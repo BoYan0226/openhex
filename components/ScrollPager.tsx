@@ -27,6 +27,7 @@ const EASE_SNAP_MAX_DURATION = 860;
 const EASE_SNAP_PX_PER_MS = 1.55;
 const TRACKPAD_SNAP_DURATION = 480;
 const HOME_TRANSITION_GUARD_RATIO = 1.15;
+const SUMMARY_TOP_OVERLAP = 2;
 
 function isLikelyTrackpad(event: WheelEvent, normalizedDelta: number) {
   return event.deltaMode === WheelEvent.DOM_DELTA_PIXEL && Math.abs(normalizedDelta) < 80;
@@ -112,7 +113,7 @@ export function ScrollPager() {
           const panelHeight =
             summaryPanel instanceof HTMLElement ? summaryPanel.offsetHeight : root.clientHeight;
 
-          summaryTopRef.current = Math.max(0, panelTop - navHeight);
+          summaryTopRef.current = Math.max(0, panelTop - navHeight + SUMMARY_TOP_OVERLAP);
           summaryBottomRef.current = panelTop + panelHeight;
           points.push(summaryTopRef.current);
           return;

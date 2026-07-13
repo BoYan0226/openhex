@@ -20,13 +20,15 @@ function easeOutCubic(value: number) {
   return 1 - (1 - value) ** 3;
 }
 
+const SUMMARY_TOP_OVERLAP = 2;
+
 function getSummaryTop(anchor: HTMLElement) {
   const summaryPanel = anchor.nextElementSibling;
   const navHeight = document.querySelector<HTMLElement>('nav')?.getBoundingClientRect().height ?? 0;
   const panelTop =
     summaryPanel instanceof HTMLElement ? summaryPanel.offsetTop : anchor.offsetTop;
 
-  return Math.max(0, panelTop - navHeight);
+  return Math.max(0, panelTop - navHeight + SUMMARY_TOP_OVERLAP);
 }
 
 export function StackJumpNav({ items }: StackJumpNavProps) {
