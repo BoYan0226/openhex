@@ -280,13 +280,7 @@ export function ScrollPathTransition() {
       if (event.deltaY < 0 && isNearScreen(SECOND_SCREEN_INDEX)) {
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (
-          !backTransitionArmedRef.current ||
-          wheelEventGap < BACK_TRANSITION_FRESH_GESTURE_GAP_MS
-        ) {
-          backTransitionArmedRef.current = false;
-          clearBackTransitionTimer();
-          armBackTransition(BACK_TRANSITION_REENTRY_GUARD_MS);
+        if (wheelEventGap < BACK_TRANSITION_FRESH_GESTURE_GAP_MS) {
           return;
         }
         backTransitionArmedRef.current = false;
