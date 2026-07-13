@@ -6,8 +6,10 @@ const MIN_WHEEL_DELTA = 4;
 const POSITION_EPSILON = 2;
 const MOUSE_GESTURE_IDLE_MS = 180;
 const TRACKPAD_GESTURE_IDLE_MS = 130;
-const TRACKPAD_TAIL_IGNORE_MS = 70;
+const TRACKPAD_RELEASE_IDLE_MS = 220;
+const TRACKPAD_TAIL_IGNORE_MS = 260;
 const TRACKPAD_TAIL_DELTA = 16;
+const TRACKPAD_TAIL_SAME_DIRECTION_DELTA = 58;
 const MOUSE_SNAP_IDLE_MS = 45;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
 const MOUSE_GESTURE_DISTANCE_LIMIT = 0.95;
@@ -87,7 +89,7 @@ export function ScrollPager() {
         isTrackpadGestureRef.current = false;
         lastInputTimeRef.current = 0;
         lastTrackpadReleaseRef.current = performance.now();
-      }, TRACKPAD_GESTURE_IDLE_MS);
+      }, TRACKPAD_RELEASE_IDLE_MS);
     };
 
     const refreshPageTops = () => {
@@ -350,7 +352,9 @@ export function ScrollPager() {
         isTrackpadInput &&
         !isTrackpadGestureRef.current &&
         now - lastTrackpadReleaseRef.current < TRACKPAD_TAIL_IGNORE_MS &&
-        Math.abs(wheelDelta) < TRACKPAD_TAIL_DELTA
+        (Math.abs(wheelDelta) < TRACKPAD_TAIL_DELTA ||
+          (direction === lastDirectionRef.current &&
+            Math.abs(wheelDelta) < TRACKPAD_TAIL_SAME_DIRECTION_DELTA))
       ) {
         return;
       }
