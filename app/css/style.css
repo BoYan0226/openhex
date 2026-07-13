@@ -130,7 +130,7 @@ body::-webkit-scrollbar,
 .stack-jump-nav {
   position: fixed;
   --stack-label-size-factor: 1;
-  left: -50px;
+  left: -30px;
   top: 50%;
   z-index: 90;
   height: 0;
