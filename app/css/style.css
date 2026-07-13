@@ -464,6 +464,10 @@ body::-webkit-scrollbar,
   .hero-split-right {
     transform: translate3d(0, 0, 0) !important;
   }
+
+  .final-cta-bee {
+    top: -0.94em;
+  }
 }
 
 .animate-run-x {
@@ -580,6 +584,13 @@ body::-webkit-scrollbar,
 .conn-logos .lt svg {
   width: 22px;
   height: 22px;
+}
+
+.conn-logos .lt img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
 }
 
 [data-stack-motion] [data-motion='header'] > *,

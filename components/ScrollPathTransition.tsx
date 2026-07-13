@@ -27,6 +27,7 @@ const FIRST_SCREEN_INDEX = 0;
 const SECOND_SCREEN_INDEX = 1;
 const SCREEN_TOLERANCE = 0.16;
 const BACK_TRANSITION_ARM_MS = 80;
+const BACK_TRANSITION_REENTRY_GUARD_MS = 520;
 const TOUCH_TRANSITION_DELTA = 1;
 const MOBILE_BREAKPOINT_PX = 767;
 
@@ -135,6 +136,23 @@ export function ScrollPathTransition() {
       root.style.overflowY = '';
       root.style.scrollSnapType = '';
       root.style.scrollBehavior = '';
+    };
+
+    const clearBackTransitionTimer = () => {
+      if (backTransitionTimerRef.current !== null) {
+        window.clearTimeout(backTransitionTimerRef.current);
+        backTransitionTimerRef.current = null;
+      }
+    };
+
+    const armBackTransition = (delay = BACK_TRANSITION_ARM_MS) => {
+      clearBackTransitionTimer();
+      backTransitionArmedRef.current = false;
+      backTransitionTimerRef.current = window.setTimeout(() => {
+        backTransitionTimerRef.current = null;
+        backTransitionArmedRef.current =
+          !isAnimatingRef.current && isNearScreen(SECOND_SCREEN_INDEX);
+      }, delay);
     };
 
     const animatePath = (
@@ -249,6 +267,8 @@ export function ScrollPathTransition() {
       }
 
       if (event.deltaY < 0 && isNearScreen(SECOND_SCREEN_INDEX)) {
+        if (!backTransitionArmedRef.current) return;
+
         event.preventDefault();
         backTransitionArmedRef.current = false;
         void runTransition('back');
@@ -315,17 +335,13 @@ export function ScrollPathTransition() {
     };
 
     const onScroll = () => {
-      backTransitionArmedRef.current = false;
-
-      if (backTransitionTimerRef.current !== null) {
-        window.clearTimeout(backTransitionTimerRef.current);
+      if (isNearScreen(SECOND_SCREEN_INDEX)) {
+        armBackTransition(BACK_TRANSITION_REENTRY_GUARD_MS);
+        return;
       }
 
-      backTransitionTimerRef.current = window.setTimeout(() => {
-        backTransitionTimerRef.current = null;
-        backTransitionArmedRef.current =
-          !isAnimatingRef.current && isNearScreen(SECOND_SCREEN_INDEX);
-      }, BACK_TRANSITION_ARM_MS);
+      clearBackTransitionTimer();
+      backTransitionArmedRef.current = false;
     };
 
     const onScrollSettled = (event: Event) => {
@@ -334,8 +350,13 @@ export function ScrollPathTransition() {
 
       const screenTop = getScreenTop(SECOND_SCREEN_INDEX);
       const tolerance = getViewportHeight() * SCREEN_TOLERANCE;
-      backTransitionArmedRef.current =
-        !isAnimatingRef.current && Math.abs(settledTop - screenTop) <= tolerance;
+      if (Math.abs(settledTop - screenTop) <= tolerance) {
+        armBackTransition(BACK_TRANSITION_REENTRY_GUARD_MS);
+        return;
+      }
+
+      clearBackTransitionTimer();
+      backTransitionArmedRef.current = false;
     };
 
     const onBackRequest = (event: Event) => {
@@ -344,6 +365,15 @@ export function ScrollPathTransition() {
       const detail = (event as CustomEvent<{ force?: boolean; fromCurrent?: boolean }>).detail;
       const shouldForce = Boolean(detail?.force);
       const fromCurrent = detail?.fromCurrent ?? shouldForce;
+
+      if (
+        shouldForce &&
+        fromCurrent === false &&
+        isNearScreen(SECOND_SCREEN_INDEX) &&
+        !backTransitionArmedRef.current
+      ) {
+        return;
+      }
 
       if (!isAnimatingRef.current && (shouldForce || isNearScreen(SECOND_SCREEN_INDEX))) {
         backTransitionArmedRef.current = false;
@@ -364,9 +394,7 @@ export function ScrollPathTransition() {
       if (frameRef.current !== null) {
         window.cancelAnimationFrame(frameRef.current);
       }
-      if (backTransitionTimerRef.current !== null) {
-        window.clearTimeout(backTransitionTimerRef.current);
-      }
+      clearBackTransitionTimer();
       root.removeEventListener('wheel', onWheel, { capture: true });
       root.removeEventListener('scroll', onScroll);
       root.removeEventListener('touchstart', onTouchStart);

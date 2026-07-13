@@ -24,6 +24,28 @@ const STATUS_STYLE: Record<StatusKey, string> = {
 export function ConnectorsSection() {
   const t = useTranslations('landing.connectors');
   const items = t.raw('items') as ConnectorItem[];
+  const renderConnectorLogos = (key: string) => {
+    if (key === 'wecom') {
+      return (
+        <div className="conn-logos shrink-0" aria-hidden>
+          <span className="lt" title="企业微信">
+            <img src="landing/connectors/wecom.svg" alt="" loading="lazy" decoding="async" />
+          </span>
+          <span className="lt" title="飞书">
+            <img src="landing/connectors/feishu.svg" alt="" loading="lazy" decoding="async" />
+          </span>
+        </div>
+      );
+    }
+
+    return (
+      <div
+        className="conn-logos shrink-0"
+        aria-hidden
+        dangerouslySetInnerHTML={{ __html: CONN_LOGOS[key] ?? '' }}
+      />
+    );
+  };
 
   return (
     <section
@@ -59,11 +81,7 @@ export function ConnectorsSection() {
               key={item.key}
               className="flex items-center gap-4 rounded-[16px] border border-line bg-white p-5 transition-shadow hover:shadow-[0_6px_24px_rgba(34,28,19,.07)] 2xl:gap-5 2xl:p-7"
             >
-              <div
-                className="conn-logos shrink-0"
-                aria-hidden
-                dangerouslySetInnerHTML={{ __html: CONN_LOGOS[item.key] ?? '' }}
-              />
+              {renderConnectorLogos(item.key)}
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-[15px] font-semibold text-ink 2xl:text-[17px]">
