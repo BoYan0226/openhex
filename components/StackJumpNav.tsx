@@ -121,6 +121,8 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
     if (!root || !target) return;
 
     if (id === 'stack-home') {
+      if (root.scrollTop < root.clientHeight * 0.65) return;
+
       window.dispatchEvent(
         new CustomEvent('landing:request-path-back', {
           detail: { force: true },
