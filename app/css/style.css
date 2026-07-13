@@ -229,17 +229,17 @@ body::-webkit-scrollbar,
 
 @media (max-width: 1800px) {
   .stack-jump-nav {
-    --stack-label-size-factor: 0.7;
+    --stack-label-size-factor: 0.8;
     --stack-label-left: 0px;
-    left: 8px;
+    left: 0;
   }
 }
 
 @media (max-width: 1180px) {
   .stack-jump-nav {
-    --stack-label-size-factor: 0.7;
+    --stack-label-size-factor: 0.8;
     --stack-label-left: 0px;
-    left: 8px;
+    left: 0;
   }
 }
 
@@ -306,12 +306,12 @@ body::-webkit-scrollbar,
 
 @media (max-width: 1800px) {
   .final-cta-content {
-    transform: scale(0.7);
+    transform: scale(0.8);
     transform-origin: center center;
   }
 
   .sticky-panel > section {
-    --section-content-scale: 0.7;
+    --section-content-scale: 0.8;
   }
 
   .sticky-panel--summary {
@@ -342,7 +342,7 @@ body::-webkit-scrollbar,
 
 @media (max-width: 1180px) {
   .sticky-panel > section {
-    --section-content-scale: 0.7;
+    --section-content-scale: 0.8;
   }
 }
 
