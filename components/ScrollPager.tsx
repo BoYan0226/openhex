@@ -92,6 +92,20 @@ export function ScrollPager() {
     const clampTarget = (value: number) => Math.min(getLastPoint(), Math.max(0, value));
     const clampMotion = (value: number) =>
       Math.max(motionMinRef.current, Math.min(motionMaxRef.current, clampTarget(value)));
+    const isHomeTarget = (value: number | undefined) =>
+      value !== undefined && value <= POSITION_EPSILON;
+    const requestHomeTransition = () => {
+      cancelSnap();
+      cancelAnimation();
+      velocityRef.current = 0;
+      isTrackpadGestureRef.current = false;
+      lastInputTimeRef.current = 0;
+      window.dispatchEvent(
+        new CustomEvent('landing:request-path-back', {
+          detail: { force: true },
+        })
+      );
+    };
     const getAdjacentTarget = (points: number[], origin: number, direction: -1 | 1) => {
       if (direction > 0) {
         return points.find(point => point > origin + POSITION_EPSILON);
@@ -213,6 +227,11 @@ export function ScrollPager() {
           : [...points].reverse().find(point => point < current - POSITION_EPSILON);
 
       if (target !== undefined) {
+        if (direction < 0 && isHomeTarget(target) && root.scrollTop > POSITION_EPSILON) {
+          requestHomeTransition();
+          return;
+        }
+
         lastDirectionRef.current = direction;
         motionMinRef.current = 0;
         motionMaxRef.current = getLastPoint();
@@ -248,6 +267,11 @@ export function ScrollPager() {
             : progress <= 1 - SNAP_DIRECTION_THRESHOLD
               ? lower
               : upper;
+      }
+
+      if (lastDirectionRef.current < 0 && isHomeTarget(target) && root.scrollTop > POSITION_EPSILON) {
+        requestHomeTransition();
+        return;
       }
 
       motionMinRef.current = 0;
@@ -341,6 +365,11 @@ export function ScrollPager() {
           motionMinRef.current = 0;
           motionMaxRef.current = getLastPoint();
           if (target !== undefined) {
+            if (direction < 0 && isHomeTarget(target) && root.scrollTop > POSITION_EPSILON) {
+              requestHomeTransition();
+              return;
+            }
+
             easeToTarget(target, TRACKPAD_SNAP_DURATION, easeOutQuart, () => {
               isTrackpadGestureRef.current = false;
               lastInputTimeRef.current = 0;
@@ -388,12 +417,19 @@ export function ScrollPager() {
         velocityRef.current = 0;
       }
 
-      targetRef.current = clampTarget(
+      const nextTarget = clampTarget(
         Math.max(
           motionMinRef.current,
           Math.min(motionMaxRef.current, targetRef.current + step)
         )
       );
+
+      if (direction < 0 && isHomeTarget(nextTarget) && root.scrollTop > POSITION_EPSILON) {
+        requestHomeTransition();
+        return;
+      }
+
+      targetRef.current = nextTarget;
       velocityRef.current = Math.max(
         -MAX_VELOCITY,
         Math.min(MAX_VELOCITY, velocityRef.current + step * velocityImpulse)
