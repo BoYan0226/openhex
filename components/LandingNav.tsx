@@ -31,7 +31,7 @@ export function LandingNav() {
             width={52}
             height={52}
             priority
-            className="h-[35px] w-[35px] shrink-0 brightness-0 invert max-sm:h-6 max-sm:w-6"
+            className="h-[35px] w-[35px] shrink-0 brightness-0 invert"
           />
           <div className="inline-grid grid-cols-[max-content] grid-rows-[max-content] place-items-start leading-[0]">
             <Image
@@ -40,9 +40,9 @@ export function LandingNav() {
               width={114}
               height={24}
               priority
-              className="col-start-1 row-start-1 block h-[18px] w-[88px] brightness-0 invert max-sm:h-[12px] max-sm:w-[58px]"
+              className="col-start-1 row-start-1 block h-[18px] w-[88px] brightness-0 invert"
             />
-            <p className="col-start-1 row-start-1 ml-[2px] mt-[17px] whitespace-nowrap text-[7.5px] font-medium leading-[1.5] tracking-[8.2px] text-white/70 max-sm:mt-[10px] max-sm:text-[5px] max-sm:tracking-[5px]">
+            <p className="col-start-1 row-start-1 ml-[2px] mt-[17px] whitespace-nowrap text-[7.5px] font-medium leading-[1.5] tracking-[8.2px] text-white/70">
               迷境智塔旗下
             </p>
           </div>
@@ -60,7 +60,7 @@ export function LandingNav() {
           </a>
           <AuthAwareCtaButton
             path="/login"
-            className="inline-flex h-8 items-center rounded-full bg-honey px-3.5 text-[13px] font-semibold text-ink shadow-none transition-colors hover:bg-honey-soft max-sm:h-6 max-sm:px-2.5 max-sm:text-[11px]"
+            className="inline-flex h-8 min-w-[74px] items-center justify-center rounded-full bg-honey px-5 text-[13px] font-semibold text-ink shadow-none transition-colors hover:bg-honey-soft max-sm:min-w-[68px] max-sm:px-4"
           >
             {t('primaryCta')}
           </AuthAwareCtaButton>
