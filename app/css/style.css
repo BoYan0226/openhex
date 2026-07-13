@@ -430,8 +430,8 @@ body::-webkit-scrollbar,
   .sticky-panel,
   .sticky-panel--pre-summary,
   .sticky-panel--summary {
-    position: sticky;
-    top: 0;
+    position: relative;
+    top: auto;
     min-height: auto;
   }
 
@@ -446,7 +446,7 @@ body::-webkit-scrollbar,
     height: auto;
     overflow: visible;
     justify-content: flex-start;
-    padding-top: max(3.5rem, env(safe-area-inset-top) + 2.75rem) !important;
+    padding-top: max(2.75rem, env(safe-area-inset-top) + 2.25rem) !important;
     padding-bottom: max(4rem, env(safe-area-inset-bottom) + 3rem) !important;
   }
 

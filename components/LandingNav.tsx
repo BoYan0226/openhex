@@ -21,7 +21,7 @@ export function LandingNav() {
   const t = useTranslations('landing.nav');
 
   return (
-    <nav className="fixed left-0 right-0 top-0 z-50 h-16 bg-[#303030] shadow-none max-sm:h-12">
+    <nav className="fixed left-0 right-0 top-0 z-50 h-16 bg-[#303030] shadow-none max-sm:h-10">
       <div className="relative flex h-full items-center px-[clamp(1rem,3vw,3rem)]">
         {/* Logo: icon + wordmark + 迷境智塔旗下 tagline */}
         <Link href="/" className="flex shrink-0 items-center" aria-label="OpenHex">
@@ -31,7 +31,7 @@ export function LandingNav() {
             width={52}
             height={52}
             priority
-            className="h-[35px] w-[35px] shrink-0 brightness-0 invert max-sm:h-7 max-sm:w-7"
+            className="h-[35px] w-[35px] shrink-0 brightness-0 invert max-sm:h-6 max-sm:w-6"
           />
           <div className="inline-grid grid-cols-[max-content] grid-rows-[max-content] place-items-start leading-[0]">
             <Image
@@ -40,9 +40,9 @@ export function LandingNav() {
               width={114}
               height={24}
               priority
-              className="col-start-1 row-start-1 block h-[18px] w-[88px] brightness-0 invert max-sm:h-[14px] max-sm:w-[68px]"
+              className="col-start-1 row-start-1 block h-[18px] w-[88px] brightness-0 invert max-sm:h-[12px] max-sm:w-[58px]"
             />
-            <p className="col-start-1 row-start-1 ml-[2px] mt-[17px] whitespace-nowrap text-[7.5px] font-medium leading-[1.5] tracking-[8.2px] text-white/70 max-sm:mt-[12px] max-sm:text-[5.75px] max-sm:tracking-[6px]">
+            <p className="col-start-1 row-start-1 ml-[2px] mt-[17px] whitespace-nowrap text-[7.5px] font-medium leading-[1.5] tracking-[8.2px] text-white/70 max-sm:mt-[10px] max-sm:text-[5px] max-sm:tracking-[5px]">
               迷境智塔旗下
             </p>
           </div>
@@ -60,7 +60,7 @@ export function LandingNav() {
           </a>
           <AuthAwareCtaButton
             path="/login"
-            className="inline-flex h-8 items-center rounded-full bg-honey px-3.5 text-[13px] font-semibold text-ink shadow-none transition-colors hover:bg-honey-soft max-sm:h-7 max-sm:px-3 max-sm:text-[12px]"
+            className="inline-flex h-8 items-center rounded-full bg-honey px-3.5 text-[13px] font-semibold text-ink shadow-none transition-colors hover:bg-honey-soft max-sm:h-6 max-sm:px-2.5 max-sm:text-[11px]"
           >
             {t('primaryCta')}
           </AuthAwareCtaButton>
