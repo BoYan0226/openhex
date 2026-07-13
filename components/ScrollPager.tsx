@@ -8,7 +8,6 @@ const MOUSE_GESTURE_IDLE_MS = 180;
 const MOUSE_SNAP_IDLE_MS = 45;
 const TRACKPAD_DELTA_LIMIT = 90;
 const TRACKPAD_START_DELAY_MS = 36;
-const TRACKPAD_RELEASE_IDLE_MS = 70;
 const TRACKPAD_EASE_DURATION = 560;
 const MOBILE_BREAKPOINT_PX = 767;
 const MOBILE_TOUCH_TRIGGER_PX = 42;
@@ -51,10 +50,8 @@ export function ScrollPager() {
   const motionMaxRef = useRef(Number.POSITIVE_INFINITY);
   const lastDirectionRef = useRef<-1 | 1>(1);
   const trackpadConsumedRef = useRef(false);
-  const trackpadLastDirectionRef = useRef<-1 | 1 | null>(null);
   const trackpadPendingDirectionRef = useRef<-1 | 1 | null>(null);
   const trackpadStartTimerRef = useRef<number | null>(null);
-  const trackpadReleaseTimerRef = useRef<number | null>(null);
   const snapTimerRef = useRef<number | null>(null);
   const resizeFrameRef = useRef<number | null>(null);
   const pageTopsRef = useRef<number[]>([]);
@@ -145,12 +142,6 @@ export function ScrollPager() {
     const isHomeTarget = (value: number | undefined) =>
       value !== undefined && value <= POSITION_EPSILON;
     const isMobileViewport = () => window.innerWidth <= MOBILE_BREAKPOINT_PX;
-    const clearTrackpadRelease = () => {
-      if (trackpadReleaseTimerRef.current !== null) {
-        window.clearTimeout(trackpadReleaseTimerRef.current);
-        trackpadReleaseTimerRef.current = null;
-      }
-    };
     const clearTrackpadStart = () => {
       if (trackpadStartTimerRef.current !== null) {
         window.clearTimeout(trackpadStartTimerRef.current);
@@ -159,28 +150,19 @@ export function ScrollPager() {
     };
     const resetTrackpadGesture = () => {
       clearTrackpadStart();
-      clearTrackpadRelease();
       trackpadConsumedRef.current = false;
-      trackpadLastDirectionRef.current = null;
       trackpadPendingDirectionRef.current = null;
     };
-    const scheduleTrackpadRelease = () => {
-      clearTrackpadRelease();
-      const idleFor = performance.now() - lastInputTimeRef.current;
-      const releaseDelay = Math.max(0, TRACKPAD_RELEASE_IDLE_MS - idleFor);
-      trackpadReleaseTimerRef.current = window.setTimeout(() => {
-        trackpadReleaseTimerRef.current = null;
-        trackpadConsumedRef.current = false;
-        trackpadLastDirectionRef.current = null;
-        trackpadPendingDirectionRef.current = null;
-      }, releaseDelay);
+    const releaseTrackpadGesture = () => {
+      trackpadConsumedRef.current = false;
+      trackpadPendingDirectionRef.current = null;
     };
     const startTrackpadPage = (direction: -1 | 1) => {
       const points = getPageTops();
       const target = getAdjacentTarget(points, root.scrollTop, direction);
 
       if (target === undefined) {
-        scheduleTrackpadRelease();
+        releaseTrackpadGesture();
         return;
       }
 
@@ -195,7 +177,7 @@ export function ScrollPager() {
       motionMinRef.current = 0;
       motionMaxRef.current = getLastPoint();
       easeToTarget(target, TRACKPAD_EASE_DURATION, easeOutQuint, () => {
-        scheduleTrackpadRelease();
+        releaseTrackpadGesture();
       });
     };
     const requestHomeTransition = () => {
@@ -564,7 +546,6 @@ export function ScrollPager() {
       }
 
       if (isTrackpadInput) {
-        trackpadLastDirectionRef.current = direction;
         lastInputTimeRef.current = now;
 
         if (trackpadStartTimerRef.current !== null) {
@@ -573,15 +554,11 @@ export function ScrollPager() {
         }
 
         if (trackpadConsumedRef.current) {
-          if (animationModeRef.current === null) {
-            scheduleTrackpadRelease();
-          }
           return;
         }
 
         trackpadConsumedRef.current = true;
         trackpadPendingDirectionRef.current = direction;
-        clearTrackpadRelease();
         trackpadStartTimerRef.current = window.setTimeout(() => {
           trackpadStartTimerRef.current = null;
           const queuedDirection = trackpadPendingDirectionRef.current ?? direction;

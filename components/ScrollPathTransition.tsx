@@ -249,6 +249,9 @@ export function ScrollPathTransition() {
       setOverlayVisible(false);
       restoreScroll();
       isAnimatingRef.current = false;
+      if (direction === 'forward') {
+        armBackTransition(BACK_TRANSITION_REENTRY_GUARD_MS);
+      }
       window.dispatchEvent(
         new CustomEvent('landing:path-transition-complete', { detail: { direction } })
       );
@@ -271,6 +274,10 @@ export function ScrollPathTransition() {
       if (event.deltaY < 0 && isNearScreen(SECOND_SCREEN_INDEX)) {
         event.preventDefault();
         event.stopImmediatePropagation();
+        if (!backTransitionArmedRef.current) {
+          armBackTransition(BACK_TRANSITION_REENTRY_GUARD_MS);
+          return;
+        }
         backTransitionArmedRef.current = false;
         clearBackTransitionTimer();
         void runTransition('back');
@@ -338,7 +345,6 @@ export function ScrollPathTransition() {
 
     const onScroll = () => {
       if (isNearScreen(SECOND_SCREEN_INDEX)) {
-        armBackTransition(BACK_TRANSITION_REENTRY_GUARD_MS);
         return;
       }
 
