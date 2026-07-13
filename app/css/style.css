@@ -262,7 +262,7 @@ body::-webkit-scrollbar,
 }
 
 .sticky-panel > section {
-  --section-content-scale: clamp(0.6, calc(-0.08 + 1.08 * (100vw / 1920)), 1);
+  --section-content-scale: clamp(0.52, calc(-0.28 + 1.28 * (100vw / 1920)), 1);
   box-shadow: none !important;
   filter: none !important;
   min-height: 100vh;
@@ -341,13 +341,13 @@ body::-webkit-scrollbar,
 
 @media (max-height: 860px), (max-width: 900px) {
   .sticky-panel--light > section {
-    --section-content-scale: min(0.72, clamp(0.6, calc(-0.08 + 1.08 * (100vw / 1920)), 1));
+    --section-content-scale: min(0.64, clamp(0.52, calc(-0.28 + 1.28 * (100vw / 1920)), 1));
   }
 }
 
 @media (max-height: 740px), (max-width: 700px) {
   .sticky-panel--light > section {
-    --section-content-scale: min(0.66, clamp(0.56, calc(-0.08 + 1 * (100vw / 1920)), 1));
+    --section-content-scale: min(0.58, clamp(0.48, calc(-0.28 + 1.18 * (100vw / 1920)), 1));
   }
 }
 
