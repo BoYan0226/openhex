@@ -229,14 +229,14 @@ body::-webkit-scrollbar,
 @media (max-width: 1800px) {
   .stack-jump-nav {
     --stack-label-size-factor: 0.6667;
-    left: -32px;
+    left: -16px;
   }
 }
 
 @media (max-width: 1180px) {
   .stack-jump-nav {
     --stack-label-size-factor: 0.6667;
-    left: -24px;
+    left: -12px;
   }
 }
 
@@ -302,6 +302,11 @@ body::-webkit-scrollbar,
 }
 
 @media (max-width: 1800px) {
+  .final-cta-content {
+    transform: scale(0.6667);
+    transform-origin: center center;
+  }
+
   .sticky-panel > section {
     --section-content-scale: 0.6667;
   }

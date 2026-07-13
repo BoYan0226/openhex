@@ -28,7 +28,7 @@ export function FinalCtaSection() {
         className="pointer-events-none absolute left-1/2 top-1/2 h-[380px] w-[760px] max-w-[92vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-honey/20 blur-[130px]"
       />
 
-      <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
+      <div className="final-cta-content relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
         <h2 className="text-[42px] font-semibold md:text-[58px] 2xl:text-[72px]">
           {t('titlePrefix')}
           <span className="relative inline-block">
