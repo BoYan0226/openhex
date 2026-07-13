@@ -47,7 +47,7 @@ export function FinalCtaSection() {
                 priority
                 alt=""
                 aria-hidden
-                className="animate-run-x block h-[1.6em] w-[200px] select-none"
+                className="animate-run-x block h-[1.6em] w-[130px] select-none"
               />
             </span>
           </span>{' '}
@@ -64,7 +64,7 @@ export function FinalCtaSection() {
                   priority
                   alt=""
                   aria-hidden
-                  className="animate-run-x block h-[1.9em] w-[200px] select-none"
+                  className="animate-run-x block h-[1.9em] w-[130px] select-none"
                 />
               </span>
             </span>
