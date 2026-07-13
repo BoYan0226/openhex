@@ -12,6 +12,7 @@ const TRACKPAD_TAIL_DELTA = 16;
 const TRACKPAD_TAIL_SAME_DIRECTION_DELTA = 58;
 const MOUSE_SNAP_IDLE_MS = 45;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
+const SNAP_MIN_DISTANCE_PX = 195;
 const MOUSE_GESTURE_DISTANCE_LIMIT = 0.95;
 const MOUSE_DISTANCE_MULTIPLIER = 1.8;
 const MOUSE_MAX_INPUT_STEP = 240;
@@ -282,13 +283,18 @@ export function ScrollPager() {
 
       let target = lower;
       if (upper !== lower) {
-        const progress = (position - lower) / (upper - lower);
+        const pageDistance = upper - lower;
+        const progress = (position - lower) / pageDistance;
+        const snapThreshold = Math.min(
+          0.42,
+          Math.max(SNAP_DIRECTION_THRESHOLD, SNAP_MIN_DISTANCE_PX / pageDistance)
+        );
         target =
           lastDirectionRef.current > 0
-            ? progress >= SNAP_DIRECTION_THRESHOLD
+            ? progress >= snapThreshold
               ? upper
               : lower
-            : progress <= 1 - SNAP_DIRECTION_THRESHOLD
+            : progress <= 1 - snapThreshold
               ? lower
               : upper;
       }
