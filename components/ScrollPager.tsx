@@ -7,10 +7,8 @@ const POSITION_EPSILON = 2;
 const MOUSE_GESTURE_IDLE_MS = 180;
 const MOUSE_SNAP_IDLE_MS = 45;
 const TRACKPAD_DELTA_LIMIT = 90;
-const TRACKPAD_TRIGGER_DELTA = 58;
-const TRACKPAD_ACTIVE_DELTA = 18;
-const TRACKPAD_RELEASE_IDLE_MS = 260;
-const TRACKPAD_EASE_DURATION = 640;
+const TRACKPAD_RELEASE_IDLE_MS = 120;
+const TRACKPAD_EASE_DURATION = 560;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
 const SNAP_MIN_DISTANCE_PX = 195;
 const MOUSE_GESTURE_DISTANCE_LIMIT = 0.95;
@@ -46,7 +44,6 @@ export function ScrollPager() {
   const motionMinRef = useRef(0);
   const motionMaxRef = useRef(Number.POSITIVE_INFINITY);
   const lastDirectionRef = useRef<-1 | 1>(1);
-  const trackpadDeltaRef = useRef(0);
   const trackpadConsumedRef = useRef(false);
   const trackpadLastDirectionRef = useRef<-1 | 1 | null>(null);
   const trackpadReleaseTimerRef = useRef<number | null>(null);
@@ -143,7 +140,6 @@ export function ScrollPager() {
     };
     const resetTrackpadGesture = () => {
       clearTrackpadRelease();
-      trackpadDeltaRef.current = 0;
       trackpadConsumedRef.current = false;
       trackpadLastDirectionRef.current = null;
     };
@@ -151,7 +147,6 @@ export function ScrollPager() {
       clearTrackpadRelease();
       trackpadReleaseTimerRef.current = window.setTimeout(() => {
         trackpadReleaseTimerRef.current = null;
-        trackpadDeltaRef.current = 0;
         trackpadConsumedRef.current = false;
         trackpadLastDirectionRef.current = null;
       }, TRACKPAD_RELEASE_IDLE_MS);
@@ -423,37 +418,19 @@ export function ScrollPager() {
       }
 
       if (isTrackpadInput) {
-        const directionChanged = trackpadLastDirectionRef.current !== null &&
-          trackpadLastDirectionRef.current !== direction;
-
-        if (directionChanged && !trackpadConsumedRef.current) {
-          trackpadDeltaRef.current = 0;
-        }
-
         trackpadLastDirectionRef.current = direction;
         lastInputTimeRef.current = now;
 
         if (trackpadConsumedRef.current) {
-          if (Math.abs(wheelDelta) >= TRACKPAD_ACTIVE_DELTA) {
-            scheduleTrackpadRelease();
-          }
-          return;
-        }
-
-        scheduleTrackpadRelease();
-        trackpadDeltaRef.current += wheelDelta;
-
-        if (Math.abs(trackpadDeltaRef.current) < TRACKPAD_TRIGGER_DELTA) {
           return;
         }
 
         const points = getPageTops();
         const target = getAdjacentTarget(points, root.scrollTop, direction);
         trackpadConsumedRef.current = true;
-        trackpadDeltaRef.current = 0;
-        scheduleTrackpadRelease();
 
         if (target === undefined) {
+          scheduleTrackpadRelease();
           return;
         }
 
@@ -467,7 +444,9 @@ export function ScrollPager() {
         gestureStartRef.current = root.scrollTop;
         motionMinRef.current = 0;
         motionMaxRef.current = getLastPoint();
-        easeToTarget(target, TRACKPAD_EASE_DURATION);
+        easeToTarget(target, TRACKPAD_EASE_DURATION, easeOutQuint, () => {
+          scheduleTrackpadRelease();
+        });
         return;
       }
 
