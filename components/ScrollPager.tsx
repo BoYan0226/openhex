@@ -13,6 +13,7 @@ const TRACKPAD_EASE_DURATION = 560;
 const MOBILE_BREAKPOINT_PX = 767;
 const MOBILE_TOUCH_TRIGGER_PX = 42;
 const MOBILE_PAGE_EDGE_TOLERANCE = 24;
+const MOBILE_PANEL_END_TOLERANCE = 4;
 const MOBILE_PAGE_DURATION = 560;
 const SNAP_DIRECTION_THRESHOLD = 0.18;
 const SNAP_MIN_DISTANCE_PX = 195;
@@ -62,6 +63,7 @@ export function ScrollPager() {
   const touchStartYRef = useRef<number | null>(null);
   const touchStartTopRef = useRef(0);
   const touchPanelBottomRef = useRef(Number.POSITIVE_INFINITY);
+  const touchStartedAtPanelEndRef = useRef(false);
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
@@ -438,7 +440,7 @@ export function ScrollPager() {
         if (!currentPanel || !nextPanel) return undefined;
 
         const hasReadCurrentPanel =
-          current + viewportHeight >= currentPanel.bottom - MOBILE_PAGE_EDGE_TOLERANCE;
+          current + viewportHeight >= currentPanel.bottom - MOBILE_PANEL_END_TOLERANCE;
         return hasReadCurrentPanel ? nextPanel.top : undefined;
       }
 
@@ -641,8 +643,12 @@ export function ScrollPager() {
 
       touchStartYRef.current = event.touches[0]?.clientY ?? null;
       touchStartTopRef.current = root.scrollTop;
-      touchPanelBottomRef.current =
+      const currentPanelBottom =
         getCurrentMobilePanel()?.bottom ?? Number.POSITIVE_INFINITY;
+      touchPanelBottomRef.current = currentPanelBottom;
+      touchStartedAtPanelEndRef.current =
+        root.scrollTop + root.clientHeight >=
+        currentPanelBottom - MOBILE_PANEL_END_TOLERANCE;
     };
     const onTouchMove = (event: TouchEvent) => {
       if (!isMobileViewport() || touchStartYRef.current === null) return;
@@ -658,7 +664,7 @@ export function ScrollPager() {
 
       const panelBottomIsVisible =
         touchStartTopRef.current + root.clientHeight >=
-        touchPanelBottomRef.current - MOBILE_PAGE_EDGE_TOLERANCE;
+        touchPanelBottomRef.current - MOBILE_PANEL_END_TOLERANCE;
       if (panelBottomIsVisible) return;
 
       const clampedTop = Math.max(touchStartTopRef.current, maxCurrentPanelTop);
@@ -674,6 +680,8 @@ export function ScrollPager() {
       const startY = touchStartYRef.current;
       touchStartYRef.current = null;
       touchPanelBottomRef.current = Number.POSITIVE_INFINITY;
+      const startedAtPanelEnd = touchStartedAtPanelEndRef.current;
+      touchStartedAtPanelEndRef.current = false;
       if (startY === null || root.style.overflowY === 'hidden') return;
 
       const endY = event.changedTouches[0]?.clientY;
@@ -681,6 +689,7 @@ export function ScrollPager() {
 
       const deltaY = startY - endY;
       if (Math.abs(deltaY) < MOBILE_TOUCH_TRIGGER_PX) return;
+      if (deltaY > 0 && !startedAtPanelEnd) return;
 
       const nativeScrollDistance = Math.abs(root.scrollTop - touchStartTopRef.current);
       if (nativeScrollDistance > root.clientHeight * 0.72) return;
@@ -690,6 +699,7 @@ export function ScrollPager() {
     const onTouchCancel = () => {
       touchStartYRef.current = null;
       touchPanelBottomRef.current = Number.POSITIVE_INFINITY;
+      touchStartedAtPanelEndRef.current = false;
     };
 
     const onScroll = () => {

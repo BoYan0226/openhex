@@ -446,7 +446,7 @@ body::-webkit-scrollbar,
     height: auto;
     overflow: visible;
     justify-content: flex-start;
-    padding-top: max(4.5rem, env(safe-area-inset-top) + 3.5rem) !important;
+    padding-top: max(3.5rem, env(safe-area-inset-top) + 2.75rem) !important;
     padding-bottom: max(4rem, env(safe-area-inset-bottom) + 3rem) !important;
   }
 
