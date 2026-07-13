@@ -385,27 +385,69 @@ export function ScrollPager() {
       cancelSnap();
       snapTimerRef.current = window.setTimeout(settleToPage, delay);
     };
+
+    type MobilePanelPoint = {
+      bottom: number;
+      top: number;
+    };
+
+    const getMobilePanelPoints = () => {
+      const viewportHeight = root.clientHeight;
+
+      return Array.from(document.querySelectorAll<HTMLElement>('.stack-anchor'))
+        .filter(anchor => anchor.id !== 'stack-home')
+        .map((anchor): MobilePanelPoint | null => {
+          const panel = anchor.nextElementSibling;
+          if (!(panel instanceof HTMLElement)) return null;
+
+          const navHeight =
+            document.querySelector<HTMLElement>('nav')?.getBoundingClientRect().height ?? 0;
+          const top =
+            anchor.id === 'stack-live-agent'
+              ? viewportHeight
+              : anchor.id === 'stack-summary'
+                ? Math.max(0, panel.offsetTop - navHeight + SUMMARY_TOP_OVERLAP)
+                : anchor.offsetTop;
+          const contentBottom = panel.offsetTop + panel.scrollHeight;
+
+          return {
+            top,
+            bottom: Math.max(top + viewportHeight, contentBottom),
+          };
+        })
+        .filter((point): point is MobilePanelPoint => point !== null)
+        .sort((a, b) => a.top - b.top);
+    };
+
     const getMobileAdjacentTarget = (direction: -1 | 1) => {
-      const points = getPageTops();
+      const panels = getMobilePanelPoints();
       const current = root.scrollTop;
       const viewportHeight = root.clientHeight;
 
       if (direction > 0) {
-        const target = points.find(point => point > current + POSITION_EPSILON);
-        if (target === undefined) return undefined;
+        const currentPanel = [...panels]
+          .reverse()
+          .find(point => point.top <= current + MOBILE_PAGE_EDGE_TOLERANCE);
+        const nextPanel = panels.find(point => point.top > current + POSITION_EPSILON);
+        if (!currentPanel || !nextPanel) return undefined;
 
         const hasReadCurrentPanel =
-          current + viewportHeight >= target - MOBILE_PAGE_EDGE_TOLERANCE;
-        return hasReadCurrentPanel ? target : undefined;
+          current + viewportHeight >= currentPanel.bottom - MOBILE_PAGE_EDGE_TOLERANCE;
+        return hasReadCurrentPanel ? nextPanel.top : undefined;
       }
 
-      const currentPanelTop =
-        [...points].reverse().find(point => point <= current + POSITION_EPSILON) ?? 0;
-      const target = [...points].reverse().find(point => point < currentPanelTop - POSITION_EPSILON);
-      if (target === undefined) return undefined;
+      const currentPanel = [...panels]
+        .reverse()
+        .find(point => point.top <= current + POSITION_EPSILON);
+      if (!currentPanel) return undefined;
 
-      const isAtCurrentPanelTop = current <= currentPanelTop + MOBILE_PAGE_EDGE_TOLERANCE;
-      return isAtCurrentPanelTop ? target : undefined;
+      const targetPanel = [...panels]
+        .reverse()
+        .find(point => point.top < currentPanel.top - POSITION_EPSILON);
+      const isAtCurrentPanelTop = current <= currentPanel.top + MOBILE_PAGE_EDGE_TOLERANCE;
+      if (!isAtCurrentPanelTop) return undefined;
+
+      return targetPanel?.top ?? 0;
     };
     const pageMobileSection = (direction: -1 | 1) => {
       const target = getMobileAdjacentTarget(direction);
