@@ -253,7 +253,7 @@ export function HeroSection() {
             unoptimized
             alt=""
             aria-hidden
-            className="animate-float pointer-events-none absolute -top-14 left-1 z-20 h-[108px] w-[108px]"
+            className="animate-float pointer-events-none absolute -top-14 left-1 z-20 h-[108px] w-auto max-w-none object-contain"
           />
           {/* Floating toast chips overlapping the card corners */}
           <div className="absolute -top-4 right-2 z-20 inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-1.5 text-[11px] font-medium text-ink shadow-[0_8px_24px_rgba(34,28,19,.12)] md:right-4 md:px-3.5 md:py-2 md:text-[13px]">
