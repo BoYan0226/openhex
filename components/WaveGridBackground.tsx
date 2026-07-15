@@ -10,16 +10,13 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 const MAX_TRAIL = 128;
 const CONTENT_FRAME_INTERVAL = 1000 / 20;
 const CONTENT_PIXEL_RATIO = 0.3;
-const CONTENT_BLUR_RADIUS = 12;
 const HERO_PIXEL_RATIO = 1.35;
 const HERO_RGB_SHIFT = 0.004;
 
 const VIGNETTE_RGB_SHIFT_SHADER = {
   uniforms: {
     tDiffuse: { value: null },
-    blurAmount: { value: 0 },
     shiftAmount: { value: HERO_RGB_SHIFT },
-    texelSize: { value: new THREE.Vector2(1, 1) },
     vignetteRadius: { value: 0.3 },
     vignetteSoftness: { value: 0.3 },
   },
@@ -33,9 +30,7 @@ const VIGNETTE_RGB_SHIFT_SHADER = {
   `,
   fragmentShader: `
     uniform sampler2D tDiffuse;
-    uniform float blurAmount;
     uniform float shiftAmount;
-    uniform vec2 texelSize;
     uniform float vignetteRadius;
     uniform float vignetteSoftness;
     varying vec2 vUv;
@@ -49,27 +44,13 @@ const VIGNETTE_RGB_SHIFT_SHADER = {
       float currentShift = shiftAmount * vignetteFactor;
 
       vec3 shiftedColor;
-      if (blurAmount > 0.0) {
-        vec2 farOffset = texelSize * blurAmount;
-        vec2 nearOffset = farOffset * 0.45;
-        shiftedColor = texture2D(tDiffuse, vUv).rgb * 0.16;
-        shiftedColor += texture2D(tDiffuse, vUv + vec2(nearOffset.x, 0.0)).rgb * 0.08;
-        shiftedColor += texture2D(tDiffuse, vUv - vec2(nearOffset.x, 0.0)).rgb * 0.08;
-        shiftedColor += texture2D(tDiffuse, vUv + vec2(0.0, nearOffset.y)).rgb * 0.08;
-        shiftedColor += texture2D(tDiffuse, vUv - vec2(0.0, nearOffset.y)).rgb * 0.08;
-        shiftedColor += texture2D(tDiffuse, vUv + vec2(farOffset.x, 0.0)).rgb * 0.05;
-        shiftedColor += texture2D(tDiffuse, vUv - vec2(farOffset.x, 0.0)).rgb * 0.05;
-        shiftedColor += texture2D(tDiffuse, vUv + vec2(0.0, farOffset.y)).rgb * 0.05;
-        shiftedColor += texture2D(tDiffuse, vUv - vec2(0.0, farOffset.y)).rgb * 0.05;
-        shiftedColor += texture2D(tDiffuse, vUv + farOffset).rgb * 0.08;
-        shiftedColor += texture2D(tDiffuse, vUv - farOffset).rgb * 0.08;
-        shiftedColor += texture2D(tDiffuse, vUv + vec2(farOffset.x, -farOffset.y)).rgb * 0.08;
-        shiftedColor += texture2D(tDiffuse, vUv + vec2(-farOffset.x, farOffset.y)).rgb * 0.08;
-      } else {
+      if (currentShift > 0.00001) {
         float r = texture2D(tDiffuse, vUv + vec2(currentShift * horzQuadrant, currentShift * vertQuadrant)).r;
         float g = texture2D(tDiffuse, vUv).g;
         float b = texture2D(tDiffuse, vUv - vec2(currentShift * horzQuadrant, currentShift * vertQuadrant)).b;
         shiftedColor = vec3(r, g, b);
+      } else {
+        shiftedColor = texture2D(tDiffuse, vUv).rgb;
       }
       float darken = 1.0 - vignetteFactor * 0.34;
 
@@ -340,7 +321,6 @@ export function WaveGridBackground() {
     refreshContentStart();
     let isContentMode = shouldUseContentMode();
     canvas.classList.toggle('wave-grid-background--content', isContentMode);
-    rgbShiftPass.uniforms.blurAmount.value = isContentMode ? CONTENT_BLUR_RADIUS : 0;
     rgbShiftPass.uniforms.shiftAmount.value = isContentMode ? 0 : HERO_RGB_SHIFT;
 
     const addTrailPoint = (x: number, z: number, distDelta: number) => {
@@ -367,10 +347,6 @@ export function WaveGridBackground() {
       renderer.setPixelRatio(pixelRatio);
       composer.setSize(width, height);
       composer.setPixelRatio(pixelRatio);
-      rgbShiftPass.uniforms.texelSize.value.set(
-        1 / Math.max(1, width * pixelRatio),
-        1 / Math.max(1, height * pixelRatio)
-      );
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
     };
@@ -383,7 +359,6 @@ export function WaveGridBackground() {
 
       isContentMode = nextContentMode;
       canvas.classList.toggle('wave-grid-background--content', isContentMode);
-      rgbShiftPass.uniforms.blurAmount.value = isContentMode ? CONTENT_BLUR_RADIUS : 0;
       rgbShiftPass.uniforms.shiftAmount.value = isContentMode ? 0 : HERO_RGB_SHIFT;
       lastTime = performance.now();
       setSize();

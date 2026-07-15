@@ -31,7 +31,7 @@ export function FinalCtaSection() {
             Agent
             <span className="pointer-events-none absolute left-1/2 top-[-0.94em] -translate-x-1/2 md:hidden">
               <Image
-                src={publicPath('/landing/bee-running.gif')}
+                src={publicPath('/landing/bee-running.webp')}
                 width={200}
                 height={200}
                 unoptimized
@@ -48,7 +48,7 @@ export function FinalCtaSection() {
               <FlipWord words={highlights} />
               <span className="pointer-events-none absolute left-1/2 top-[-1.65em] hidden -translate-x-1/2 md:block">
                 <Image
-                  src={publicPath('/landing/bee-running.gif')}
+                  src={publicPath('/landing/bee-running.webp')}
                   width={200}
                   height={200}
                   unoptimized

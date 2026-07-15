@@ -84,6 +84,10 @@ body,
     transform 360ms ease;
 }
 
+.wave-grid-background-placeholder {
+  background: #f7f4e9;
+}
+
 .wave-grid-background--content {
   filter: blur(20px) saturate(1.15);
   transform: scale(1.08);

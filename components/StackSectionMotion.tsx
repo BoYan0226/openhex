@@ -13,6 +13,7 @@ type SectionMotion = {
   element: HTMLElement;
   items: MotionItem[];
   lastProgress?: number;
+  top: number;
 };
 
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
@@ -52,9 +53,20 @@ export function StackSectionMotion() {
         });
       });
 
-      return { element: section, items };
+      return { element: section, items, top: 0 };
     });
     let frame: number | null = null;
+
+    const refreshSectionTops = () => {
+      const rootTop = root.getBoundingClientRect().top;
+      const scrollTop = root.scrollTop;
+
+      sections.forEach(section => {
+        section.top =
+          scrollTop + section.element.getBoundingClientRect().top - rootTop;
+        section.lastProgress = undefined;
+      });
+    };
 
     const renderItem = (
       { element, index, type, variant }: MotionItem,
@@ -252,14 +264,13 @@ export function StackSectionMotion() {
     const update = () => {
       frame = null;
       const viewportHeight = root.clientHeight;
-      const rootTop = root.getBoundingClientRect().top;
       const startLine = viewportHeight * MOTION_START_VIEWPORTS;
       const endLine = viewportHeight * MOTION_END_VIEWPORTS;
       const motionDistance = Math.max(1, startLine - endLine);
 
       sections.forEach(section => {
-        const { element, items } = section;
-        const sectionTop = element.getBoundingClientRect().top - rootTop;
+        const { items } = section;
+        const sectionTop = section.top - root.scrollTop;
         const sectionProgress = clamp((startLine - sectionTop) / motionDistance);
 
         const quantizedProgress = Math.round(sectionProgress * 1000) / 1000;
@@ -276,12 +287,16 @@ export function StackSectionMotion() {
     };
 
     const onResize = () => {
+      refreshSectionTops();
       requestUpdate();
     };
 
+    refreshSectionTops();
     root.addEventListener('scroll', requestUpdate, { passive: true });
     window.addEventListener('resize', onResize);
     requestUpdate();
+
+    void document.fonts?.ready.then(onResize);
 
     return () => {
       if (frame !== null) window.cancelAnimationFrame(frame);

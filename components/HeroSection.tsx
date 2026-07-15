@@ -30,6 +30,7 @@ export function HeroSection() {
   const lastScrollTopRef = useRef(0);
   const scrollDirectionRef = useRef<1 | -1>(1);
   const [isEntered, setIsEntered] = useState(true);
+  const [shouldLoadMascot, setShouldLoadMascot] = useState(false);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -142,6 +143,7 @@ export function HeroSection() {
       const direction = (event as CustomEvent<{ direction?: 'forward' | 'back' }>).detail
         ?.direction;
       if (direction === 'forward') {
+        setShouldLoadMascot(true);
         isTransitioningRef.current = true;
         resetPanels();
         reveal(HERO_REVEAL_DELAY_MS);
@@ -155,6 +157,7 @@ export function HeroSection() {
 
     const onRootScroll = () => {
       const currentTop = root.scrollTop;
+      if (currentTop >= root.clientHeight * 0.35) setShouldLoadMascot(true);
       scrollDirectionRef.current = currentTop >= lastScrollTopRef.current ? 1 : -1;
       lastScrollTopRef.current = currentTop;
     };
@@ -163,6 +166,7 @@ export function HeroSection() {
       entries => {
         const entry = entries[0];
         if (!entry?.isIntersecting || isTransitioningRef.current) return;
+        setShouldLoadMascot(true);
 
         if (scrollDirectionRef.current < 0) {
           settlePanels();
@@ -178,6 +182,7 @@ export function HeroSection() {
     );
 
     lastScrollTopRef.current = root.scrollTop;
+    if (root.scrollTop >= root.clientHeight * 0.35) setShouldLoadMascot(true);
     observer.observe(section);
     root.addEventListener('scroll', onRootScroll, { passive: true });
     window.addEventListener('landing:path-transition-start', onTransitionStart);
@@ -260,15 +265,17 @@ export function HeroSection() {
           className="hero-split-side hero-split-right relative w-full min-w-0 max-w-[540px] md:max-w-[620px] md:flex-1 2xl:max-w-[720px]"
         >
           {/* Bee mascot peeking out the card's top-left corner */}
-          <Image
-            src={publicPath('/landing/bee-hero.gif')}
-            width={120}
-            height={120}
-            unoptimized
-            alt=""
-            aria-hidden
-            className="animate-float pointer-events-none absolute -top-14 left-1 z-20 h-[108px] w-[108px]"
-          />
+          {shouldLoadMascot ? (
+            <Image
+              src={publicPath('/landing/bee-hero.webp')}
+              width={120}
+              height={120}
+              unoptimized
+              alt=""
+              aria-hidden
+              className="animate-float pointer-events-none absolute -top-14 left-1 z-20 h-[108px] w-[108px]"
+            />
+          ) : null}
           {/* Floating toast chips overlapping the card corners */}
           <div className="glass-surface-soft absolute -top-4 right-2 z-20 inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-1.5 text-[11px] font-medium text-ink shadow-[0_8px_24px_rgba(34,28,19,.12)] md:right-4 md:px-3.5 md:py-2 md:text-[13px]">
             <span className="hex-clip h-2.5 w-2.5 bg-honey" />

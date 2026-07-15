@@ -15,7 +15,7 @@ import { ScrollPathTransition } from '@/components/ScrollPathTransition';
 import { SectionInertiaSnap } from '@/components/SectionInertiaSnap';
 import { StackSectionMotion } from '@/components/StackSectionMotion';
 import { StackJumpNav } from '@/components/StackJumpNav';
-import { WaveGridBackground } from '@/components/WaveGridBackground';
+import { DeferredWaveGridBackground } from '@/components/DeferredWaveGridBackground';
 
 type StickyPanelTone = 'light' | 'dark';
 
@@ -119,7 +119,7 @@ export default function HomePage() {
       data-landing-scroll-root
       className="relative isolate h-screen overflow-x-hidden overflow-y-scroll bg-transparent text-ink"
     >
-      <WaveGridBackground />
+      <DeferredWaveGridBackground />
       <LandingNav />
       <ScrollPathTransition />
       <SectionInertiaSnap />
