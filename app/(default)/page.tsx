@@ -12,7 +12,8 @@ import { SummarySection } from '@/components/sections/SummarySection';
 import { FinalCtaSection } from '@/components/sections/FinalCtaSection';
 import { LandingFooter } from '@/components/LandingFooter';
 import { ScrollPathTransition } from '@/components/ScrollPathTransition';
-import { SectionInertiaSnap } from '@/components/SectionInertiaSnap';
+import { ScrollPager } from '@/components/ScrollPager';
+import { StackPageMask } from '@/components/StackPageMask';
 import { StackSectionMotion } from '@/components/StackSectionMotion';
 import { StackJumpNav } from '@/components/StackJumpNav';
 import { DeferredWaveGridBackground } from '@/components/DeferredWaveGridBackground';
@@ -122,7 +123,8 @@ export default function HomePage() {
       <DeferredWaveGridBackground />
       <LandingNav />
       <ScrollPathTransition />
-      <SectionInertiaSnap />
+      <ScrollPager />
+      <StackPageMask />
       <StackSectionMotion />
       <StackJumpNav items={STACK_NAV_ITEMS_CN} />
       <div id="stack-home" className="stack-anchor" />

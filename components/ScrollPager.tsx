@@ -43,6 +43,18 @@ function easeOutQuint(value: number) {
   return 1 - (1 - value) ** 5;
 }
 
+function getStaticTop(element: HTMLElement, root: HTMLElement) {
+  let top = 0;
+  let current: HTMLElement | null = element;
+
+  while (current && current !== root) {
+    top += current.offsetTop;
+    current = current.offsetParent as HTMLElement | null;
+  }
+
+  return top;
+}
+
 function isLikelyTrackpad(event: WheelEvent, normalizedDelta: number) {
   if (event.deltaMode !== WheelEvent.DOM_DELTA_PIXEL) return false;
 
@@ -121,7 +133,9 @@ export function ScrollPager() {
           const navHeight =
             document.querySelector<HTMLElement>('nav')?.getBoundingClientRect().height ?? 0;
           const panelTop =
-            summaryPanel instanceof HTMLElement ? summaryPanel.offsetTop : anchor.offsetTop;
+            summaryPanel instanceof HTMLElement
+              ? getStaticTop(summaryPanel, root)
+              : getStaticTop(anchor, root);
           const panelHeight =
             summaryPanel instanceof HTMLElement ? summaryPanel.offsetHeight : root.clientHeight;
 
@@ -131,7 +145,7 @@ export function ScrollPager() {
           return;
         }
 
-        points.push(anchor.offsetTop);
+        points.push(getStaticTop(anchor, root));
       });
 
       pageTopsRef.current = Array.from(new Set(points.map(point => Math.round(point)))).sort(
@@ -865,6 +879,8 @@ export function ScrollPager() {
     };
 
     const onScroll = () => {
+      if (isMobileViewport()) return;
+
       const lastPoint = getLastPoint();
       if (root.scrollTop > lastPoint) {
         root.scrollTop = lastPoint;

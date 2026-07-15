@@ -27,6 +27,18 @@ const easeOutBack = (value: number) => {
   return 1 + c3 * Math.pow(value - 1, 3) + c1 * Math.pow(value - 1, 2);
 };
 
+function getStaticTop(element: HTMLElement, root: HTMLElement) {
+  let top = 0;
+  let current: HTMLElement | null = element;
+
+  while (current && current !== root) {
+    top += current.offsetTop;
+    current = current.offsetParent as HTMLElement | null;
+  }
+
+  return top;
+}
+
 export function StackSectionMotion() {
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
@@ -58,12 +70,8 @@ export function StackSectionMotion() {
     let frame: number | null = null;
 
     const refreshSectionTops = () => {
-      const rootTop = root.getBoundingClientRect().top;
-      const scrollTop = root.scrollTop;
-
       sections.forEach(section => {
-        section.top =
-          scrollTop + section.element.getBoundingClientRect().top - rootTop;
+        section.top = getStaticTop(section.element, root);
         section.lastProgress = undefined;
       });
     };

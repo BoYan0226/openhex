@@ -19,7 +19,15 @@ function easeOutCubic(value: number) {
 const SUMMARY_TOP_OVERLAP = 2;
 
 function getScrollTopForElement(root: HTMLElement, element: HTMLElement) {
-  return root.scrollTop + element.getBoundingClientRect().top - root.getBoundingClientRect().top;
+  let top = 0;
+  let current: HTMLElement | null = element;
+
+  while (current && current !== root) {
+    top += current.offsetTop;
+    current = current.offsetParent as HTMLElement | null;
+  }
+
+  return top;
 }
 
 function getSummaryTop(root: HTMLElement, anchor: HTMLElement) {
