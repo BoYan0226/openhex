@@ -235,13 +235,13 @@ body::-webkit-scrollbar,
   cursor: pointer;
   pointer-events: auto;
   opacity: var(--stack-label-opacity, 1);
-  transform: translate(
+  transform: translate3d(
     var(--stack-label-shift, 0rem),
-    calc(var(--stack-label-y, 0rem) - 50%)
+    calc(var(--stack-label-y, 0rem) - 50%),
+    0
   ) scale(var(--stack-label-scale, 1));
   transform-origin: right center;
-  backface-visibility: hidden;
-  will-change: auto;
+  will-change: transform, opacity;
   transition:
     color 220ms ease,
     opacity 460ms cubic-bezier(0.22, 1, 0.36, 1),
