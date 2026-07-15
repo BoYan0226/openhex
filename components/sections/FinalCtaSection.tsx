@@ -25,7 +25,7 @@ export function FinalCtaSection() {
   return (
     <section className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-transparent py-20 text-center text-ink">
       <div className="final-cta-content relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
-        <h2 className="text-[42px] font-semibold md:text-[58px] 2xl:text-[72px]">
+        <h2 className="final-cta-title text-[26px] font-semibold leading-[1.18] text-ink sm:text-[40px] sm:leading-[1.14] md:text-[50px] 2xl:text-[58px]">
           <span>{titleBeforeAgent}</span>
           <span className="relative inline-block whitespace-nowrap">
             Agent

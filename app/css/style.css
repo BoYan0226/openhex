@@ -542,9 +542,17 @@ body::-webkit-scrollbar,
    Two honey halves split at the center seam; on each tick the top half
    of the current word folds down and the bottom half of the next word
    folds up — a calendar / airport-board flip from the middle. */
+.final-cta-title {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
+}
+
 .flap {
   position: relative;
   display: inline-block;
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: inherit;
+  line-height: inherit;
   perspective: 320px;
   vertical-align: baseline;
 }
