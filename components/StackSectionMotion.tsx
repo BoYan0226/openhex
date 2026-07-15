@@ -10,25 +10,15 @@ type MotionItem = {
 };
 
 type SectionMotion = {
-  anchor: HTMLElement | null;
-  anchorTop: number;
+  element: HTMLElement;
   items: MotionItem[];
   lastProgress?: number;
-  nextAnchorTop?: number;
-};
-
-type HandlePanelMotion = {
-  anchorTop: number;
-  lastWidth?: string;
-  nextTop?: number;
-  panel: HTMLElement;
 };
 
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
 const smoothstep = (value: number) => value * value * (3 - 2 * value);
-const MOTION_SPAN_VIEWPORTS = 1.05;
-const HANDLE_LONG_WIDTH_VW = 72;
-const HANDLE_REST_WIDTH_VW = 22;
+const MOTION_START_VIEWPORTS = 1.05;
+const MOTION_END_VIEWPORTS = 0.05;
 const easeOutCubic = (value: number) => 1 - Math.pow(1 - value, 3);
 const easeOutBack = (value: number) => {
   const c1 = 1.35;
@@ -44,7 +34,6 @@ export function StackSectionMotion() {
     const sections: SectionMotion[] = Array.from(
       document.querySelectorAll<HTMLElement>('[data-stack-motion]')
     ).map(section => {
-      const anchor = section.closest('.sticky-panel')?.previousElementSibling as HTMLElement | null;
       const items: MotionItem[] = [];
       const variant = (section.dataset.motionStyle || 'rise') as MotionItem['variant'];
 
@@ -53,43 +42,19 @@ export function StackSectionMotion() {
         if (!container) return;
 
         Array.from(container.children).forEach((child, index) => {
-          if (child instanceof HTMLElement) items.push({ element: child, index, type, variant });
+          if (child instanceof HTMLElement) {
+            child.style.opacity = '';
+            child.style.filter = '';
+            child.style.visibility = '';
+            child.style.willChange = 'auto';
+            items.push({ element: child, index, type, variant });
+          }
         });
       });
 
-      return { anchor, anchorTop: 0, items };
+      return { element: section, items };
     });
-    const handlePanels: HandlePanelMotion[] = Array.from(
-      document.querySelectorAll<HTMLElement>('.sticky-panel--light')
-    ).map(panel => ({ anchorTop: 0, panel }));
-
     let frame: number | null = null;
-    let previousScrollTop = root.scrollTop;
-    const handleTimers = new Map<HTMLElement, number>();
-
-    const refreshMetrics = () => {
-      sections.forEach((section, index) => {
-        section.anchorTop = section.anchor?.offsetTop ?? 0;
-        section.nextAnchorTop = sections[index + 1]?.anchor?.offsetTop;
-      });
-
-      handlePanels.forEach(entry => {
-        const anchor = entry.panel.previousElementSibling as HTMLElement | null;
-        const nextAnchor = entry.panel.nextElementSibling as HTMLElement | null;
-        entry.anchorTop = anchor?.classList.contains('stack-anchor') ? anchor.offsetTop : 0;
-        entry.nextTop = nextAnchor?.classList.contains('stack-anchor')
-          ? nextAnchor.offsetTop
-          : undefined;
-      });
-    };
-
-    const clearHandleTimer = (panel: HTMLElement) => {
-      const timer = handleTimers.get(panel);
-      if (timer === undefined) return;
-
-      window.clearTimeout(timer);
-      handleTimers.delete(panel);
-    };
 
     const renderItem = (
       { element, index, type, variant }: MotionItem,
@@ -100,21 +65,26 @@ export function StackSectionMotion() {
       const rawProgress = clamp((sectionProgress - offset) / (1 - offset));
       const itemProgress = smoothstep(rawProgress);
       const impactProgress = clamp(easeOutBack(rawProgress));
-      const fastProgress = easeOutCubic(rawProgress);
+      const fastProgress = itemProgress;
       const remaining = 1 - itemProgress;
-      const impactRemaining = 1 - impactProgress;
+      const impactRemaining = remaining;
       const fastRemaining = 1 - fastProgress;
+      const isActive = rawProgress > 0.001 && rawProgress < 0.999;
 
-      element.style.opacity = (0.08 + fastProgress * 0.92).toFixed(3);
+      element.style.willChange = isActive ? 'transform' : 'auto';
       element.style.clipPath = '';
       element.style.transformOrigin = '';
 
       if (type === 'split') {
         const direction = index === 0 ? -1 : 1;
         const scale = 0.84 + impactProgress * 0.16;
-        element.style.transform = `translate3d(${(direction * impactRemaining * 260).toFixed(
+        element.style.transform = `translate3d(${(direction * impactRemaining * 360).toFixed(
           2
-        )}px, ${(fastRemaining * 28).toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
+        )}px, ${(fastRemaining * 50).toFixed(2)}px, 0) rotateY(${(
+          direction *
+          fastRemaining *
+          -6
+        ).toFixed(2)}deg) scale(${scale.toFixed(4)})`;
         return;
       }
 
@@ -123,39 +93,42 @@ export function StackSectionMotion() {
 
         if (variant === 'fan') {
           const scale = 0.88 + impactProgress * 0.12;
-          element.style.transformOrigin = '50% 100%';
-          element.style.transform = `translate3d(${(direction * impactRemaining * 150).toFixed(
+          element.style.transformOrigin = `${index % 2 === 0 ? 0 : 100}% 120%`;
+          element.style.transform = `translate3d(${(direction * impactRemaining * 240).toFixed(
             2
-          )}px, ${(fastRemaining * 56).toFixed(2)}px, 0) rotate(${(
+          )}px, ${(fastRemaining * 88).toFixed(2)}px, 0) rotate(${(
             direction *
             impactRemaining *
-            8
+            10
           ).toFixed(2)}deg) scale(${scale.toFixed(4)})`;
           return;
         }
 
         if (variant === 'tilt') {
-          const scale = 0.78 + impactProgress * 0.22;
+          const scale = 0.72 + impactProgress * 0.28;
           element.style.transformOrigin = '50% 100%';
           element.style.transform = `perspective(900px) translate3d(${(
             direction *
             impactRemaining *
-            34
-          ).toFixed(2)}px, ${(fastRemaining * 120).toFixed(2)}px, 0) rotateX(${(
-            fastRemaining * 30
-          ).toFixed(2)}deg) rotateZ(${(direction * impactRemaining * 2.8).toFixed(
+            88
+          ).toFixed(2)}px, ${(fastRemaining * 180).toFixed(2)}px, 0) rotateX(${(
+            fastRemaining * 19
+          ).toFixed(2)}deg) rotateZ(${(direction * impactRemaining * 3).toFixed(
             2
           )}deg) scale(${scale.toFixed(4)})`;
           return;
         }
 
         if (variant === 'steps') {
-          element.style.opacity = (0.16 + fastProgress * 0.84).toFixed(3);
-          element.style.clipPath = `inset(0 ${(fastRemaining * 100).toFixed(2)}% 0 0)`;
-          element.style.transformOrigin = '0 50%';
-          element.style.transform = `translate3d(${(-fastRemaining * 96).toFixed(
+          element.style.clipPath = `inset(0 ${(fastRemaining * 100).toFixed(
             2
-          )}px, ${(impactRemaining * 18).toFixed(2)}px, 0) scaleX(${(
+          )}% 0 0 round ${(fastRemaining * 18).toFixed(2)}px)`;
+          element.style.transformOrigin = '0 50%';
+          element.style.transform = `translate3d(${(-fastRemaining * 150).toFixed(
+            2
+          )}px, ${(impactRemaining * 30).toFixed(2)}px, 0) skewX(${(
+            -fastRemaining * 8
+          ).toFixed(2)}deg) scaleX(${(
             0.9 +
             impactProgress * 0.1
           ).toFixed(4)})`;
@@ -165,9 +138,9 @@ export function StackSectionMotion() {
         if (variant === 'weave') {
           const rowDirection = index < 3 ? -1 : 1;
           const scale = 0.86 + impactProgress * 0.14;
-          element.style.transform = `translate3d(${(direction * impactRemaining * 190).toFixed(
+          element.style.transform = `translate3d(${(direction * impactRemaining * 280).toFixed(
             2
-          )}px, ${(rowDirection * impactRemaining * 46).toFixed(2)}px, 0) rotate(${(
+          )}px, ${(rowDirection * impactRemaining * 92).toFixed(2)}px, 0) rotate(${(
             direction *
             impactRemaining *
             5
@@ -178,16 +151,18 @@ export function StackSectionMotion() {
         if (variant === 'burst') {
           const columnDirection = index % 2 === 0 ? -1 : 1;
           const rowDirection = index < 2 ? -1 : 1;
-          const scale = 0.7 + impactProgress * 0.3;
+          const scale = 0.62 + impactProgress * 0.38;
           element.style.transformOrigin = '50% 50%';
           element.style.transform = `translate3d(${(
             columnDirection *
             impactRemaining *
-            132
-          ).toFixed(2)}px, ${(fastRemaining * -24).toFixed(2)}px) rotate(${(
+            210
+          ).toFixed(2)}px, ${(rowDirection * impactRemaining * 145).toFixed(
+            2
+          )}px, 0) rotate(${(
             columnDirection *
             impactRemaining *
-            7
+            7.5
           ).toFixed(2)}deg) scale(${scale.toFixed(4)})`;
           return;
         }
@@ -198,10 +173,12 @@ export function StackSectionMotion() {
           element.style.transform = `translate3d(${(
             columnDirection *
             impactRemaining *
-            240
-          ).toFixed(2)}px, ${(fastRemaining * 34).toFixed(
+            370
+          ).toFixed(2)}px, ${(fastRemaining * 56).toFixed(
             2
-          )}px, 0) scale(${scale.toFixed(4)})`;
+          )}px, 0) rotateY(${(columnDirection * fastRemaining * -6.5).toFixed(
+            2
+          )}deg) scale(${scale.toFixed(4)})`;
           return;
         }
 
@@ -213,119 +190,68 @@ export function StackSectionMotion() {
       }
 
       if (variant === 'fan') {
-        element.style.transform = `translate3d(${(-fastRemaining * 90).toFixed(
+        element.style.clipPath = `polygon(0 0, ${(fastProgress * 100).toFixed(
           2
-        )}px, ${(fastRemaining * 12).toFixed(2)}px, 0)`;
+        )}% 0, ${(fastProgress * 100).toFixed(2)}% 100%, 0 100%)`;
+        element.style.transform = `translate3d(${(-fastRemaining * 160).toFixed(
+          2
+        )}px, ${(fastRemaining * 24).toFixed(2)}px, 0) skewX(${(
+          -fastRemaining * 7
+        ).toFixed(2)}deg)`;
         return;
       }
 
       if (variant === 'steps') {
-        element.style.opacity = (0.18 + fastProgress * 0.82).toFixed(3);
-        element.style.clipPath = `inset(0 ${(fastRemaining * 100).toFixed(2)}% 0 0)`;
-        element.style.transform = `translate3d(${(-fastRemaining * 58).toFixed(
+        element.style.clipPath = `inset(0 ${(fastRemaining * 100).toFixed(
           2
-        )}px, ${(fastRemaining * 10).toFixed(2)}px, 0)`;
+        )}% 0 0 round ${(fastRemaining * 14).toFixed(2)}px)`;
+        element.style.transform = `translate3d(${(-fastRemaining * 108).toFixed(
+          2
+        )}px, ${(fastRemaining * 16).toFixed(2)}px, 0) skewX(${(
+          -fastRemaining * 5
+        ).toFixed(2)}deg)`;
         return;
       }
 
       if (variant === 'burst') {
         const scale = 0.82 + impactProgress * 0.18;
-        element.style.transform = `translate3d(0, ${(fastRemaining * 58).toFixed(
+        element.style.transform = `translate3d(0, ${(fastRemaining * 150).toFixed(
           2
-        )}px, 0) scale(${scale.toFixed(4)})`;
+        )}px, 0) rotateX(${(fastRemaining * 5).toFixed(2)}deg) scale(${scale.toFixed(4)})`;
         return;
       }
 
       if (variant === 'tilt') {
-        element.style.transform = `translate3d(0, ${(fastRemaining * 64).toFixed(
+        element.style.transform = `translate3d(0, ${(fastRemaining * 150).toFixed(
           2
-        )}px, 0)`;
+        )}px, 0) rotateX(${(fastRemaining * 9).toFixed(2)}deg)`;
         return;
       }
 
       if (variant === 'weave') {
-        element.style.transform = `translate3d(0, ${(fastRemaining * 48).toFixed(
+        element.style.transform = `translate3d(${(fastRemaining * -105).toFixed(
           2
-        )}px, 0)`;
+        )}px, ${(fastRemaining * 98).toFixed(
+          2
+        )}px, 0) rotate(${(fastRemaining * -1.5).toFixed(2)}deg)`;
         return;
       }
 
-      element.style.transform = `translate3d(0, ${(fastRemaining * 52).toFixed(2)}px, 0)`;
+      element.style.transform = `translate3d(0, ${(fastRemaining * 92).toFixed(2)}px, 0)`;
     };
 
     const update = () => {
       frame = null;
       const viewportHeight = root.clientHeight;
-      const scrollTop = root.scrollTop;
-      const isScrollingUp = scrollTop < previousScrollTop - 0.5;
-      previousScrollTop = scrollTop;
-
-      handlePanels.forEach(entry => {
-        const { anchorTop, nextTop, panel } = entry;
-        const rect = panel.getBoundingClientRect();
-        const isReverseEntering =
-          isScrollingUp &&
-          nextTop !== undefined &&
-          scrollTop > anchorTop + 1 &&
-          scrollTop <= nextTop + 1;
-        const reverseSpan =
-          nextTop === undefined ? viewportHeight : Math.min(viewportHeight, nextTop - anchorTop);
-        const arrivalProgress = isReverseEntering
-          ? clamp((nextTop - scrollTop) / Math.max(1, reverseSpan))
-          : clamp(1 - Math.max(0, rect.top) / Math.max(1, viewportHeight));
-        const easedProgress = easeOutCubic(arrivalProgress);
-        const width =
-          HANDLE_LONG_WIDTH_VW -
-          (HANDLE_LONG_WIDTH_VW - HANDLE_REST_WIDTH_VW) * easedProgress;
-        const widthValue = `${width.toFixed(2)}vw`;
-        const isAtTop = Math.abs(rect.top) <= 1;
-
-        if (entry.lastWidth !== widthValue) {
-          panel.style.setProperty('--stack-handle-width', widthValue);
-          entry.lastWidth = widthValue;
-        }
-
-        if (isAtTop && isReverseEntering) {
-          clearHandleTimer(panel);
-          panel.dataset.handleHidden = 'true';
-          return;
-        }
-
-        if (!isAtTop) {
-          clearHandleTimer(panel);
-          panel.dataset.handleHidden = 'false';
-          return;
-        }
-
-        if (panel.dataset.handleHidden === 'true' || handleTimers.has(panel)) {
-          return;
-        }
-
-        const timer = window.setTimeout(() => {
-          handleTimers.delete(panel);
-          panel.dataset.handleHidden = 'true';
-        }, 120);
-        handleTimers.set(panel, timer);
-      });
+      const rootTop = root.getBoundingClientRect().top;
+      const startLine = viewportHeight * MOTION_START_VIEWPORTS;
+      const endLine = viewportHeight * MOTION_END_VIEWPORTS;
+      const motionDistance = Math.max(1, startLine - endLine);
 
       sections.forEach(section => {
-        const { anchor, anchorTop, items, nextAnchorTop } = section;
-        if (!anchor) return;
-
-        const span = viewportHeight * MOTION_SPAN_VIEWPORTS;
-        const start = anchorTop - span;
-        const end = anchorTop;
-        let sectionProgress = clamp((scrollTop - start) / Math.max(1, end - start));
-
-        if (
-          isScrollingUp &&
-          nextAnchorTop !== undefined &&
-          scrollTop >= anchorTop - 1 &&
-          scrollTop <= nextAnchorTop + 1
-        ) {
-          const reverseSpan = Math.min(span, Math.max(1, nextAnchorTop - anchorTop));
-          sectionProgress = clamp((nextAnchorTop - scrollTop) / reverseSpan);
-        }
+        const { element, items } = section;
+        const sectionTop = element.getBoundingClientRect().top - rootTop;
+        const sectionProgress = clamp((startLine - sectionTop) / motionDistance);
 
         const quantizedProgress = Math.round(sectionProgress * 1000) / 1000;
         if (section.lastProgress === quantizedProgress) return;
@@ -341,18 +267,15 @@ export function StackSectionMotion() {
     };
 
     const onResize = () => {
-      refreshMetrics();
       requestUpdate();
     };
 
-    refreshMetrics();
     root.addEventListener('scroll', requestUpdate, { passive: true });
     window.addEventListener('resize', onResize);
     requestUpdate();
 
     return () => {
       if (frame !== null) window.cancelAnimationFrame(frame);
-      handleTimers.forEach(timer => window.clearTimeout(timer));
       root.removeEventListener('scroll', requestUpdate);
       window.removeEventListener('resize', onResize);
     };

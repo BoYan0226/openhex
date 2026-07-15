@@ -26,11 +26,11 @@ export function WhichSideSection() {
           className="mb-12 flex flex-col items-center text-center 2xl:mb-20"
           data-motion="header"
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
-            <span className="hex-clip h-2.5 w-2.5 bg-honey" />
+          <span className="section-kicker">
+            <span className="section-kicker-dot" />
             {t('eyebrow')}
           </span>
-          <h2 className="mt-5 text-[30px] font-semibold text-ink md:text-[44px] 2xl:text-[54px]">
+          <h2 className="mt-5 text-[26px] font-semibold leading-[1.18] text-ink sm:text-[40px] sm:leading-[1.14] md:text-[50px] 2xl:text-[58px]">
             {t('title')}
           </h2>
           <p className="mx-auto mt-4 max-w-[680px] text-ink/55 2xl:text-[17px]">{t('subtitle')}</p>
@@ -43,7 +43,7 @@ export function WhichSideSection() {
         >
           {/* Creator card */}
           <div
-            className="relative flex min-h-[320px] flex-col overflow-hidden rounded-[20px] border border-line bg-[#fffdf7] p-8 shadow-[0_2px_24px_rgba(34,28,19,.05)] md:min-h-[380px] md:p-10 2xl:min-h-[460px] 2xl:p-12"
+            className="glass-surface relative flex min-h-[320px] flex-col overflow-hidden rounded-[20px] border border-line bg-[#fffdf7] p-8 shadow-[0_2px_24px_rgba(34,28,19,.05)] md:min-h-[380px] md:p-10 2xl:min-h-[460px] 2xl:p-12"
           >
             <span
               aria-hidden
@@ -80,7 +80,7 @@ export function WhichSideSection() {
 
           {/* User card */}
           <div
-            className="relative flex min-h-[320px] flex-col overflow-hidden rounded-[20px] border border-line bg-[#fffdf7] p-8 shadow-[0_2px_24px_rgba(34,28,19,.05)] md:min-h-[380px] md:p-10 2xl:min-h-[460px] 2xl:p-12"
+            className="glass-surface relative flex min-h-[320px] flex-col overflow-hidden rounded-[20px] border border-line bg-[#fffdf7] p-8 shadow-[0_2px_24px_rgba(34,28,19,.05)] md:min-h-[380px] md:p-10 2xl:min-h-[460px] 2xl:p-12"
           >
             <span
               aria-hidden
@@ -103,7 +103,7 @@ export function WhichSideSection() {
                 href={CONSUMER_CONTACTS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-auto inline-flex h-11 w-fit items-center rounded-full border border-line bg-white px-5 text-[14px] font-medium text-ink hover:bg-black/[0.03]"
+                className="glass-surface-soft mt-auto inline-flex h-11 w-fit items-center rounded-full border border-line bg-white px-5 text-[14px] font-medium text-ink hover:bg-black/[0.03]"
               >
                 {t('user.cta')}
               </a>

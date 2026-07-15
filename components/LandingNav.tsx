@@ -22,9 +22,9 @@ export function LandingNav() {
 
   return (
     <nav
-      className="fixed left-0 right-0 top-0 z-50 h-16 bg-[#303030] shadow-none max-sm:h-14"
+      className="fixed left-0 right-0 top-0 z-50 h-16 border-b border-line bg-[rgba(255,255,255,0.3)] shadow-[inset_0_1px_0_rgba(255,255,255,0.68),0_10px_34px_rgba(34,28,19,0.08)] backdrop-blur-2xl backdrop-saturate-150 max-sm:h-14"
     >
-      <div className="relative flex h-full items-center px-[clamp(1rem,3vw,3rem)]">
+      <div className="relative flex h-full items-center px-[calc(clamp(1rem,3vw,3rem)+30px)] max-sm:px-4">
         {/* Logo: icon + wordmark + 迷境智塔旗下 tagline */}
         <Link href="/" className="flex shrink-0 items-center" aria-label="OpenHex">
           <Image
@@ -33,7 +33,7 @@ export function LandingNav() {
             width={52}
             height={52}
             priority
-            className="h-[35px] w-[35px] shrink-0 brightness-0 invert"
+            className="h-[35px] w-[35px] shrink-0"
           />
           <div className="inline-grid grid-cols-[max-content] grid-rows-[max-content] place-items-start leading-[0]">
             <Image
@@ -42,9 +42,9 @@ export function LandingNav() {
               width={114}
               height={24}
               priority
-              className="col-start-1 row-start-1 block h-[18px] w-[88px] brightness-0 invert"
+              className="col-start-1 row-start-1 block h-[18px] w-[88px]"
             />
-            <p className="col-start-1 row-start-1 ml-[2px] mt-[17px] whitespace-nowrap text-[7.5px] font-medium leading-[1.5] tracking-[8.2px] text-white/70">
+            <p className="col-start-1 row-start-1 ml-[2px] mt-[17px] whitespace-nowrap text-[7.5px] font-medium leading-[1.5] tracking-[8.2px] text-ink/55">
               迷境智塔旗下
             </p>
           </div>
@@ -56,7 +56,7 @@ export function LandingNav() {
             href={LANDING_PLATFORM_DOC_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden h-9 items-center rounded-[10px] px-3 text-[14px] font-medium text-white transition-colors hover:bg-white/10 sm:inline-flex"
+            className="hidden h-9 items-center rounded-[10px] px-3 text-[14px] font-medium text-ink transition-colors hover:bg-white/35 sm:inline-flex"
           >
             {t('docsLink')}
           </a>

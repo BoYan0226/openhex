@@ -12,23 +12,34 @@ type StackJumpNavProps = {
   items: readonly StackJumpItem[];
 };
 
-function getRemInPixels() {
-  return Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-}
-
 function easeOutCubic(value: number) {
   return 1 - (1 - value) ** 3;
 }
 
 const SUMMARY_TOP_OVERLAP = 2;
 
-function getSummaryTop(anchor: HTMLElement) {
+function getScrollTopForElement(root: HTMLElement, element: HTMLElement) {
+  return root.scrollTop + element.getBoundingClientRect().top - root.getBoundingClientRect().top;
+}
+
+function getSummaryTop(root: HTMLElement, anchor: HTMLElement) {
   const summaryPanel = anchor.nextElementSibling;
   const navHeight = document.querySelector<HTMLElement>('nav')?.getBoundingClientRect().height ?? 0;
   const panelTop =
-    summaryPanel instanceof HTMLElement ? summaryPanel.offsetTop : anchor.offsetTop;
+    summaryPanel instanceof HTMLElement
+      ? getScrollTopForElement(root, summaryPanel)
+      : getScrollTopForElement(root, anchor);
 
   return Math.max(0, panelTop - navHeight + SUMMARY_TOP_OVERLAP);
+}
+
+function getSectionTop(root: HTMLElement, anchor: HTMLElement) {
+  if (anchor.id === 'stack-summary') return getSummaryTop(root, anchor);
+
+  const panel = anchor.nextElementSibling;
+  return panel instanceof HTMLElement
+    ? getScrollTopForElement(root, panel)
+    : getScrollTopForElement(root, anchor);
 }
 
 export function StackJumpNav({ items }: StackJumpNavProps) {
@@ -47,10 +58,8 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
 
     let frame: number | null = null;
     const refreshTargetTops = () => {
-      targetTopsRef.current = targets.map(target =>
-        target?.id === 'stack-summary' ? getSummaryTop(target) : target?.offsetTop ?? 0
-      );
-      summaryTopRef.current = summary ? getSummaryTop(summary) : 0;
+      targetTopsRef.current = targets.map(target => (target ? getSectionTop(root, target) : 0));
+      summaryTopRef.current = summary ? getSummaryTop(root, summary) : 0;
     };
 
     const update = () => {
@@ -73,14 +82,16 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
         return;
       }
 
-      const probe = root.scrollTop + Math.min(root.clientHeight * 0.38, 280);
+      const probe = root.scrollTop + root.clientHeight * 0.5;
       let nextIndex = 0;
 
       targetTopsRef.current.forEach((targetTop, index) => {
         if (targets[index] && targetTop <= probe) nextIndex = index;
       });
 
-      setActiveIndex(current => (current === nextIndex ? current : nextIndex));
+      const correctedIndex = Math.min(items.length - 1, Math.max(1, nextIndex));
+
+      setActiveIndex(current => (current === correctedIndex ? current : correctedIndex));
       setNavPhase(current => (current === 'active' ? current : 'active'));
     };
 
@@ -120,8 +131,15 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
 
     if (Math.abs(distance) < 2) {
       root.scrollTop = targetTop;
+      window.dispatchEvent(new CustomEvent('landing:stack-jump-complete'));
       return;
     }
+
+    window.dispatchEvent(
+      new CustomEvent('landing:stack-jump-start', {
+        detail: { top: targetTop },
+      })
+    );
 
     const tick = (now: number) => {
       const progress = Math.min((now - startedAt) / duration, 1);
@@ -134,6 +152,7 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
 
       root.scrollTop = targetTop;
       jumpFrameRef.current = null;
+      window.dispatchEvent(new CustomEvent('landing:stack-jump-complete'));
     };
 
     jumpFrameRef.current = window.requestAnimationFrame(tick);
@@ -156,12 +175,7 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
       return;
     }
 
-    const topValue = getComputedStyle(target).getPropertyValue('--sticky-offset');
-    const offsetRem = Number.parseFloat(topValue) || 0;
-    const targetTop =
-      id === 'stack-summary'
-        ? getSummaryTop(target)
-        : target.offsetTop - offsetRem * getRemInPixels();
+    const targetTop = getSectionTop(root, target);
     animateJump(root, Math.max(0, targetTop));
   };
 
@@ -178,7 +192,6 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
         const shift = 0.55 + 3.7 * Math.exp(-distance * 0.42);
         const opacity = Math.max(0.2, 1 - distance * 0.14);
         const scale = Math.max(0.74, 1 - distance * 0.055);
-        const blur = Math.min(0.36, distance * 0.06);
 
         return (
           <button
@@ -196,16 +209,7 @@ export function StackJumpNav({ items }: StackJumpNavProps) {
                   2
                 )}rem * var(--stack-label-size-factor, 1))`,
                 '--stack-label-opacity': opacity.toFixed(2),
-                '--stack-label-font-size': `clamp(calc(${(0.94 * scale).toFixed(
-                  3
-                )}rem * var(--stack-label-size-factor, 1)), calc((${(0.83 * scale).toFixed(
-                  3
-                )}rem + ${(0.44 * scale).toFixed(
-                  3
-                )}vw) * var(--stack-label-size-factor, 1)), calc(${(1.24 * scale).toFixed(
-                  3
-                )}rem * var(--stack-label-size-factor, 1)))`,
-                '--stack-label-blur': `${blur.toFixed(2)}px`,
+                '--stack-label-scale': scale.toFixed(3),
               } as CSSProperties
             }
             onClick={() => handleJump(item.id)}

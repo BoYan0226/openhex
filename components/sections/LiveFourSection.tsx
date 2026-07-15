@@ -33,11 +33,11 @@ export function LiveFourSection() {
           className="max-w-[760px] md:max-w-[900px] 2xl:max-w-[1080px]"
           data-motion="header"
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
-            <span className="hex-clip h-2.5 w-2.5 bg-honey" />
+          <span className="section-kicker">
+            <span className="section-kicker-dot" />
             {t('eyebrow')}
           </span>
-          <h2 className="mt-5 text-[32px] font-bold leading-[1.25] text-ink md:text-[46px] 2xl:text-[56px]">
+          <h2 className="mt-5 text-[26px] font-bold leading-[1.18] text-ink sm:text-[40px] sm:leading-[1.14] md:text-[50px] 2xl:text-[58px]">
             {t.rich('titleLine1', {
               nowrap: chunks => <span className="whitespace-nowrap">{chunks}</span>,
             })}
@@ -71,7 +71,7 @@ export function LiveFourSection() {
             {items.map(item => (
               <div
                 key={item.letter}
-                className="flex flex-col rounded-[18px] border border-line bg-card p-6 shadow-[0_2px_20px_rgba(34,28,19,.04)] 2xl:min-h-[300px] 2xl:p-8"
+                className="glass-surface flex flex-col rounded-[18px] border border-line bg-card p-6 shadow-[0_2px_20px_rgba(34,28,19,.04)] 2xl:min-h-[300px] 2xl:p-8"
               >
                 <span className="font-display text-[44px] font-bold leading-none text-honey 2xl:text-[52px]">
                   {item.letter}

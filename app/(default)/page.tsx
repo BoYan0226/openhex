@@ -12,9 +12,10 @@ import { SummarySection } from '@/components/sections/SummarySection';
 import { FinalCtaSection } from '@/components/sections/FinalCtaSection';
 import { LandingFooter } from '@/components/LandingFooter';
 import { ScrollPathTransition } from '@/components/ScrollPathTransition';
-import { ScrollPager } from '@/components/ScrollPager';
-import { StackJumpNav } from '@/components/StackJumpNav';
+import { SectionInertiaSnap } from '@/components/SectionInertiaSnap';
 import { StackSectionMotion } from '@/components/StackSectionMotion';
+import { StackJumpNav } from '@/components/StackJumpNav';
+import { WaveGridBackground } from '@/components/WaveGridBackground';
 
 type StickyPanelTone = 'light' | 'dark';
 
@@ -39,6 +40,19 @@ const PAGE_SURFACE_SHADE = PAGE_SURFACE_LIGHT;
 const stickyOffset = (index: number) => STICKY_BASE_OFFSET_REM + index * STICKY_STEP_REM;
 
 const STACK_NAV_ITEMS = [
+  { id: 'stack-home', label: '首页' },
+  { id: 'stack-live-agent', label: 'Live Agent' },
+  { id: 'stack-live-four', label: 'LIVE 四要素' },
+  { id: 'stack-capabilities', label: '核心能力' },
+  { id: 'stack-asset', label: '能力资产' },
+  { id: 'stack-how-it-works', label: '如何创建' },
+  { id: 'stack-connectors', label: '连接器' },
+  { id: 'stack-infra', label: '技术底座' },
+  { id: 'stack-which-side', label: '适合谁' },
+  { id: 'stack-summary', label: 'OPS × A2A' },
+] as const;
+
+const STACK_NAV_ITEMS_CN = [
   { id: 'stack-home', label: '首页' },
   { id: 'stack-live-agent', label: 'Live Agent' },
   { id: 'stack-live-four', label: 'LIVE 四要素' },
@@ -90,6 +104,7 @@ function StickyPanel({
         }${
           summary ? ' sticky-panel--summary' : ''
         }`}
+        data-scroll-fade-section
         style={stickyStyle(layer, offsetRem, surfaceStart, surfaceEnd)}
       >
         {children}
@@ -102,16 +117,19 @@ export default function HomePage() {
   return (
     <main
       data-landing-scroll-root
-      className="h-screen overflow-x-hidden overflow-y-scroll bg-paper text-ink"
+      className="relative isolate h-screen overflow-x-hidden overflow-y-scroll bg-transparent text-ink"
     >
+      <WaveGridBackground />
       <LandingNav />
       <ScrollPathTransition />
-      <ScrollPager />
+      <SectionInertiaSnap />
       <StackSectionMotion />
+      <StackJumpNav items={STACK_NAV_ITEMS_CN} />
       <div id="stack-home" className="stack-anchor" />
-      <FinalCtaSection />
+      <div data-scroll-fade-section>
+        <FinalCtaSection />
+      </div>
       <div className="sticky-flow">
-        <StackJumpNav items={STACK_NAV_ITEMS} />
         <StickyPanel
           layer={1}
           offsetRem={stickyOffset(0)}

@@ -25,12 +25,13 @@ export function InfraSection() {
       <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
         {/* Header */}
         <div className="flex flex-col items-center text-center" data-motion="header">
-          <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
-            <span className="hex-clip h-2.5 w-2.5 bg-honey" />
+          <span className="section-kicker">
+            <span className="section-kicker-dot" />
             {t('eyebrow')}
           </span>
-          <h2 className="mt-5 text-[30px] font-semibold text-ink md:text-[44px] 2xl:text-[54px]">
-            {t('titleLine1')} <span className="text-honey">{t('titleHighlight')}</span>
+          <h2 className="mt-5 text-[26px] font-semibold leading-[1.18] text-ink sm:text-[40px] sm:leading-[1.14] md:text-[50px] 2xl:text-[58px]">
+            {t('titleLine1')}{' '}
+            <span className="title-honey-shadow text-honey">{t('titleHighlight')}</span>
           </h2>
           <p className="mt-4 max-w-[680px] text-ink/55 2xl:text-[17px]">{t('subtitle')}</p>
         </div>
@@ -45,7 +46,7 @@ export function InfraSection() {
             return (
               <article
                 key={item.title}
-                className="flex gap-4 rounded-[18px] border border-line bg-card p-7 shadow-[0_2px_20px_rgba(34,28,19,.04)] 2xl:gap-5 2xl:p-9"
+                className="glass-surface flex gap-4 rounded-[18px] border border-line bg-card p-7 shadow-[0_2px_20px_rgba(34,28,19,.04)] 2xl:gap-5 2xl:p-9"
               >
                 <div className="hex-clip flex size-12 shrink-0 items-center justify-center bg-honey/15 text-honey-deep 2xl:size-14">
                   <Icon className="size-5 2xl:size-6" />

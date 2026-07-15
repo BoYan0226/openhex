@@ -97,20 +97,20 @@ export function AssetSection() {
     >
       <div className="relative z-10 mx-auto max-w-[1240px] px-6 2xl:max-w-[1560px]">
         <div
-          className="grid items-center gap-12 md:grid-cols-2 2xl:gap-20"
+          className="grid items-center gap-12 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] 2xl:gap-20"
           data-motion="split"
         >
           {/* LEFT — copy */}
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
-              <span className="hex-clip h-2.5 w-2.5 bg-honey" />
+            <span className="section-kicker">
+              <span className="section-kicker-dot" />
               {t('eyebrow')}
             </span>
 
-            <h2 className="mt-5 text-[28px] font-semibold leading-tight text-ink md:text-[40px] 2xl:text-[48px]">
-              {t('titleLine1')}
+            <h2 className="mt-5 text-[26px] font-semibold leading-[1.18] text-ink sm:text-[40px] sm:leading-[1.14] md:text-[50px] 2xl:text-[58px]">
+              <span className="whitespace-nowrap">{t('titleLine1')}</span>
               <br />
-              <span className="text-honey">{t('titleHighlight')}</span>
+              <span className="title-honey-shadow text-honey">{t('titleHighlight')}</span>
             </h2>
 
             <p className="mt-4 text-[15px] leading-relaxed text-ink/65 2xl:mt-5 2xl:text-[17px]">
@@ -146,7 +146,7 @@ export function AssetSection() {
               {tags.map(tag => (
                 <span
                   key={tag}
-                  className="rounded-full border border-line bg-white px-3 py-1 text-[12px] text-ink/60"
+                  className="glass-surface-soft rounded-full border border-line bg-white px-3 py-1 text-[12px] text-ink/60"
                 >
                   {tag}
                 </span>
@@ -158,7 +158,7 @@ export function AssetSection() {
           <div>
             <div className="relative pb-8 pr-2 md:pr-12 2xl:pb-12">
               {/* Desktop creator console */}
-              <div className="overflow-hidden rounded-[14px] border border-line bg-white shadow-[0_24px_60px_rgba(34,28,19,.14)]">
+              <div className="glass-surface overflow-hidden rounded-[14px] border border-line bg-white shadow-[0_24px_60px_rgba(34,28,19,.14)]">
                 {/* Titlebar */}
                 <div className="flex items-center gap-1.5 border-b border-line px-4 py-2.5">
                   <span className="size-2.5 rounded-full bg-[#ff5f57]" />
@@ -237,7 +237,7 @@ export function AssetSection() {
                         <Check className="size-3" /> 已编辑 /agent/IDENTITY.md
                       </p>
                     </div>
-                    <div className="mt-auto rounded-lg border border-line px-2.5 py-2 text-[10px] text-ink/35">
+                    <div className="glass-surface-soft mt-auto rounded-lg border border-line px-2.5 py-2 text-[10px] text-ink/35">
                       描述你想创建的 Agent，并提出技能要求～
                     </div>
                   </div>
@@ -245,19 +245,19 @@ export function AssetSection() {
               </div>
 
               {/* Consumer phone overlapping bottom-right */}
-              <div className="absolute -bottom-4 right-0 w-[208px] overflow-hidden rounded-[26px] border-[6px] border-[#1a1a1a] bg-white shadow-2xl 2xl:w-[240px]">
+              <div className="phone-solid absolute -bottom-4 right-0 w-[208px] overflow-hidden rounded-[26px] border-[6px] bg-[#fffdf7] 2xl:w-[240px]">
                 {/* Status bar */}
                 <div className="flex items-center justify-between px-3 py-1 text-[9px] font-medium text-ink/60">
                   <span>9:29</span>
                   <span>5G ▮▮▮ 59</span>
                 </div>
                 {/* Header */}
-                <div className="flex items-center justify-between bg-honey/15 px-3 py-2">
+                <div className="flex items-center justify-between bg-[#fff4bd] px-3 py-2">
                   <span className="font-display text-[12px] font-semibold text-ink">◆ OpenHex</span>
                   <span className="text-ink/40">···</span>
                 </div>
                 {/* Contacts */}
-                <div className="divide-y divide-line">
+                <div className="divide-y divide-line bg-[#fffdf7]">
                   {CONTACTS.map(c => (
                     <div key={c.name} className="flex items-center gap-2 px-2.5 py-2">
                       <span

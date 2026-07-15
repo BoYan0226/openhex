@@ -3,7 +3,7 @@ name: Deploy GitHub Pages
 on:
   push:
     branches:
-      - codex/scroll-path-transition
+      - main
   workflow_dispatch:
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAGES: 'true'
-      NEXT_PUBLIC_BASE_PATH: /openhex
+      NEXT_PUBLIC_BASE_PATH: /landing-page2
     steps:
       - name: Checkout
         uses: actions/checkout@v4

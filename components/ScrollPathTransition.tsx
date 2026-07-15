@@ -18,14 +18,15 @@ const PATHS = {
 };
 
 const TRANSITION_LAYERS = [
-  { id: 'yellow', fill: '#ffde4a', delay: 0 },
-  { id: 'ink', fill: '#303030', delay: 60 },
+  { id: 'pale-yellow', fill: '#f5eaa6', delay: 0 },
+  { id: 'footer-glass', fill: '#f6f4ee', delay: 60 },
 ] as const;
 
 const PATH_NUMBER_PATTERN = /-?\d*\.?\d+/g;
 const FIRST_SCREEN_INDEX = 0;
 const SECOND_SCREEN_INDEX = 1;
 const SCREEN_TOLERANCE = 0.16;
+const BACK_SCREEN_TOLERANCE = 0.05;
 const BACK_TRANSITION_ARM_MS = 80;
 const BACK_TRANSITION_REENTRY_GUARD_MS = 280;
 const TOUCH_TRANSITION_DELTA = 1;
@@ -113,6 +114,10 @@ export function ScrollPathTransition() {
     const isNearScreen = (screenIndex: number) => {
       const tolerance = getViewportHeight() * SCREEN_TOLERANCE;
       return Math.abs(root.scrollTop - getScreenTop(screenIndex)) <= tolerance;
+    };
+    const isInBackTransitionRange = () => {
+      const tolerance = getViewportHeight() * BACK_SCREEN_TOLERANCE;
+      return Math.abs(root.scrollTop - getScreenTop(SECOND_SCREEN_INDEX)) <= tolerance;
     };
     const setOverlayVisible = (visible: boolean) => {
       overlay.style.opacity = visible ? '1' : '0';
@@ -268,7 +273,15 @@ export function ScrollPathTransition() {
       if (event.deltaY > 0 && isNearScreen(FIRST_SCREEN_INDEX)) {
         event.preventDefault();
         void runTransition('forward');
+        return;
       }
+
+      if (event.deltaY < 0 && root.scrollTop <= 1) {
+        event.preventDefault();
+        return;
+      }
+
+      if (event.deltaY < 0 && isInBackTransitionRange()) return;
     };
 
     const onTouchStart = (event: TouchEvent) => {
@@ -301,12 +314,12 @@ export function ScrollPathTransition() {
 
       if (
         deltaY < -TOUCH_TRANSITION_DELTA &&
-        isNearScreen(SECOND_SCREEN_INDEX)
+        isInBackTransitionRange()
       ) {
         event.preventDefault();
         touchStartYRef.current = null;
         backTransitionArmedRef.current = false;
-        void runTransition('back');
+        void runTransition('back', { fromCurrent: true });
       }
     };
 
@@ -324,9 +337,9 @@ export function ScrollPathTransition() {
         return;
       }
 
-      if (['ArrowUp', 'PageUp'].includes(event.key) && isNearScreen(SECOND_SCREEN_INDEX)) {
+      if (['ArrowUp', 'PageUp'].includes(event.key) && isInBackTransitionRange()) {
         event.preventDefault();
-        void runTransition('back');
+        void runTransition('back', { fromCurrent: true });
       }
     };
 

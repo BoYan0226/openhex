@@ -27,6 +27,8 @@ export function HeroSection() {
   const revealTimerRef = useRef<number | null>(null);
   const revealFrameRef = useRef<number | null>(null);
   const isTransitioningRef = useRef(false);
+  const lastScrollTopRef = useRef(0);
+  const scrollDirectionRef = useRef<1 | -1>(1);
   const [isEntered, setIsEntered] = useState(true);
 
   useEffect(() => {
@@ -151,27 +153,39 @@ export function HeroSection() {
       }
     };
 
+    const onRootScroll = () => {
+      const currentTop = root.scrollTop;
+      scrollDirectionRef.current = currentTop >= lastScrollTopRef.current ? 1 : -1;
+      lastScrollTopRef.current = currentTop;
+    };
+
     const observer = new IntersectionObserver(
       entries => {
-        if (isTransitioningRef.current) return;
-
         const entry = entries[0];
-        if (entry?.isIntersecting && entry.intersectionRatio > 0.15) {
-          reveal(120);
+        if (!entry?.isIntersecting || isTransitioningRef.current) return;
+
+        if (scrollDirectionRef.current < 0) {
+          settlePanels();
+          return;
         }
+
+        reveal(HERO_REVEAL_DELAY_MS);
       },
       {
         root,
-        threshold: [0, 0.15, 0.45],
+        threshold: 0.58,
       }
     );
 
+    lastScrollTopRef.current = root.scrollTop;
     observer.observe(section);
+    root.addEventListener('scroll', onRootScroll, { passive: true });
     window.addEventListener('landing:path-transition-start', onTransitionStart);
     window.addEventListener('landing:path-transition-complete', onTransitionComplete);
 
     return () => {
       observer.disconnect();
+      root.removeEventListener('scroll', onRootScroll);
       window.removeEventListener('landing:path-transition-start', onTransitionStart);
       window.removeEventListener('landing:path-transition-complete', onTransitionComplete);
       cancelPanelAnimations();
@@ -198,8 +212,8 @@ export function HeroSection() {
           ref={leftPanelRef}
           className="hero-split-side hero-split-left flex w-full max-w-[560px] flex-col items-start 2xl:max-w-[680px]"
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
-            <span className="hex-clip h-2.5 w-2.5 bg-honey" />
+          <span className="section-kicker">
+            <span className="section-kicker-dot" />
             {t('eyebrow')}
           </span>
 
@@ -208,7 +222,7 @@ export function HeroSection() {
             <br />
             {t('titleLine2')}
             <br />
-            <span className="font-display text-[40px] font-bold text-honey sm:text-[56px] md:text-[68px] 2xl:text-[80px]">
+            <span className="title-honey-shadow font-display text-[40px] font-bold text-honey sm:text-[56px] md:text-[68px] 2xl:text-[80px]">
               {t('liveWord')}
             </span>
           </h1>
@@ -226,7 +240,7 @@ export function HeroSection() {
             >
               {t('primaryCta')}
             </AuthAwareCtaButton>
-            <BookDemoButton className="inline-flex h-12 items-center rounded-full border border-line bg-white px-6 text-[15px] font-medium text-ink hover:bg-black/[0.03]">
+            <BookDemoButton className="glass-surface-soft inline-flex h-12 items-center rounded-full border border-line bg-white px-6 text-[15px] font-medium text-ink hover:bg-black/[0.03]">
               {t('secondaryCta')}
             </BookDemoButton>
           </div>
@@ -256,16 +270,16 @@ export function HeroSection() {
             className="animate-float pointer-events-none absolute -top-14 left-1 z-20 h-[108px] w-[108px]"
           />
           {/* Floating toast chips overlapping the card corners */}
-          <div className="absolute -top-4 right-2 z-20 inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-1.5 text-[11px] font-medium text-ink shadow-[0_8px_24px_rgba(34,28,19,.12)] md:right-4 md:px-3.5 md:py-2 md:text-[13px]">
+          <div className="glass-surface-soft absolute -top-4 right-2 z-20 inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-1.5 text-[11px] font-medium text-ink shadow-[0_8px_24px_rgba(34,28,19,.12)] md:right-4 md:px-3.5 md:py-2 md:text-[13px]">
             <span className="hex-clip h-2.5 w-2.5 bg-honey" />
             {t('card.toastProgress')}
           </div>
-          <div className="absolute -bottom-3 -left-3 z-20 inline-flex items-center gap-2 rounded-full border border-line bg-white px-3.5 py-2 text-[13px] font-medium text-ink shadow-[0_8px_24px_rgba(34,28,19,.12)]">
+          <div className="glass-surface-soft absolute -bottom-3 -left-3 z-20 inline-flex items-center gap-2 rounded-full border border-line bg-white px-3.5 py-2 text-[13px] font-medium text-ink shadow-[0_8px_24px_rgba(34,28,19,.12)]">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             {t('card.toastNew')}
           </div>
 
-          <div className="relative z-10 rounded-[22px] border border-line bg-white p-5 pt-6 shadow-[0_28px_70px_rgba(34,28,19,.14)] md:p-7 md:pt-8">
+          <div className="glass-surface relative z-10 rounded-[22px] border border-line bg-white p-5 pt-6 shadow-[0_28px_70px_rgba(34,28,19,.14)] md:p-7 md:pt-8">
             {/* LIVE badge, top-right */}
             <span className="absolute right-5 top-5 inline-flex items-center gap-1.5 rounded-md bg-ink px-2 py-1 text-[10px] font-bold tracking-wider text-white">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -304,7 +318,7 @@ export function HeroSection() {
             </div>
 
             {/* Inner project / progress card */}
-            <div className="mt-6 rounded-[18px] border border-line bg-card p-5">
+            <div className="glass-surface-soft mt-6 rounded-[18px] border border-line bg-card p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-[15px] font-semibold text-ink">
