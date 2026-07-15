@@ -77,6 +77,17 @@ body,
   width: 100%;
   height: 100%;
   pointer-events: none;
+  filter: none;
+  transform: scale(1);
+  transform-origin: center;
+  transition:
+    filter 360ms ease,
+    transform 360ms ease;
+}
+
+.wave-grid-background--content {
+  filter: blur(20px) saturate(1.15);
+  transform: scale(1.08);
 }
 
 [data-landing-scroll-root] > section,
@@ -96,23 +107,9 @@ body::-webkit-scrollbar,
 /* Codrops-style sticky stack starts after the opening screen. */
 .sticky-flow {
   isolation: isolate;
-  background: transparent;
+  background: rgba(250, 250, 250, 0.2);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-}
-
-.content-glass-layer {
-  position: sticky;
-  top: 0;
-  z-index: 0;
-  height: 100vh;
-  height: 100svh;
-  margin-bottom: -100vh;
-  margin-bottom: -100svh;
-  pointer-events: none;
-  background: rgba(250, 250, 250, 0.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.15);
-  backdrop-filter: blur(20px) saturate(1.15);
 }
 
 .sticky-flow::after {

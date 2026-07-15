@@ -285,14 +285,10 @@ export function ScrollPathTransition() {
     };
 
     const onTouchStart = (event: TouchEvent) => {
-      if (isMobileViewport()) return;
-
       touchStartYRef.current = event.touches[0]?.clientY ?? null;
     };
 
     const onTouchMove = (event: TouchEvent) => {
-      if (isMobileViewport()) return;
-
       if (isAnimatingRef.current) {
         event.preventDefault();
         return;
