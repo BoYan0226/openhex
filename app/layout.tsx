@@ -8,8 +8,9 @@ import './css/style.css';
 /**
  * Display typeface from the design — used for the LIVE watermark, the
  * "Live Agent" wordmark, and the big 01/02 step/persona numerals. CJK
- * body copy uses native CJK fonts so the first paint already has the
- * final glyph metrics and never shifts after a remote font loads.
+ * body copy uses Noto Sans SC, loaded via the Google Fonts <link> below
+ * (next/font's CJK subsetting is unreliable for full Noto Sans SC, so a
+ * plain stylesheet link is the robust path).
  */
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -43,6 +44,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const messages = await getMessages();
   return (
     <html lang="zh-CN" className={`${spaceGrotesk.variable} scroll-smooth`}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="bg-paper text-ink antialiased">
         <NextIntlClientProvider messages={messages} locale="zh-CN">
           {children}

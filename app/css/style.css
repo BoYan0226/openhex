@@ -6,8 +6,9 @@
  * Tokens mirror the design's CSS custom properties exactly so every
  * section uses semantic Tailwind utilities (bg-paper, text-ink,
  * text-honey, bg-night, font-display, …) instead of scattering raw hex
- * per component. Space Grotesk is self-hosted by next/font; CJK copy
- * uses native platform fonts to prevent late font swaps and reflow.
+ * per component. Fonts are wired in app/layout.tsx via next/font
+ * (Space Grotesk) + a Google Fonts link (Noto Sans SC); the variables
+ * they expose feed --font-display / --font-sans below.
  */
 @theme {
   /* Surfaces */
@@ -32,8 +33,8 @@
   --color-line-dark: rgba(255, 255, 255, 0.1);
 
   /* Type */
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
-  --font-display: var(--font-space-grotesk), var(--font-sans);
+  --font-sans: 'Noto Sans SC', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-display: var(--font-space-grotesk), 'Noto Sans SC', sans-serif;
 }
 
 :root {
@@ -542,17 +543,9 @@ body::-webkit-scrollbar,
    Two honey halves split at the center seam; on each tick the top half
    of the current word folds down and the bottom half of the next word
    folds up — a calendar / airport-board flip from the middle. */
-.final-cta-title {
-  font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
-}
-
 .flap {
   position: relative;
   display: inline-block;
-  font-family: inherit;
-  font-size: 1em;
-  font-weight: inherit;
-  line-height: inherit;
   perspective: 320px;
   vertical-align: baseline;
 }
