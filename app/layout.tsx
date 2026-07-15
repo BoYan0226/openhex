@@ -1,23 +1,41 @@
 import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
-import { Space_Grotesk } from 'next/font/google';
 import { publicPath } from '@/components/publicPath';
 import './css/style.css';
 
 /**
- * Display typeface from the design — used for the LIVE watermark, the
- * "Live Agent" wordmark, and the big 01/02 step/persona numerals. CJK
- * body copy uses Noto Sans SC, loaded via the Google Fonts <link> below
- * (next/font's CJK subsetting is unreliable for full Noto Sans SC, so a
- * plain stylesheet link is the robust path).
+ * Both families are reduced to the glyphs used by this site and served
+ * from the same origin. This keeps the original type design without a
+ * late cross-origin font swap on the first screen.
  */
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-space-grotesk',
-  display: 'swap',
-});
+const sansFontPath = publicPath('/fonts/openhex-sans-vf.woff2');
+const latinFontPath = publicPath('/fonts/openhex-latin-vf.woff2');
+const localFontFaces = `
+  @font-face {
+    font-family: 'OpenHex Sans';
+    src: url('${sansFontPath}') format('woff2');
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'OpenHex Latin';
+    src: url('${latinFontPath}') format('woff2');
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    size-adjust: 106%;
+  }
+  @font-face {
+    font-family: 'OpenHex Latin Fallback';
+    src: local('Arial');
+    ascent-override: 90%;
+    descent-override: 22.43%;
+    line-gap-override: 0%;
+    size-adjust: 113.72%;
+  }
+`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('landing.metadata');
@@ -43,14 +61,23 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const messages = await getMessages();
   return (
-    <html lang="zh-CN" className={`${spaceGrotesk.variable} scroll-smooth`}>
+    <html lang="zh-CN" className="scroll-smooth">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
-          rel="stylesheet"
+          rel="preload"
+          href={sansFontPath}
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
         />
+        <link
+          rel="preload"
+          href={latinFontPath}
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <style>{localFontFaces}</style>
       </head>
       <body className="bg-paper text-ink antialiased">
         <NextIntlClientProvider messages={messages} locale="zh-CN">

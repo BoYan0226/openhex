@@ -28,7 +28,7 @@ export function FlipWord({ words }: { words: string[] }) {
   };
 
   return (
-    <span className="flap ml-2 font-bold text-ink">
+    <span className="flap ml-2 text-ink">
       {/* invisible sizer fixes the box to the current word's size */}
       <span className="flap-sizer">{cur}</span>
 
