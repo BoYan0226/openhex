@@ -339,7 +339,6 @@ export function WaveGridBackground() {
 
     refreshContentStart();
     let isContentMode = shouldUseContentMode();
-    canvas.classList.toggle('wave-grid-background--content', isContentMode);
     rgbShiftPass.uniforms.blurAmount.value = isContentMode ? CONTENT_BLUR_RADIUS : 0;
     rgbShiftPass.uniforms.shiftAmount.value = isContentMode ? 0 : HERO_RGB_SHIFT;
 
@@ -382,7 +381,6 @@ export function WaveGridBackground() {
       if (nextContentMode === isContentMode) return;
 
       isContentMode = nextContentMode;
-      canvas.classList.toggle('wave-grid-background--content', isContentMode);
       rgbShiftPass.uniforms.blurAmount.value = isContentMode ? CONTENT_BLUR_RADIUS : 0;
       rgbShiftPass.uniforms.shiftAmount.value = isContentMode ? 0 : HERO_RGB_SHIFT;
       lastTime = performance.now();
@@ -505,7 +503,6 @@ export function WaveGridBackground() {
       window.removeEventListener('pointermove', onPointerMove);
       document.removeEventListener('visibilitychange', onVisibilityChange);
       scrollRoot?.removeEventListener('scroll', updateRenderMode);
-      canvas.classList.remove('wave-grid-background--content');
       composer.dispose();
       renderer.dispose();
       geometry.dispose();

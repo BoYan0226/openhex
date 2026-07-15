@@ -130,6 +130,7 @@ export default function HomePage() {
         <FinalCtaSection />
       </div>
       <div className="sticky-flow">
+        <div className="content-glass-layer" aria-hidden />
         <StickyPanel
           layer={1}
           offsetRem={stickyOffset(0)}
