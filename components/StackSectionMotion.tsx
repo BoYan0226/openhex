@@ -120,9 +120,12 @@ export function StackSectionMotion() {
         }
 
         if (variant === 'steps') {
-          element.style.clipPath = `inset(0 ${(fastRemaining * 100).toFixed(
-            2
-          )}% 0 0 round ${(fastRemaining * 18).toFixed(2)}px)`;
+          element.style.clipPath =
+            rawProgress >= 0.999
+              ? ''
+              : `inset(0 ${(fastRemaining * 100).toFixed(2)}% 0 0 round ${(
+                  fastRemaining * 18
+                ).toFixed(2)}px)`;
           element.style.transformOrigin = '0 50%';
           element.style.transform = `translate3d(${(-fastRemaining * 150).toFixed(
             2
@@ -190,9 +193,12 @@ export function StackSectionMotion() {
       }
 
       if (variant === 'fan') {
-        element.style.clipPath = `polygon(0 0, ${(fastProgress * 100).toFixed(
-          2
-        )}% 0, ${(fastProgress * 100).toFixed(2)}% 100%, 0 100%)`;
+        element.style.clipPath =
+          rawProgress >= 0.999
+            ? ''
+            : `polygon(0 0, ${(fastProgress * 100).toFixed(2)}% 0, ${(
+                fastProgress * 100
+              ).toFixed(2)}% 100%, 0 100%)`;
         element.style.transform = `translate3d(${(-fastRemaining * 160).toFixed(
           2
         )}px, ${(fastRemaining * 24).toFixed(2)}px, 0) skewX(${(
@@ -202,9 +208,12 @@ export function StackSectionMotion() {
       }
 
       if (variant === 'steps') {
-        element.style.clipPath = `inset(0 ${(fastRemaining * 100).toFixed(
-          2
-        )}% 0 0 round ${(fastRemaining * 14).toFixed(2)}px)`;
+        element.style.clipPath =
+          rawProgress >= 0.999
+            ? ''
+            : `inset(0 ${(fastRemaining * 100).toFixed(2)}% 0 0 round ${(
+                fastRemaining * 14
+              ).toFixed(2)}px)`;
         element.style.transform = `translate3d(${(-fastRemaining * 108).toFixed(
           2
         )}px, ${(fastRemaining * 16).toFixed(2)}px, 0) skewX(${(
