@@ -313,9 +313,32 @@ export function WaveGridBackground() {
     let isPlacingRandomPoints = true;
     let isVisible = document.visibilityState === 'visible';
     const scrollRoot = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
-    let isContentMode = Boolean(
-      scrollRoot && scrollRoot.scrollTop >= scrollRoot.clientHeight * 0.95
-    );
+    const contentFlow = document.querySelector<HTMLElement>('.sticky-flow');
+    const mobileMedia = window.matchMedia('(max-width: 767px)');
+    let contentStart = scrollRoot?.clientHeight ?? window.innerHeight;
+
+    const refreshContentStart = () => {
+      if (!scrollRoot || !contentFlow) return;
+
+      contentStart =
+        scrollRoot.scrollTop +
+        contentFlow.getBoundingClientRect().top -
+        scrollRoot.getBoundingClientRect().top;
+    };
+
+    const shouldUseContentMode = () => {
+      if (!scrollRoot) return false;
+
+      if (mobileMedia.matches) {
+        const contentEntryTop = Math.max(1, contentStart - scrollRoot.clientHeight + 1);
+        return scrollRoot.scrollTop >= contentEntryTop;
+      }
+
+      return scrollRoot.scrollTop >= scrollRoot.clientHeight * 0.95;
+    };
+
+    refreshContentStart();
+    let isContentMode = shouldUseContentMode();
     canvas.classList.toggle('wave-grid-background--content', isContentMode);
     rgbShiftPass.uniforms.blurAmount.value = isContentMode ? CONTENT_BLUR_RADIUS : 0;
     rgbShiftPass.uniforms.shiftAmount.value = isContentMode ? 0 : HERO_RGB_SHIFT;
@@ -355,7 +378,7 @@ export function WaveGridBackground() {
     const updateRenderMode = () => {
       if (!scrollRoot) return;
 
-      const nextContentMode = scrollRoot.scrollTop >= scrollRoot.clientHeight * 0.95;
+      const nextContentMode = shouldUseContentMode();
       if (nextContentMode === isContentMode) return;
 
       isContentMode = nextContentMode;
@@ -363,6 +386,12 @@ export function WaveGridBackground() {
       rgbShiftPass.uniforms.blurAmount.value = isContentMode ? CONTENT_BLUR_RADIUS : 0;
       rgbShiftPass.uniforms.shiftAmount.value = isContentMode ? 0 : HERO_RGB_SHIFT;
       lastTime = performance.now();
+      setSize();
+    };
+
+    const onResize = () => {
+      refreshContentStart();
+      updateRenderMode();
       setSize();
     };
 
@@ -464,7 +493,7 @@ export function WaveGridBackground() {
 
     setSize();
     updateCamera();
-    window.addEventListener('resize', setSize);
+    window.addEventListener('resize', onResize);
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     document.addEventListener('visibilitychange', onVisibilityChange);
     scrollRoot?.addEventListener('scroll', updateRenderMode, { passive: true });
@@ -472,7 +501,7 @@ export function WaveGridBackground() {
 
     return () => {
       window.cancelAnimationFrame(animationFrame);
-      window.removeEventListener('resize', setSize);
+      window.removeEventListener('resize', onResize);
       window.removeEventListener('pointermove', onPointerMove);
       document.removeEventListener('visibilitychange', onVisibilityChange);
       scrollRoot?.removeEventListener('scroll', updateRenderMode);
