@@ -1,8 +1,13 @@
+'use client';
+
 import Image from 'next/image';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { AuthAwareCtaButton } from './AuthAwareCtaButton';
 import { BookDemoButton } from './BookDemoButton';
-import { HONEYCOMB_LIGHT_STYLE } from '@/components/ui/textures';
+import { LANDING_LOGIN_URL } from './landingLinks';
+import { publicPath } from './publicPath';
+
+const HERO_REVEAL_DELAY_MS = 700;
 
 /**
  * Hero section for the Live Agent landing redesign.
@@ -16,21 +21,204 @@ import { HONEYCOMB_LIGHT_STYLE } from '@/components/ui/textures';
  */
 export function HeroSection() {
   const t = useTranslations('landing.hero');
+  const sectionRef = useRef<HTMLElement>(null);
+  const leftPanelRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+  const revealTimerRef = useRef<number | null>(null);
+  const revealFrameRef = useRef<number | null>(null);
+  const isTransitioningRef = useRef(false);
+  const lastScrollTopRef = useRef(0);
+  const scrollDirectionRef = useRef<1 | -1>(1);
+  const [isEntered, setIsEntered] = useState(true);
+  const [shouldLoadMascot, setShouldLoadMascot] = useState(false);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
+
+    if (!section || !root) {
+      setIsEntered(true);
+      return undefined;
+    }
+
+    const getStartTransforms = () => {
+      const isMobile = window.matchMedia('(max-width: 767px)').matches;
+      return isMobile
+        ? { left: 'translate3d(0, 0, 0)', right: 'translate3d(0, 0, 0)' }
+        : { left: 'translate3d(-32vw, 0, 0)', right: 'translate3d(32vw, 0, 0)' };
+    };
+
+    const cancelPanelAnimations = () => {
+      [leftPanelRef.current, rightPanelRef.current].forEach(panel => {
+        if (!panel) return;
+        panel.style.transition = '';
+      });
+    };
+
+    const resetPanels = () => {
+      const leftPanel = leftPanelRef.current;
+      const rightPanel = rightPanelRef.current;
+      const transforms = getStartTransforms();
+
+      cancelPanelAnimations();
+      setIsEntered(false);
+
+      if (leftPanel) {
+        leftPanel.style.opacity = '1';
+        leftPanel.style.transition = 'none';
+        leftPanel.style.transform = transforms.left;
+      }
+
+      if (rightPanel) {
+        rightPanel.style.opacity = '1';
+        rightPanel.style.transition = 'none';
+        rightPanel.style.transform = transforms.right;
+      }
+    };
+
+    const settlePanels = () => {
+      if (revealTimerRef.current !== null) {
+        window.clearTimeout(revealTimerRef.current);
+        revealTimerRef.current = null;
+      }
+      if (revealFrameRef.current !== null) {
+        window.cancelAnimationFrame(revealFrameRef.current);
+        revealFrameRef.current = null;
+      }
+
+      setIsEntered(true);
+      [leftPanelRef.current, rightPanelRef.current].forEach(panel => {
+        if (!panel) return;
+        panel.style.transition = 'none';
+        panel.style.transform = 'translate3d(0, 0, 0)';
+      });
+    };
+
+    const reveal = (delay = 0) => {
+      if (revealTimerRef.current !== null) {
+        window.clearTimeout(revealTimerRef.current);
+      }
+      if (revealFrameRef.current !== null) {
+        window.cancelAnimationFrame(revealFrameRef.current);
+      }
+
+      resetPanels();
+      revealTimerRef.current = window.setTimeout(() => {
+        revealFrameRef.current = window.requestAnimationFrame(() => {
+          revealFrameRef.current = window.requestAnimationFrame(() => {
+            const leftPanel = leftPanelRef.current;
+            const rightPanel = rightPanelRef.current;
+            const duration = window.matchMedia('(max-width: 767px)').matches ? 900 : 1250;
+            const transition = `transform ${duration}ms cubic-bezier(0.22, 1, 0.36, 1)`;
+
+            setIsEntered(true);
+
+            if (leftPanel) {
+              leftPanel.style.transition = transition;
+              leftPanel.style.transform = 'translate3d(0, 0, 0)';
+            }
+
+            if (rightPanel) {
+              rightPanel.style.transition = transition;
+              rightPanel.style.transform = 'translate3d(0, 0, 0)';
+            }
+          });
+        });
+      }, delay);
+    };
+
+    const onTransitionComplete = (event: Event) => {
+      const direction = (event as CustomEvent<{ direction?: 'forward' | 'back' }>).detail
+        ?.direction;
+      if (direction === 'forward') {
+        isTransitioningRef.current = false;
+      }
+
+      if (direction === 'back') {
+        isTransitioningRef.current = false;
+      }
+    };
+
+    const onTransitionStart = (event: Event) => {
+      const direction = (event as CustomEvent<{ direction?: 'forward' | 'back' }>).detail
+        ?.direction;
+      if (direction === 'forward') {
+        setShouldLoadMascot(true);
+        isTransitioningRef.current = true;
+        resetPanels();
+        reveal(HERO_REVEAL_DELAY_MS);
+      }
+
+      if (direction === 'back') {
+        isTransitioningRef.current = true;
+        settlePanels();
+      }
+    };
+
+    const onRootScroll = () => {
+      const currentTop = root.scrollTop;
+      if (currentTop >= root.clientHeight * 0.35) setShouldLoadMascot(true);
+      scrollDirectionRef.current = currentTop >= lastScrollTopRef.current ? 1 : -1;
+      lastScrollTopRef.current = currentTop;
+    };
+
+    const observer = new IntersectionObserver(
+      entries => {
+        const entry = entries[0];
+        if (!entry?.isIntersecting || isTransitioningRef.current) return;
+        setShouldLoadMascot(true);
+
+        if (scrollDirectionRef.current < 0) {
+          settlePanels();
+          return;
+        }
+
+        reveal(HERO_REVEAL_DELAY_MS);
+      },
+      {
+        root,
+        threshold: 0.58,
+      }
+    );
+
+    lastScrollTopRef.current = root.scrollTop;
+    if (root.scrollTop >= root.clientHeight * 0.35) setShouldLoadMascot(true);
+    observer.observe(section);
+    root.addEventListener('scroll', onRootScroll, { passive: true });
+    window.addEventListener('landing:path-transition-start', onTransitionStart);
+    window.addEventListener('landing:path-transition-complete', onTransitionComplete);
+
+    return () => {
+      observer.disconnect();
+      root.removeEventListener('scroll', onRootScroll);
+      window.removeEventListener('landing:path-transition-start', onTransitionStart);
+      window.removeEventListener('landing:path-transition-complete', onTransitionComplete);
+      cancelPanelAnimations();
+      if (revealTimerRef.current !== null) {
+        window.clearTimeout(revealTimerRef.current);
+      }
+      if (revealFrameRef.current !== null) {
+        window.cancelAnimationFrame(revealFrameRef.current);
+      }
+    };
+  }, []);
 
   return (
-    <section className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-paper pb-16 pt-24 md:pb-20 md:pt-28">
-      {/* Faint honeycomb texture */}
+    <section
+      ref={sectionRef}
+      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] pb-16 pt-24 md:pb-20 md:pt-28"
+    >
       <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={HONEYCOMB_LIGHT_STYLE}
-      />
-
-      <div className="relative mx-auto flex w-full max-w-[1240px] flex-col items-center gap-14 px-6 2xl:max-w-[1440px] md:flex-row md:items-center md:gap-14">
+        className="hero-split relative mx-auto flex w-full max-w-[1240px] flex-col items-center gap-14 px-6 2xl:max-w-[1440px] md:flex-row md:items-center md:gap-14"
+        data-entered={isEntered ? 'true' : 'false'}
+      >
         {/* Left column — copy */}
-        <div className="flex w-full max-w-[560px] flex-col items-start 2xl:max-w-[680px]">
-          <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
-            <span className="hex-clip h-2.5 w-2.5 bg-honey" />
+        <div
+          ref={leftPanelRef}
+          className="hero-split-side hero-split-left flex w-full max-w-[560px] flex-col items-start 2xl:max-w-[680px]"
+        >
+          <span className="section-kicker">
+            <span className="section-kicker-dot" />
             {t('eyebrow')}
           </span>
 
@@ -39,7 +227,7 @@ export function HeroSection() {
             <br />
             {t('titleLine2')}
             <br />
-            <span className="font-display text-[40px] font-bold text-honey sm:text-[56px] md:text-[68px] 2xl:text-[80px]">
+            <span className="title-honey-shadow font-display text-[40px] font-bold text-honey sm:text-[56px] md:text-[68px] 2xl:text-[80px]">
               {t('liveWord')}
             </span>
           </h1>
@@ -51,13 +239,15 @@ export function HeroSection() {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
-            <AuthAwareCtaButton
-              path="/login"
+            <a
+              href={LANDING_LOGIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex h-12 items-center justify-center rounded-full bg-honey px-6 text-[15px] font-semibold text-ink shadow-[0_4px_16px_rgba(241,212,34,.4)] transition-colors hover:bg-honey-soft"
             >
               {t('primaryCta')}
-            </AuthAwareCtaButton>
-            <BookDemoButton className="inline-flex h-12 items-center rounded-full border border-line bg-white px-6 text-[15px] font-medium text-ink hover:bg-black/[0.03]">
+            </a>
+            <BookDemoButton className="glass-surface-soft inline-flex h-12 items-center rounded-full border border-line bg-white px-6 text-[15px] font-medium text-ink hover:bg-black/[0.03]">
               {t('secondaryCta')}
             </BookDemoButton>
           </div>
@@ -72,29 +262,33 @@ export function HeroSection() {
         </div>
 
         {/* Right column — chat-card mockup (generously scaled to match design) */}
-        <div className="relative w-full min-w-0 max-w-[540px] md:max-w-[620px] md:flex-1 2xl:max-w-[720px]">
+        <div
+          ref={rightPanelRef}
+          className="hero-split-side hero-split-right relative w-full min-w-0 max-w-[540px] md:max-w-[620px] md:flex-1 2xl:max-w-[720px]"
+        >
           {/* Bee mascot peeking out the card's top-left corner */}
-          <Image
-            src="/landing/bee-hero.gif"
-            width={120}
-            height={120}
-            unoptimized
-            priority
-            alt=""
-            aria-hidden
-            className="animate-float pointer-events-none absolute -top-14 left-1 z-20 h-[108px] w-[108px]"
-          />
+          {shouldLoadMascot ? (
+            <Image
+              src={publicPath('/landing/bee-hero.webp')}
+              width={120}
+              height={120}
+              unoptimized
+              alt=""
+              aria-hidden
+              className="animate-float pointer-events-none absolute -top-14 left-1 z-20 h-[108px] w-[108px]"
+            />
+          ) : null}
           {/* Floating toast chips overlapping the card corners */}
-          <div className="absolute -top-4 right-2 z-20 inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-1.5 text-[11px] font-medium text-ink shadow-[0_8px_24px_rgba(34,28,19,.12)] md:right-4 md:px-3.5 md:py-2 md:text-[13px]">
+          <div className="glass-surface-soft absolute -top-4 right-2 z-20 inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-1.5 text-[11px] font-medium text-ink shadow-[0_8px_24px_rgba(34,28,19,.12)] md:right-4 md:px-3.5 md:py-2 md:text-[13px]">
             <span className="hex-clip h-2.5 w-2.5 bg-honey" />
             {t('card.toastProgress')}
           </div>
-          <div className="absolute -bottom-3 -left-3 z-20 inline-flex items-center gap-2 rounded-full border border-line bg-white px-3.5 py-2 text-[13px] font-medium text-ink shadow-[0_8px_24px_rgba(34,28,19,.12)]">
+          <div className="glass-surface-soft absolute -bottom-3 -left-3 z-20 inline-flex items-center gap-2 rounded-full border border-line bg-white px-3.5 py-2 text-[13px] font-medium text-ink shadow-[0_8px_24px_rgba(34,28,19,.12)]">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             {t('card.toastNew')}
           </div>
 
-          <div className="relative z-10 rounded-[22px] border border-line bg-white p-5 pt-6 shadow-[0_28px_70px_rgba(34,28,19,.14)] md:p-7 md:pt-8">
+          <div className="glass-surface relative z-10 rounded-[22px] border border-line bg-white p-5 pt-6 shadow-[0_28px_70px_rgba(34,28,19,.14)] md:p-7 md:pt-8">
             {/* LIVE badge, top-right */}
             <span className="absolute right-5 top-5 inline-flex items-center gap-1.5 rounded-md bg-ink px-2 py-1 text-[10px] font-bold tracking-wider text-white">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -133,7 +327,7 @@ export function HeroSection() {
             </div>
 
             {/* Inner project / progress card */}
-            <div className="mt-6 rounded-[18px] border border-line bg-card p-5">
+            <div className="glass-surface-soft mt-6 rounded-[18px] border border-line bg-card p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-[15px] font-semibold text-ink">

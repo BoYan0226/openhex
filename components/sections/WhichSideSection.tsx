@@ -1,8 +1,7 @@
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { AuthAwareCtaButton } from '@/components/AuthAwareCtaButton';
-import { CONSUMER_CONTACTS_URL } from '@/components/landingLinks';
-import { HONEYCOMB_LIGHT_STYLE } from '@/components/ui/textures';
+import { CONSUMER_LOGIN_URL, LANDING_LOGIN_URL } from '@/components/landingLinks';
+import { publicPath } from '@/components/publicPath';
 
 /**
  * 你想做哪一端? — centered header + two large cards (创造者 / 使用者). Each
@@ -15,30 +14,36 @@ export function WhichSideSection() {
   return (
     <section
       id="which-side"
-      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-paper py-20 md:py-24"
+      data-stack-motion
+      data-short-screen-fit
+      data-motion-style="split"
+      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={HONEYCOMB_LIGHT_STYLE}
-      />
       <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
         {/* Centered header */}
-        <div className="mb-12 flex flex-col items-center text-center 2xl:mb-20">
-          <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
-            <span className="hex-clip h-2.5 w-2.5 bg-honey" />
+        <div
+          className="mb-12 flex flex-col items-center text-center 2xl:mb-20"
+          data-motion="header"
+        >
+          <span className="section-kicker">
+            <span className="section-kicker-dot" />
             {t('eyebrow')}
           </span>
-          <h2 className="mt-5 text-[30px] font-semibold text-ink md:text-[44px] 2xl:text-[54px]">
+          <h2 className="mt-5 text-[26px] font-semibold leading-[1.18] text-ink sm:text-[40px] sm:leading-[1.14] md:text-[50px] 2xl:text-[58px]">
             {t('title')}
           </h2>
           <p className="mx-auto mt-4 max-w-[680px] text-ink/55 2xl:text-[17px]">{t('subtitle')}</p>
         </div>
 
         {/* Two cards */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:gap-8">
+        <div
+          className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:gap-8"
+          data-motion="split"
+        >
           {/* Creator card */}
-          <div className="relative flex min-h-[320px] flex-col overflow-hidden rounded-[20px] border border-line bg-[#fffdf7] p-8 shadow-[0_2px_24px_rgba(34,28,19,.05)] md:min-h-[380px] md:p-10 2xl:min-h-[460px] 2xl:p-12">
+          <div
+            className="glass-surface relative flex min-h-[320px] flex-col overflow-hidden rounded-[20px] border border-line bg-[#fffdf7] p-8 shadow-[0_2px_24px_rgba(34,28,19,.05)] md:min-h-[380px] md:p-10 2xl:min-h-[460px] 2xl:p-12"
+          >
             <span
               aria-hidden
               className="pointer-events-none absolute right-6 top-4 font-display text-[88px] font-bold leading-none text-honey/15 md:text-[120px] 2xl:text-[150px]"
@@ -56,24 +61,28 @@ export function WhichSideSection() {
               <p className="mt-4 max-w-[440px] text-[14px] leading-relaxed text-ink/60 2xl:text-[16px]">
                 {t('creator.desc')}
               </p>
-              <AuthAwareCtaButton
-                path="/login"
+              <a
+                href={LANDING_LOGIN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="mt-auto inline-flex h-11 w-fit items-center rounded-full bg-honey px-5 pt-0 text-[14px] font-semibold text-ink hover:bg-honey-soft"
               >
                 {t('creator.cta')}
-              </AuthAwareCtaButton>
+              </a>
             </div>
             <Image
-              src="/landing/bee-laptop.svg"
+              src={publicPath('/landing/bee-laptop.svg')}
               width={150}
               height={150}
               alt=""
-              className="pointer-events-none absolute -bottom-1 right-2 h-32 w-32 2xl:h-40 2xl:w-40"
+              className="pointer-events-none absolute -bottom-1 right-2 h-24 w-24 object-contain md:h-32 md:w-32 2xl:h-40 2xl:w-40"
             />
           </div>
 
           {/* User card */}
-          <div className="relative flex min-h-[320px] flex-col overflow-hidden rounded-[20px] border border-line bg-[#fffdf7] p-8 shadow-[0_2px_24px_rgba(34,28,19,.05)] md:min-h-[380px] md:p-10 2xl:min-h-[460px] 2xl:p-12">
+          <div
+            className="glass-surface relative flex min-h-[320px] flex-col overflow-hidden rounded-[20px] border border-line bg-[#fffdf7] p-8 shadow-[0_2px_24px_rgba(34,28,19,.05)] md:min-h-[380px] md:p-10 2xl:min-h-[460px] 2xl:p-12"
+          >
             <span
               aria-hidden
               className="pointer-events-none absolute right-6 top-4 font-display text-[88px] font-bold leading-none text-honey/15 md:text-[120px] 2xl:text-[150px]"
@@ -92,21 +101,21 @@ export function WhichSideSection() {
                 {t('user.desc')}
               </p>
               <a
-                href={CONSUMER_CONTACTS_URL}
+                href={CONSUMER_LOGIN_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-auto inline-flex h-11 w-fit items-center rounded-full border border-line bg-white px-5 text-[14px] font-medium text-ink hover:bg-black/[0.03]"
+                className="glass-surface-soft mt-auto inline-flex h-11 w-fit items-center rounded-full border border-line bg-white px-5 text-[14px] font-medium text-ink hover:bg-black/[0.03]"
               >
                 {t('user.cta')}
               </a>
             </div>
             <Image
-              src="/landing/bee-agent.svg"
+              src={publicPath('/landing/bee-agent.svg')}
               width={150}
               height={150}
               unoptimized
               alt=""
-              className="pointer-events-none absolute -bottom-1 right-2 h-32 w-32 2xl:h-40 2xl:w-40 object-contain"
+              className="pointer-events-none absolute -bottom-1 right-2 h-24 w-24 object-contain md:h-32 md:w-32 2xl:h-40 2xl:w-40"
             />
           </div>
         </div>

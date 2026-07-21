@@ -1,15 +1,10 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { AuthAwareCtaButton } from './AuthAwareCtaButton';
-import { BookDemoButton } from './BookDemoButton';
-import { LANDING_PLATFORM_DOC_URL } from './landingLinks';
-
-interface NavItem {
-  slug: string;
-  label: string;
-}
+import { LANDING_LOGIN_URL, LANDING_PLATFORM_DOC_URL } from './landingLinks';
+import { publicPath } from './publicPath';
 
 /**
  * Top nav (2026 landing redesign).
@@ -23,71 +18,55 @@ interface NavItem {
  */
 export function LandingNav() {
   const t = useTranslations('landing.nav');
-  const items = t.raw('items') as NavItem[];
 
   return (
-    <nav className="fixed left-0 right-0 top-0 z-50 h-16 border-b border-line bg-paper/80 backdrop-blur-[6px]">
-      <div className="relative mx-auto flex h-full max-w-[1240px] 2xl:max-w-[1440px] items-center px-5">
+    <nav
+      className="fixed left-0 right-0 top-0 z-50 h-16 border-b border-line bg-[rgba(255,255,255,0.3)] shadow-[inset_0_1px_0_rgba(255,255,255,0.68),0_10px_34px_rgba(34,28,19,0.08)] backdrop-blur-2xl backdrop-saturate-150 max-sm:h-14"
+    >
+      <div className="relative flex h-full items-center px-[calc(clamp(1rem,3vw,3rem)+30px)] max-sm:px-4">
         {/* Logo: icon + wordmark + 迷境智塔旗下 tagline */}
-        <a href="/" className="flex shrink-0 items-center" aria-label="OpenHex">
+        <Link href="/" className="flex shrink-0 items-center" aria-label="OpenHex">
           <Image
-            src="/landing/logo-icon.svg"
+            src={publicPath('/landing/logo-icon.svg')}
             alt=""
             width={52}
             height={52}
             priority
-            className="h-[44px] w-[44px] shrink-0"
+            className="h-[35px] w-[35px] shrink-0"
           />
           <div className="inline-grid grid-cols-[max-content] grid-rows-[max-content] place-items-start leading-[0]">
             <Image
-              src="/landing/logo-wordmark.svg"
+              src={publicPath('/landing/logo-wordmark.svg')}
               alt="OpenHex"
               width={114}
               height={24}
               priority
-              className="col-start-1 row-start-1 block h-[21px] w-[104px]"
+              className="col-start-1 row-start-1 block h-[18px] w-[88px]"
             />
-            <p className="col-start-1 row-start-1 ml-[3px] mt-[20px] whitespace-nowrap text-[9px] font-medium leading-[1.5] tracking-[8.4px] text-ink/70">
+            <p className="col-start-1 row-start-1 ml-[2px] mt-[17px] whitespace-nowrap text-[7.5px] font-medium leading-[1.5] tracking-[8.2px] text-ink/55">
               迷境智塔旗下
             </p>
           </div>
-        </a>
+        </Link>
 
-        {/* Centred nav links — absolutely positioned to the viewport. */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 lg:block">
-          <div className="pointer-events-auto flex h-9 items-center gap-1">
-            {items.map(item => (
-              <a
-                key={item.slug}
-                href={`#${item.slug}`}
-                className="flex h-9 items-center justify-center rounded-[10px] px-4 text-[14px] font-medium text-ink/80 transition-colors hover:bg-ink/5 hover:text-ink"
-              >
-                {item.label}
-              </a>
-            ))}
-            {/* 技术文档 — external docs site, sits after 适合谁 */}
-            <a
-              href={LANDING_PLATFORM_DOC_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex h-9 items-center justify-center rounded-[10px] px-4 text-[14px] font-medium text-ink/80 transition-colors hover:bg-ink/5 hover:text-ink"
-            >
-              {t('docsLink')}
-            </a>
-          </div>
-        </div>
-
-        {/* Right slot: ghost demo link + brand CTA. */}
+        {/* Right slot: docs link + brand CTA. */}
         <div className="ml-auto flex items-center gap-2">
-          <BookDemoButton className="hidden h-9 items-center rounded-[10px] px-3 text-[14px] font-medium text-ink/70 transition-colors hover:bg-ink/5 hover:text-ink sm:inline-flex">
-            {t('demoCta')}
-          </BookDemoButton>
-          <AuthAwareCtaButton
-            path="/login"
-            className="inline-flex h-9 items-center rounded-full bg-honey px-4 text-[13px] font-semibold text-ink shadow-[0_2px_10px_rgba(241,212,34,0.4)] transition-colors hover:bg-honey-soft"
+          <a
+            href={LANDING_PLATFORM_DOC_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden h-9 items-center rounded-[10px] px-3 text-[14px] font-medium text-ink transition-colors hover:bg-white/35 sm:inline-flex"
+          >
+            {t('docsLink')}
+          </a>
+          <a
+            href={LANDING_LOGIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-8 min-w-[74px] items-center justify-center rounded-full bg-honey px-5 text-[13px] font-semibold text-ink shadow-none transition-colors hover:bg-honey-soft max-sm:min-w-[68px] max-sm:px-4"
           >
             {t('primaryCta')}
-          </AuthAwareCtaButton>
+          </a>
         </div>
       </div>
     </nav>

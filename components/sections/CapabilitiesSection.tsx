@@ -1,6 +1,5 @@
 import { useTranslations } from 'next-intl';
 import { UserRound, Share2, Send } from 'lucide-react';
-import { HONEYCOMB_LIGHT_STYLE } from '@/components/ui/textures';
 
 /**
  * 三件普通 AI 做不到的事 — cream section, 3 numbered cards each with a
@@ -22,21 +21,19 @@ export function CapabilitiesSection() {
   return (
     <section
       id="capabilities"
-      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-paper py-20 md:py-24"
+      data-stack-motion
+      data-short-screen-fit
+      data-motion-style="tilt"
+      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={HONEYCOMB_LIGHT_STYLE}
-      />
       <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
         {/* Header */}
-        <div className="mb-12 text-center md:mb-16 2xl:mb-20">
-          <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
-            <span className="hex-clip h-2.5 w-2.5 bg-honey" />
+        <div className="mb-12 text-center md:mb-16 2xl:mb-20" data-motion="header">
+          <span className="section-kicker">
+            <span className="section-kicker-dot" />
             {t('eyebrow')}
           </span>
-          <h2 className="mt-4 text-[30px] font-semibold text-ink md:text-[44px] 2xl:text-[54px]">
+          <h2 className="mt-4 text-[26px] font-semibold leading-[1.18] text-ink sm:text-[40px] sm:leading-[1.14] md:text-[50px] 2xl:text-[58px]">
             {t('title')}
           </h2>
           <p className="mx-auto mt-4 max-w-[680px] text-[15px] text-ink/55 2xl:text-[17px]">
@@ -45,13 +42,16 @@ export function CapabilitiesSection() {
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 2xl:gap-8">
+        <div
+          className="grid grid-cols-1 gap-6 md:grid-cols-3 2xl:gap-8"
+          data-motion="group"
+        >
           {items.map((item, i) => {
             const Icon = ICONS[i] ?? UserRound;
             return (
               <article
                 key={item.num}
-                className="flex flex-col rounded-[20px] border border-line bg-card p-8 shadow-[0_2px_20px_rgba(34,28,19,.04)] md:p-9 2xl:min-h-[380px] 2xl:p-12"
+                className="glass-surface flex flex-col rounded-[20px] border border-line bg-card p-8 shadow-[0_2px_20px_rgba(34,28,19,.04)] md:p-9 2xl:min-h-[380px] 2xl:p-12"
               >
                 <span className="font-display text-[15px] font-bold text-honey-deep">
                   {item.num}

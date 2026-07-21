@@ -1,5 +1,4 @@
 import { useTranslations } from 'next-intl';
-import { HONEYCOMB_LIGHT_STYLE } from '@/components/ui/textures';
 
 /**
  * 三步，创建你的 Live Agent — cream section, 3 steps in a row, each with a
@@ -18,21 +17,19 @@ export function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-paper py-20 md:py-24"
+      data-stack-motion
+      data-short-screen-fit
+      data-motion-style="steps"
+      className="relative flex min-h-screen snap-start flex-col justify-center overflow-hidden bg-[#fbf7ee] py-20 md:py-24"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={HONEYCOMB_LIGHT_STYLE}
-      />
       <div className="relative z-10 mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-6">
         {/* Header */}
-        <div className="mb-12 text-center md:mb-16 2xl:mb-28">
-          <span className="inline-flex items-center gap-2 rounded-full border border-honey/30 bg-honey/10 px-4 py-1.5 text-[12px] font-semibold tracking-wider text-honey-deep">
-            <span className="hex-clip h-2.5 w-2.5 bg-honey" />
+        <div className="mb-12 text-center md:mb-16 2xl:mb-28" data-motion="header">
+          <span className="section-kicker">
+            <span className="section-kicker-dot" />
             {t('eyebrow')}
           </span>
-          <h2 className="mt-4 text-[30px] font-semibold text-ink md:text-[44px] 2xl:text-[54px]">
+          <h2 className="mt-4 text-[26px] font-semibold leading-[1.18] text-ink sm:text-[40px] sm:leading-[1.14] md:text-[50px] 2xl:text-[58px]">
             {t('title')}
           </h2>
           <p className="mx-auto mt-4 max-w-[680px] text-[15px] text-ink/55 2xl:text-[17px]">
@@ -41,7 +38,10 @@ export function HowItWorksSection() {
         </div>
 
         {/* Steps — three columns separated by vertical dividers (desktop). */}
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-0">
+        <div
+          className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-0"
+          data-motion="group"
+        >
           {steps.map((step, i) => (
             <div
               key={step.num}

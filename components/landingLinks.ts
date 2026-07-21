@@ -5,6 +5,9 @@ export const LANDING_PLATFORM_DOC_URL = (
   process.env.NEXT_PUBLIC_DOCS_URL || 'https://docs.openhex.tech'
 ).replace(/\/$/, '');
 
+/** OpenHex app sign-in used by the primary landing-page CTAs. */
+export const LANDING_LOGIN_URL = 'https://app.openhex.tech/login';
+
 /** Consumer (使用端) app — where end users browse + chat with Live Agents.
  *  CI sets NEXT_PUBLIC_AGENT_WEBAPP_ORIGIN per env; default to prod. */
 const CONSUMER_ORIGIN = (
@@ -13,3 +16,6 @@ const CONSUMER_ORIGIN = (
 
 /** "浏览 Live Agent" → the consumer-side contacts/agents list. */
 export const CONSUMER_CONTACTS_URL = `${CONSUMER_ORIGIN}/contacts`;
+
+/** Agent consumer app sign-in used by the "Browse Agent world" CTA. */
+export const CONSUMER_LOGIN_URL = `${CONSUMER_ORIGIN}/login`;
