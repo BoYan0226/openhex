@@ -19,6 +19,18 @@ const nextConfig = {
     unoptimized: isGitHubPages,
   },
   reactStrictMode: true,
+  ...(isGitHubPages
+    ? {}
+    : {
+        async rewrites() {
+          return [
+            {
+              source: '/api/openhex/chat-token',
+              destination: 'https://www.openhex.tech/api/openhex/chat-token',
+            },
+          ];
+        },
+      }),
 };
 
 module.exports = withNextIntl(nextConfig);
