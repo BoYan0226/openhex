@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { CONSUMER_CONTACTS_URL, LANDING_LOGIN_URL } from '@/components/landingLinks';
+import { CONSUMER_LOGIN_URL, LANDING_LOGIN_URL } from '@/components/landingLinks';
 import { publicPath } from '@/components/publicPath';
 
 /**
@@ -101,7 +101,7 @@ export function WhichSideSection() {
                 {t('user.desc')}
               </p>
               <a
-                href={CONSUMER_CONTACTS_URL}
+                href={CONSUMER_LOGIN_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="glass-surface-soft mt-auto inline-flex h-11 w-fit items-center rounded-full border border-line bg-white px-5 text-[14px] font-medium text-ink hover:bg-black/[0.03]"

@@ -16,3 +16,6 @@ const CONSUMER_ORIGIN = (
 
 /** "浏览 Live Agent" → the consumer-side contacts/agents list. */
 export const CONSUMER_CONTACTS_URL = `${CONSUMER_ORIGIN}/contacts`;
+
+/** Agent consumer app sign-in used by the "Browse Agent world" CTA. */
+export const CONSUMER_LOGIN_URL = `${CONSUMER_ORIGIN}/login`;
