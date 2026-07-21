@@ -3,8 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { AuthAwareCtaButton } from './AuthAwareCtaButton';
-import { LANDING_PLATFORM_DOC_URL } from './landingLinks';
+import { LANDING_LOGIN_URL, LANDING_PLATFORM_DOC_URL } from './landingLinks';
 import { publicPath } from './publicPath';
 
 /**
@@ -60,12 +59,14 @@ export function LandingNav() {
           >
             {t('docsLink')}
           </a>
-          <AuthAwareCtaButton
-            path="/login"
+          <a
+            href={LANDING_LOGIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex h-8 min-w-[74px] items-center justify-center rounded-full bg-honey px-5 text-[13px] font-semibold text-ink shadow-none transition-colors hover:bg-honey-soft max-sm:min-w-[68px] max-sm:px-4"
           >
             {t('primaryCta')}
-          </AuthAwareCtaButton>
+          </a>
         </div>
       </div>
     </nav>

@@ -3,8 +3,8 @@
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { AuthAwareCtaButton } from './AuthAwareCtaButton';
 import { BookDemoButton } from './BookDemoButton';
+import { LANDING_LOGIN_URL } from './landingLinks';
 import { publicPath } from './publicPath';
 
 const HERO_REVEAL_DELAY_MS = 700;
@@ -239,12 +239,14 @@ export function HeroSection() {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
-            <AuthAwareCtaButton
-              path="/login"
+            <a
+              href={LANDING_LOGIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex h-12 items-center justify-center rounded-full bg-honey px-6 text-[15px] font-semibold text-ink shadow-[0_4px_16px_rgba(241,212,34,.4)] transition-colors hover:bg-honey-soft"
             >
               {t('primaryCta')}
-            </AuthAwareCtaButton>
+            </a>
             <BookDemoButton className="glass-surface-soft inline-flex h-12 items-center rounded-full border border-line bg-white px-6 text-[15px] font-medium text-ink hover:bg-black/[0.03]">
               {t('secondaryCta')}
             </BookDemoButton>

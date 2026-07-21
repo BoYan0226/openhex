@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { AuthAwareCtaButton } from '@/components/AuthAwareCtaButton';
 import { FlipWord } from '@/components/FlipWord';
 import { BookDemoButton } from '@/components/BookDemoButton';
+import { LANDING_LOGIN_URL } from '@/components/landingLinks';
 import { publicPath } from '@/components/publicPath';
 
 /**
@@ -63,12 +63,14 @@ export function FinalCtaSection() {
         </h2>
 
         <div className="mt-8 flex justify-center gap-3 2xl:mt-10">
-          <AuthAwareCtaButton
-            path="/login"
+          <a
+            href={LANDING_LOGIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex h-12 items-center rounded-full bg-honey px-6 text-[15px] font-semibold text-ink shadow-[0_4px_20px_rgba(241,212,34,.4)] transition-colors hover:bg-honey-soft"
           >
             {t('primaryCta')}
-          </AuthAwareCtaButton>
+          </a>
           <BookDemoButton className="inline-flex h-12 items-center rounded-full border border-line bg-white/55 px-6 text-[15px] font-medium text-ink transition-colors hover:bg-white/80">
             {t('secondaryCta')}
           </BookDemoButton>

@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { AuthAwareCtaButton } from '@/components/AuthAwareCtaButton';
-import { CONSUMER_CONTACTS_URL } from '@/components/landingLinks';
+import { CONSUMER_CONTACTS_URL, LANDING_LOGIN_URL } from '@/components/landingLinks';
 import { publicPath } from '@/components/publicPath';
 
 /**
@@ -62,12 +61,14 @@ export function WhichSideSection() {
               <p className="mt-4 max-w-[440px] text-[14px] leading-relaxed text-ink/60 2xl:text-[16px]">
                 {t('creator.desc')}
               </p>
-              <AuthAwareCtaButton
-                path="/login"
+              <a
+                href={LANDING_LOGIN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="mt-auto inline-flex h-11 w-fit items-center rounded-full bg-honey px-5 pt-0 text-[14px] font-semibold text-ink hover:bg-honey-soft"
               >
                 {t('creator.cta')}
-              </AuthAwareCtaButton>
+              </a>
             </div>
             <Image
               src={publicPath('/landing/bee-laptop.svg')}
