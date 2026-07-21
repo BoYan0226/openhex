@@ -17,6 +17,7 @@ import { StackPageMask } from '@/components/StackPageMask';
 import { StackSectionMotion } from '@/components/StackSectionMotion';
 import { StackJumpNav } from '@/components/StackJumpNav';
 import { DeferredWaveGridBackground } from '@/components/DeferredWaveGridBackground';
+import { CustomerServiceDock } from '@/components/CustomerServiceDock';
 
 type StickyPanelTone = 'light' | 'dark';
 
@@ -123,6 +124,7 @@ export default function HomePage() {
       <DeferredWaveGridBackground />
       <LandingNav />
       <ScrollPathTransition />
+      <CustomerServiceDock />
       <ScrollPager />
       <StackPageMask />
       <StackSectionMotion />
